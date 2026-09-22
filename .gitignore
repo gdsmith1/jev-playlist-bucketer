@@ -1,0 +1,7 @@
+.env
+
+# bucket definition and caches
+*.json
+
+runs/
+*.csv
