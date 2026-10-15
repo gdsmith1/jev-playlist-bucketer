@@ -99,11 +99,10 @@ class FetchTest(unittest.TestCase):
     def test_artist_search_fallback_score_threshold(self):
         with tempfile.TemporaryDirectory() as tmp:
             p = make(tmp)
-            fake, calls = route({"artist?": (200, {"artists": [{"id": "x", "score": 80}]})})
+            fake, calls = route({"artist": (200, {"artists": [{"id": "x", "score": 80}]})})
             with mock.patch.object(musicbrainz, "http_get_json", fake):
                 e = p.fetch("Nobody", "t", "", "")
             self.assertIsNone(e["levels"]["artist"])
-            self.assertIn("Nobody", p.cache.section("artist") and "Nobody".title() or "Nobody")
             self.assertIsNone(p.cache.section("artist")["nobody"])  # not found cached as null
 
     def test_error_not_cached(self):
@@ -120,7 +119,7 @@ class FetchTest(unittest.TestCase):
     def test_not_found_cached_null(self):
         with tempfile.TemporaryDirectory() as tmp:
             p = make(tmp)
-            fake, _ = route({"release-group": (200, {"release-groups": []}), "artist?": (200, {"artists": []})})
+            fake, _ = route({"release-group": (200, {"release-groups": []}), "artist": (200, {"artists": []})})
             with mock.patch.object(musicbrainz, "http_get_json", fake):
                 p.fetch("A", "t", "Alb", "I1")  # isrc 404 -> not found
             self.assertIsNone(p.cache.section("track")["I1"])
