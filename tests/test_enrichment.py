@@ -10,8 +10,8 @@ from enrichment import (
     Throttle,
     artist_candidates,
     clean_album,
+    is_unknown_album,
     clean_tags,
-    clean_track,
     coverage_stats,
     empty_enrichment,
     format_for_jev,
@@ -20,7 +20,6 @@ from enrichment import (
     primary_artist,
 )
 
-FIELDS = ["Kyuss", "Hwy 74", "Wretch", "1991", "00:04:43", "USEE10181126"]
 
 
 def tag(name, count=0):
@@ -38,9 +37,32 @@ class CleanTagsTest(unittest.TestCase):
         self.assertEqual([t["name"] for t in out], ["grunge"])
 
     def test_dedupes_keeping_best_count_and_truncates(self):
-        out = clean_tags([tag("rock", 1), tag("Rock", 50)] + [tag(f"t{i}", 10) for i in range(20)], max_n=3)
-        self.assertEqual(out[0], {"name": "rock", "count": 50})
+        out = clean_tags([tag("grunge", 1), tag("Grunge", 50)] + [tag(f"t{i}", 10) for i in range(20)], max_n=3)
+        self.assertEqual(out[0], {"name": "grunge", "count": 50})
         self.assertEqual(len(out), 3)
+
+    def test_drops_junk_and_merges_spelling_variants(self):
+        out = clean_tags([tag("reissue", 90), tag("wrong track streaming", 80), tag("Synth-pop", 60),
+                          tag("synthpop", 40), tag("synth pop", 40), tag("new wave", 20)])
+        self.assertEqual([t["name"] for t in out], ["synth-pop", "new wave"])
+
+    def test_vague_tags_rank_below_specific_ones(self):
+        out = clean_tags([tag("rock", 100), tag("alternative", 90), tag("post-hardcore", 5)])
+        self.assertEqual([t["name"] for t in out], ["post-hardcore", "rock", "alternative"])
+
+    def test_drops_list_membership_and_chatter_tags(self):
+        junk = ["1001 albums you must hear before you die", "top metal albums of the decade 2020 - 2029",
+                "best of 2013", "allboutguitarcom", "reissue"]
+        self.assertEqual(clean_tags([tag(n, 50) for n in junk] + [tag("doom metal", 5)]), [tag("doom metal", 5)])
+
+    def test_keeps_nationality_tags(self):
+        out = clean_tags([tag("swedish", 50), tag("death metal", 40)])
+        self.assertEqual([t["name"] for t in out], ["swedish", "death metal"])
+
+    def test_drops_echoes_of_excluded_names(self):
+        out = clean_tags([tag("Quicksand", 100), tag("manic compression", 50), tag("post-hardcore", 5)],
+                         exclude=("Quicksand", "Manic Compression"))
+        self.assertEqual([t["name"] for t in out], ["post-hardcore"])
 
     def test_accepts_none_and_bare_strings(self):
         self.assertEqual(clean_tags(None), [])
@@ -59,76 +81,75 @@ class NameCleaningTest(unittest.TestCase):
         self.assertEqual(artist_candidates("Simon & Garfunkel"), ["Simon", "Simon & Garfunkel"])
         self.assertEqual(artist_candidates("Kyuss"), ["Kyuss"])
 
-    def test_clean_track(self):
-        self.assertEqual(clean_track("Song - Remastered 2009"), "Song")
-        self.assertEqual(clean_track("Song (Remastered)"), "Song")
-        self.assertEqual(clean_track("Song (Live at Wembley)"), "Song")
-        self.assertEqual(clean_track("Song [Bonus]"), "Song")
-        self.assertEqual(clean_track("Song (feat. Other)"), "Song")
-        self.assertEqual(clean_track("Song - 2011 Remaster"), "Song")
-
-    def test_clean_track_keeps_leading_parenthetical_and_never_returns_empty(self):
-        self.assertEqual(clean_track("(Do Not Feed The) Oyster"), "(Do Not Feed The) Oyster")
-        self.assertEqual(clean_track("[Intro]"), "[Intro]")
-
     def test_clean_album(self):
         self.assertEqual(clean_album("Wretch (Deluxe Edition)"), "Wretch")
         self.assertEqual(clean_album("Wretch (Remastered 2009)"), "Wretch")
         self.assertEqual(clean_album("Wretch - Expanded Edition"), "Wretch")
         self.assertEqual(clean_album("Wretch [Bonus Tracks]"), "Wretch")
+        self.assertEqual(clean_album("The End Complete (Reissue)"), "The End Complete")
         self.assertEqual(clean_album("Wretch"), "Wretch")
 
 
 class FormatForJevTest(unittest.TestCase):
-    def test_all_none(self):
-        text = format_for_jev(FIELDS, empty_enrichment("lastfm"))
+    @staticmethod
+    def enrichment(album=None, artist=None, similar=None):
+        e = empty_enrichment("lastfm")
+        e["levels"]["album"] = {"genres": [], "tags": album} if album is not None else None
+        e["levels"]["artist"] = {"genres": [], "tags": artist} if artist is not None else None
+        if similar:
+            e["extras"]["similar_artists"] = similar
+        return e
+
+    def test_no_data_is_just_the_head(self):
+        text = format_for_jev("Kyuss", "Wretch", "1991-01-01", empty_enrichment("lastfm"))
+        self.assertEqual(text, "Album: Wretch by Kyuss (1991)")
+
+    def test_album_artist_and_similar_sections_without_numbers(self):
+        e = self.enrichment(album=[tag("stoner rock", 100), tag("stoner metal", 86)],
+                            artist=[tag("desert rock", 8)], similar=["Fu Manchu", "Sleep"])
+        text = format_for_jev("Kyuss; Someone", "Wretch (Deluxe Edition)", "1991", e)
         self.assertEqual(
             text,
-            "Kyuss, Hwy 74, Wretch, 1991, 00:04:43 | track: no data | album: no data | artist: no data",
+            "Album: Wretch by Kyuss (1991)\n"
+            "Album tags (strongest first): stoner rock, stoner metal\n"
+            "Artist tags (strongest first): desert rock\n"
+            "Similar artists: Fu Manchu, Sleep",
         )
 
-    def test_mixed_levels_dedupe_and_annotation(self):
-        enrichment = empty_enrichment("lastfm")
-        enrichment["levels"]["album"] = {"genres": [], "tags": [tag("stoner rock", 100), tag("stoner metal", 86)]}
-        enrichment["levels"]["artist"] = {"genres": ["stoner rock"], "tags": [tag("desert rock", 8)]}
-        text = format_for_jev(FIELDS, enrichment)
-        self.assertIn("track: no data", text)
-        self.assertIn("album: stoner rock (x2), stoner metal", text)
-        self.assertIn("artist: desert rock", text)
+    def test_artist_tags_already_shown_at_album_level_are_omitted(self):
+        e = self.enrichment(album=[tag("rock", 5), tag("grunge", 9)], artist=[tag("rock", 5)])
+        text = format_for_jev("A", "B", "", e)
+        self.assertNotIn("Artist tags", text)
+        self.assertEqual(text.splitlines()[0], "Album: B by A")
 
-    def test_level_fully_covered_by_higher_level(self):
-        enrichment = empty_enrichment("x")
-        enrichment["levels"]["album"] = {"genres": ["rock"], "tags": []}
-        enrichment["levels"]["artist"] = {"genres": ["rock"], "tags": []}
-        self.assertIn("artist: same as higher level", format_for_jev(FIELDS, enrichment))
+    def test_unknown_album_describes_the_artist_only(self):
+        e = self.enrichment(artist=[tag("grunge", 9)])
+        text = format_for_jev("Kyuss", "Unknown", "1991", e)
+        self.assertEqual(text, "Artist: Kyuss\nArtist tags (strongest first): grunge")
 
     def test_caps_items_per_level(self):
-        enrichment = empty_enrichment("x")
-        enrichment["levels"]["artist"] = {"genres": [], "tags": [tag(f"t{i}", 100 - i) for i in range(10)]}
-        text = format_for_jev(FIELDS, enrichment)
+        e = self.enrichment(artist=[tag(f"t{i}", 100 - i) for i in range(10)])
+        text = format_for_jev("A", "B", "1990", e)
         self.assertIn("t5", text)
         self.assertNotIn("t6", text)
 
-    def test_info_section(self):
-        enrichment = empty_enrichment("x")
-        enrichment["extras"] = {"artist_type": "Group", "artist_country": "US", "artist_begin": "1987",
-                                "have": 12603}
-        text = format_for_jev(FIELDS, enrichment)
-        self.assertTrue(text.endswith("| info: group from US; began 1987; 12603 collectors"))
-
     def test_deterministic_regardless_of_input_order(self):
-        a, b = empty_enrichment("x"), empty_enrichment("x")
-        a["levels"]["artist"] = {"genres": [], "tags": [tag("b", 5), tag("a", 5), tag("c", 9)]}
-        b["levels"]["artist"] = {"genres": [], "tags": [tag("c", 9), tag("a", 5), tag("b", 5)]}
-        self.assertEqual(format_for_jev(FIELDS, a), format_for_jev(FIELDS, b))
+        a = self.enrichment(artist=[tag("b", 5), tag("a", 5), tag("c", 9)])
+        b = self.enrichment(artist=[tag("c", 9), tag("a", 5), tag("b", 5)])
+        self.assertEqual(format_for_jev("X", "Y", "1990", a), format_for_jev("X", "Y", "1990", b))
 
-    def test_length_cap_truncates_info_first(self):
-        enrichment = empty_enrichment("x")
-        enrichment["levels"]["artist"] = {"genres": ["rock"], "tags": []}
-        enrichment["extras"] = {"similar_artists": ["x" * 200] * 5, "artist_listeners": 5}
-        text = format_for_jev(FIELDS, enrichment)
+    def test_length_cap_drops_similar_artists_first(self):
+        e = self.enrichment(artist=[tag("rock", 1)], similar=["x" * 200] * 5)
+        text = format_for_jev("A", "B", "1990", e)
         self.assertLessEqual(len(text), 600)
-        self.assertIn("artist: rock", text)
+        self.assertIn("Artist tags (strongest first): rock", text)
+
+
+class UnknownAlbumTest(unittest.TestCase):
+    def test_values(self):
+        self.assertTrue(is_unknown_album(" Unknown Album "))
+        self.assertTrue(is_unknown_album(""))
+        self.assertFalse(is_unknown_album("Wretch"))
 
 
 class CoverageStatsTest(unittest.TestCase):
@@ -137,16 +158,16 @@ class CoverageStatsTest(unittest.TestCase):
         full["levels"]["album"] = {"genres": ["rock"], "tags": []}
         full["levels"]["artist"] = {"genres": [], "tags": [tag("metal", 1)]}
         empty_level = empty_enrichment("x")
-        empty_level["levels"]["track"] = {"genres": [], "tags": []}
+        empty_level["levels"]["album"] = {"genres": [], "tags": []}
         stats = coverage_stats([full, empty_level, empty_enrichment("x")])
-        self.assertEqual(stats, {"songs": 3, "track": 0, "album": 1, "artist": 1, "any": 1, "none": 2})
+        self.assertEqual(stats, {"albums": 3, "album": 1, "artist": 1, "any": 1, "none": 2})
 
     def test_run_stats_text(self):
         stats = coverage_stats([empty_enrichment("x")])
         text = format_run_stats("x", stats, {"calls": 3, "cache_hits": 1, "errors": 0}, 12.4)
         self.assertEqual(
             text,
-            "x level coverage over 1 songs: track 0/1  album 0/1  artist 0/1  any 0/1  none 1/1\n"
+            "x coverage over 1 albums: album 0/1  artist 0/1  any 0/1  none 1/1\n"
             "x calls: 3  cache_hits: 1  errors: 0   elapsed: 12s",
         )
 

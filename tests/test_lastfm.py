@@ -49,44 +49,51 @@ class LastfmTest(Base):
     def test_full_fetch_and_tag_cleanup(self):
         def fn(p):
             m = p["method"]
-            if m == "track.getTopTags":
-                return 200, tags_resp(("Stoner Rock", 100), ("1991", 50), ("seen live", 40), track="hwy 74")
             if m == "album.getTopTags":
-                return 200, tags_resp(("stoner metal", 100))
+                return 200, tags_resp(("Stoner Metal", 100), ("1991", 50), ("seen live", 40), ("Wretch", 30), ("reissue", 20))
             if m == "artist.getTopTags":
-                return 200, tags_resp(("stoner rock", 100))
+                return 200, tags_resp(("stoner rock", 100), ("Kyuss", 90))
             return 200, info_resp()
         self.script(fn)
-        e = self.p.fetch("Kyuss", "Hwy 74", "Wretch", "x")
-        self.assertEqual([t["name"] for t in e["levels"]["track"]["tags"]], ["stoner rock"])
-        self.assertEqual(e["matched"]["track"], "hwy 74")
-        self.assertEqual(e["extras"]["artist_listeners"], 1000)
-        self.assertEqual(len(e["extras"]["similar_artists"]), 5)
+        e = self.p.fetch("Kyuss", "Wretch (Deluxe Edition)")
+        self.assertEqual([t["name"] for t in e["levels"]["album"]["tags"]], ["stoner metal"])
+        self.assertEqual([t["name"] for t in e["levels"]["artist"]["tags"]], ["stoner rock"])
+        self.assertEqual(e["extras"], {"similar_artists": ["a", "b", "c", "d", "e"]})
+        self.assertNotIn("track.getTopTags", self.methods())
         self.assertNotIn("bio", str(e))
 
-    def test_retry_with_cleaned_then_original_and_not_found_cached(self):
+    def test_album_retry_cleaned_then_original_and_not_found_cached(self):
         def fn(p):
-            if p["method"] == "track.getTopTags":
-                return 200, (tags_resp(("rock", 100)) if p["track"] == "Song (Remastered)" else tags_resp())
+            if p["method"] == "album.getTopTags":
+                return 200, (tags_resp(("grunge", 100)) if p["album"] == "Alb (Deluxe Edition)" else tags_resp())
             return 200, {"error": 6, "message": "nf"}
         self.script(fn)
-        e = self.p.fetch("Band", "Song (Remastered)", "Unknown", "")
-        self.assertEqual(e["levels"]["track"]["tags"][0]["name"], "rock")
-        self.assertEqual([c["track"] for c in self.calls if c["method"] == "track.getTopTags"], ["Song", "Song (Remastered)"])
-        self.assertIsNone(e["levels"]["album"])
+        e = self.p.fetch("Band", "Alb (Deluxe Edition)")
+        self.assertEqual(e["levels"]["album"]["tags"][0]["name"], "grunge")
+        self.assertEqual([c["album"] for c in self.calls if c["method"] == "album.getTopTags"], ["Alb", "Alb (Deluxe Edition)"])
         self.assertIsNone(e["levels"]["artist"])
-        self.assertIn("band|song (remastered)", self.p.cache.section("track"))
-        self.assertIsNone(self.p.cache.section("album")["band|unknown"])
-        self.assertNotIn("album.getTopTags", self.methods())  # unknown album skipped
+        self.assertIn("band", self.p.cache.section("artist"))
         self.assertEqual(self.p.stats["errors"], 0)
+
+    def test_unknown_album_skips_lookup(self):
+        self.script(lambda p: (200, {"error": 6, "message": "nf"}))
+        e = self.p.fetch("Band", "Unknown")
+        self.assertIsNone(e["levels"]["album"])
+        self.assertNotIn("album.getTopTags", self.methods())
+
+    def test_deluxe_and_plain_album_share_cache(self):
+        self.script(lambda p: (200, info_resp() if p["method"] == "artist.getInfo" else tags_resp(("grunge", 100))))
+        self.p.fetch("Band", "Alb")
+        self.p.fetch("Band", "Alb (Remastered 2009)")
+        self.assertEqual(self.methods().count("album.getTopTags"), 1)
 
     def test_error_not_cached(self):
         self.script(lambda p: (200, {"error": 10, "message": "bad key"}))
-        e = self.p.fetch("Band", "Song", "Alb", "")
-        self.assertEqual(e["levels"], {"track": None, "album": None, "artist": None})
-        self.assertEqual(self.p.stats["errors"], 3)
+        e = self.p.fetch("Band", "Alb")
+        self.assertEqual(e["levels"], {"album": None, "artist": None})
+        self.assertEqual(self.p.stats["errors"], 2)
         self.assertEqual(self.p.cache.section("artist"), {})
-        self.assertEqual(self.p.cache.section("track"), {})
+        self.assertEqual(self.p.cache.section("album"), {})
 
     def test_rate_limit_backoff_then_success(self):
         state = {"n": 0}
@@ -114,15 +121,15 @@ class LastfmTest(Base):
         def fn(p):
             return 200, info_resp() if p["method"] == "artist.getInfo" else tags_resp(("rock", 100))
         self.script(fn)
-        self.p.fetch("Kyuss", "A", "X", "")
-        self.p.fetch("Kyuss; Someone", "B", "Y", "")
+        self.p.fetch("Kyuss", "X")
+        self.p.fetch("Kyuss; Someone", "Y")
         self.assertEqual(self.methods().count("artist.getTopTags"), 1)
         self.assertEqual(self.methods().count("artist.getInfo"), 1)
         self.assertGreaterEqual(self.p.stats["cache_hits"], 1)
 
     def test_flush_roundtrip(self):
         self.script(lambda p: (200, info_resp() if p["method"] == "artist.getInfo" else tags_resp(("rock", 100))))
-        self.p.fetch("Kyuss", "A", "X", "")
+        self.p.fetch("Kyuss", "X")
         self.p.flush()
         p2 = Provider(cache_dir=self.tmp.name)
         self.assertIn("kyuss", p2.cache.section("artist"))

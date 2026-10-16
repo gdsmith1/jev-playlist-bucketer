@@ -6,14 +6,14 @@ import json
 import os
 import re
 import time
-from collections import Counter
 
 import requests
 
 MAX_TAGS_PER_LEVEL = 8
 MAX_ITEMS_PER_LEVEL = 6
 MAX_TEXT_LEN = 600
-LEVEL_ORDER = ("track", "album", "artist")
+LEVEL_ORDER = ("album", "artist")
+UNKNOWN_ALBUMS = frozenset({"", "unknown", "unknown album", "[unknown]", "<unknown>"})
 
 NOISE_TAGS = frozenset(
     {
@@ -35,8 +35,19 @@ NOISE_TAGS = frozenset(
     }
 )
 
+# Last.fm housekeeping tags. Nationalities and places are kept: where a band is from is useful context.
+JUNK_TAGS = frozenset({"wrong track streaming", "reissue", "remaster", "remastered", "deluxe edition"})
+
+# Too generic to characterize an album; kept, but ranked below any specific tag.
+VAGUE_TAGS = frozenset({"alternative", "rock", "indie", "pop", "metal", "punk", "electronic", "experimental"})
+
 _YEAR_RE = re.compile(r"^\d{4}$")
 _DECADE_RE = re.compile(r"^\d{2,4}s$")
+# List-membership and chatter tags: "1001 albums you must hear...", "best of 2013", "top metal albums of
+# the decade", "allboutguitarcom", and jokes like "a good girlfriend will have sex with me to this music".
+_JUNK_RE = re.compile(
+    r"^(wrong|incorrect|best of|top )\b|\balbums? (you|i|of|that)\b|\bgirlfriend\b|\b\d{4}\b.*\b\d{4}\b|\w+com$"
+)
 
 
 class Throttle:
@@ -93,18 +104,13 @@ class JsonCache:
 _ARTIST_SPLIT_RE = re.compile(r";\s*|\s+feat\.?\s+|\s+ft\.?\s+|\s+featuring\s+|\s+&\s+", re.IGNORECASE)
 
 _TRAILING_BRACKET_RE = re.compile(r"\s*\[[^\]]*\]\s*$")
-_TRACK_PAREN_RE = re.compile(
-    r"\s*\((?:[^()]*\b)?(?:remaster(?:ed)?|live|feat\.?|ft\.?|featuring)\b[^()]*\)\s*$",
-    re.IGNORECASE,
-)
-_TRACK_DASH_RE = re.compile(r"\s+-\s+(?:\d{4}\s+)?(?:remaster(?:ed)?|live)\b.*$", re.IGNORECASE)
 
 _ALBUM_PAREN_RE = re.compile(
-    r"\s*\([^()]*\b(?:deluxe|remaster(?:ed)?|expanded|edition|anniversary|bonus|version)\b[^()]*\)\s*$",
+    r"\s*\([^()]*\b(?:deluxe|remaster(?:ed)?|reissue|expanded|edition|anniversary|bonus|version)\b[^()]*\)\s*$",
     re.IGNORECASE,
 )
 _ALBUM_DASH_RE = re.compile(
-    r"\s+-\s+[^-]*\b(?:deluxe|remaster(?:ed)?|expanded|edition|anniversary|bonus|version)\b.*$",
+    r"\s+-\s+[^-]*\b(?:deluxe|remaster(?:ed)?|reissue|expanded|edition|anniversary|bonus|version)\b.*$",
     re.IGNORECASE,
 )
 
@@ -134,19 +140,25 @@ def _strip_repeatedly(s, patterns):
     return current or original
 
 
-def clean_track(s):
-    """Strip trailing remaster/live/feat/bracket noise. A leading parenthetical is kept."""
-    return _strip_repeatedly(s, [_TRAILING_BRACKET_RE, _TRACK_PAREN_RE, _TRACK_DASH_RE])
-
-
 def clean_album(s):
     return _strip_repeatedly(s, [_TRAILING_BRACKET_RE, _ALBUM_PAREN_RE, _ALBUM_DASH_RE])
 
 
-def clean_tags(tags, max_n=MAX_TAGS_PER_LEVEL):
+def tag_key(name):
+    """Spelling-insensitive identity: `synth-pop`, `synth pop` and `synthpop` match."""
+    return re.sub(r"[^a-z0-9]+", "", name.lower())
+
+
+def _tag_order(name, count):
+    return (name in VAGUE_TAGS, -count, name)
+
+
+def clean_tags(tags, max_n=MAX_TAGS_PER_LEVEL, exclude=()):
     """Normalize `[{"name", "count"}]` (bare strings tolerated, count 0): lowercase,
-    drop years/decades and noise, dedupe (best count wins), sort by count desc then
-    name, truncate."""
+    drop years/decades, noise, junk and echoes of `exclude` names (artist/album),
+    merge spelling variants (best count wins), sort specific tags first then by
+    count desc then name, truncate."""
+    excluded = {tag_key(n) for n in exclude if n}
     best = {}
     for tag in tags or []:
         if isinstance(tag, str):
@@ -156,11 +168,20 @@ def clean_tags(tags, max_n=MAX_TAGS_PER_LEVEL):
         if not name:
             continue
         name = name.strip().lower()
-        if not name or name in NOISE_TAGS or _YEAR_RE.match(name) or _DECADE_RE.match(name):
+        if (
+            not name
+            or name in NOISE_TAGS
+            or name in JUNK_TAGS
+            or _JUNK_RE.search(name)
+            or _YEAR_RE.match(name)
+            or _DECADE_RE.match(name)
+            or tag_key(name) in excluded
+        ):
             continue
-        if name not in best or count > best[name]:
-            best[name] = count
-    ordered = sorted(best.items(), key=lambda item: (-item[1], item[0]))
+        key = tag_key(name)
+        if key not in best or (count, name) > (best[key][1], best[key][0]):
+            best[key] = (name, count)
+    ordered = sorted(best.values(), key=lambda item: _tag_order(*item))
     return [{"name": name, "count": count} for name, count in ordered[:max_n]]
 
 
@@ -172,95 +193,58 @@ def clean_tags(tags, max_n=MAX_TAGS_PER_LEVEL):
 def empty_enrichment(source):
     return {
         "source": source,
-        "levels": {"track": None, "album": None, "artist": None},
+        "levels": {"album": None, "artist": None},
         "extras": {},
-        "matched": {"artist": None, "album": None, "track": None},
+        "matched": {"artist": None, "album": None},
     }
+
+
+def is_unknown_album(album):
+    return (album or "").strip().lower() in UNKNOWN_ALBUMS
 
 
 def _level_items(level):
     if not level:
         return []
-    items = []
-    seen = set()
     names = [g.strip().lower() for g in level.get("genres") or [] if g]
     tags = sorted(
         level.get("tags") or [],
-        key=lambda t: (-(t.get("count") or 0), t["name"].strip().lower()),
+        key=lambda t: _tag_order(t["name"].strip().lower(), t.get("count") or 0),
     )
     names += [t["name"].strip().lower() for t in tags]
+    items = []
     for name in names:
-        if name and name not in seen:
-            seen.add(name)
+        if name and name not in items:
             items.append(name)
     return items[:MAX_ITEMS_PER_LEVEL]
 
 
-def _info_parts(extras):
-    e = extras or {}
-    parts = []
-    if e.get("artist_type") or e.get("artist_country"):
-        kind = str(e.get("artist_type") or "artist").lower()
-        parts.append(f"{kind} from {e['artist_country']}" if e.get("artist_country") else kind)
-    if e.get("artist_begin"):
-        began = f"began {e['artist_begin']}"
-        parts.append(f"{began}, ended" if e.get("artist_ended") else began)
-    if e.get("album_type"):
-        secondary = [str(x).lower() for x in e.get("album_secondary") or []]
-        text = f"release: {str(e['album_type']).lower()}"
-        parts.append(f"{text} ({', '.join(secondary)})" if secondary else text)
-    if e.get("first_release_date"):
-        parts.append(f"first released {e['first_release_date']}")
-    if e.get("format"):
-        parts.append(f"format: {str(e['format']).lower()}")
-    if e.get("year"):
-        parts.append(f"released {e['year']}")
-    if e.get("country") and not e.get("artist_country"):
-        parts.append(f"country: {e['country']}")
-    if e.get("have") is not None:
-        parts.append(f"{e['have']} collectors")
-    if e.get("want") is not None:
-        parts.append(f"{e['want']} wanted")
-    if e.get("artist_listeners") is not None:
-        parts.append(f"{e['artist_listeners']} listeners")
-    similar = e.get("similar_artists") or []
-    if similar:
-        parts.append("similar: " + ", ".join(str(a) for a in similar[:5]))
-    return parts
+def format_for_jev(artist, album, release_date, enrichment):
+    """Deterministic album-level text sent to jev (and used as its cache key).
+    Semantic evidence only: no counts, track titles, durations or ids."""
+    artist = primary_artist(artist)
+    year = (release_date or "").strip()[:4]
+    if is_unknown_album(album):
+        head = f"Artist: {artist}"
+    else:
+        head = f"Album: {clean_album(album)} by {artist}" + (f" ({year})" if _YEAR_RE.match(year) else "")
 
-
-def format_for_jev(fields, enrichment):
-    """Deterministic text sent to jev (and used as its cache key). See PLAN.md 3.5."""
-    artist, track, album, release_date, length = fields[:5]
     levels = enrichment.get("levels") or {}
-    items = {name: _level_items(levels.get(name)) for name in LEVEL_ORDER}
-    occurrences = Counter(item for name in LEVEL_ORDER for item in items[name])
-
     seen = set()
-    sections = []
+    lines = [head]
     for name in LEVEL_ORDER:
-        if not items[name]:
-            body = "no data"
-        else:
-            shown = []
-            for item in items[name]:
-                if item in seen:
-                    continue
-                seen.add(item)
-                shown.append(f"{item} (x{occurrences[item]})" if occurrences[item] > 1 else item)
-            body = ", ".join(shown) if shown else "same as higher level"
-        sections.append(f"{name}: {body}")
+        shown = [item for item in _level_items(levels.get(name)) if item not in seen]
+        seen.update(shown)
+        if shown:
+            lines.append(f"{name.capitalize()} tags (strongest first): {', '.join(shown)}")
 
-    head = f"{artist}, {track}, {album}, {release_date}, {length}"
-    base = " | ".join([head] + sections)
-
-    parts = _info_parts(enrichment.get("extras"))
-    while parts:
-        text = f"{base} | info: {'; '.join(parts)}"
-        if len(text) <= MAX_TEXT_LEN:
+    similar = (enrichment.get("extras") or {}).get("similar_artists") or []
+    while True:
+        out = lines + ([f"Similar artists: {', '.join(str(a) for a in similar)}"] if similar else [])
+        text = "\n".join(out)
+        if len(text) <= MAX_TEXT_LEN or not similar:
             return text
-        parts.pop()
-    return base
+        similar = similar[:-1]
 
 
 def _has_data(level):
@@ -268,9 +252,9 @@ def _has_data(level):
 
 
 def coverage_stats(enrichments):
-    stats = {"songs": 0, "track": 0, "album": 0, "artist": 0, "any": 0, "none": 0}
+    stats = {"albums": 0, "album": 0, "artist": 0, "any": 0, "none": 0}
     for enrichment in enrichments:
-        stats["songs"] += 1
+        stats["albums"] += 1
         hits = [_has_data((enrichment.get("levels") or {}).get(name)) for name in LEVEL_ORDER]
         for name, hit in zip(LEVEL_ORDER, hits):
             stats[name] += hit
@@ -282,11 +266,10 @@ def coverage_stats(enrichments):
 
 
 def format_run_stats(source, coverage, provider_stats, elapsed):
-    n = coverage["songs"]
+    n = coverage["albums"]
     return (
-        f"{source} level coverage over {n} songs: track {coverage['track']}/{n}  "
-        f"album {coverage['album']}/{n}  artist {coverage['artist']}/{n}  "
-        f"any {coverage['any']}/{n}  none {coverage['none']}/{n}\n"
+        f"{source} coverage over {n} albums: album {coverage['album']}/{n}  "
+        f"artist {coverage['artist']}/{n}  any {coverage['any']}/{n}  none {coverage['none']}/{n}\n"
         f"{source} calls: {provider_stats.get('calls', 0)}  "
         f"cache_hits: {provider_stats.get('cache_hits', 0)}  "
         f"errors: {provider_stats.get('errors', 0)}   elapsed: {elapsed:.0f}s"

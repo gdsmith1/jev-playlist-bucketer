@@ -9,9 +9,9 @@ from enrichment import (
     artist_candidates,
     clean_album,
     clean_tags,
-    clean_track,
     empty_enrichment,
     http_get_json,
+    is_unknown_album,
     primary_artist,
 )
 
@@ -22,7 +22,6 @@ NOT_FOUND_ERROR = 6
 MAX_RATE_LIMIT_RETRIES = 4
 
 OK, NOT_FOUND, ERROR = "ok", "not_found", "error"
-_UNKNOWN_ALBUMS = {"", "unknown", "unknown album", "[unknown]", "<unknown>"}
 
 
 def _norm(s):
@@ -39,7 +38,7 @@ def _dedupe(names):
 
 
 class Provider:
-    """Last.fm crowd tags at track, album and artist level, plus artist listener stats."""
+    """Last.fm crowd tags at album and artist level, plus similar artists."""
 
     name = "lastfm"
 
@@ -48,7 +47,7 @@ class Provider:
         if not self.api_key:
             raise SystemExit("LASTFM_API_KEY is not set (add it to .env)")
         self.cache = JsonCache(os.path.join(cache_dir, "lastfm_cache.json"))
-        for section in ("artist", "album", "track"):
+        for section in ("artist", "album"):
             self.cache.section(section)
         self.throttle = Throttle(LASTFM_MIN_INTERVAL)
         self.session = requests.Session()
@@ -83,15 +82,16 @@ class Provider:
         return ERROR, None
 
     @staticmethod
-    def _tags(data):
+    def _tags(data, exclude=()):
         raw = (data.get("toptags") or {}).get("tag") or []
         if isinstance(raw, dict):
             raw = [raw]
         tags = [{"name": t.get("name"), "count": int(t.get("count") or 0)} for t in raw if isinstance(t, dict)]
-        return clean_tags(tags)
+        return clean_tags(tags, exclude=exclude)
 
-    def _top_tags(self, method, candidates, **fixed):
-        """Try each candidate in order. Returns (status, tags, matched_name)."""
+    def _top_tags(self, method, candidates, exclude=(), **fixed):
+        """Try each candidate in order. Returns (status, tags, matched_name).
+        `exclude` names (artist/album) are dropped from the tags as echoes."""
         errored = False
         for key, value in candidates:
             status, data = self._call(method, **{key: value}, **fixed)
@@ -99,7 +99,7 @@ class Provider:
                 errored = True
                 continue
             if status == OK:
-                tags = self._tags(data)
+                tags = self._tags(data, exclude)
                 if tags:
                     attr = (data.get("toptags") or {}).get("@attr") or {}
                     matched = attr.get("track") or attr.get("album") or attr.get("artist") or value
@@ -108,24 +108,15 @@ class Provider:
 
     # -- lookups ------------------------------------------------------------
 
-    def lookup_track(self, artist, track):
-        titles = _dedupe([clean_track(track), track])
-        cands = [(a, t) for a in artist_candidates(artist) for t in titles]
-        errored = False
-        for a, t in cands:
-            status, tags, matched = self._top_tags("track.getTopTags", [("track", t)], artist=a)
-            if status == OK:
-                return OK, {"genres": [], "tags": tags, "matched": matched}
-            errored = errored or status == ERROR
-        return (ERROR if errored else NOT_FOUND), None
-
     def lookup_album(self, artist, album):
-        if _norm(album) in _UNKNOWN_ALBUMS:
+        if is_unknown_album(album):
             return NOT_FOUND, None
         titles = _dedupe([clean_album(album), album])
         errored = False
         for a in artist_candidates(artist):
-            status, tags, matched = self._top_tags("album.getTopTags", [("album", t) for t in titles], artist=a)
+            status, tags, matched = self._top_tags(
+                "album.getTopTags", [("album", t) for t in titles], exclude=(a, album, clean_album(album)), artist=a
+            )
             if status == OK:
                 return OK, {"genres": [], "tags": tags, "matched": matched}
             errored = errored or status == ERROR
@@ -134,7 +125,7 @@ class Provider:
     def lookup_artist(self, artist):
         errored = False
         for a in artist_candidates(artist):
-            status, tags, matched = self._top_tags("artist.getTopTags", [("artist", a)])
+            status, tags, matched = self._top_tags("artist.getTopTags", [("artist", a)], exclude=(a,))
             if status == ERROR:
                 errored = True
                 continue
@@ -147,12 +138,6 @@ class Provider:
             extras = {}
             if istatus == OK:
                 node = info.get("artist") or {}
-                stats = node.get("stats") or {}
-                for key, field in (("artist_listeners", "listeners"), ("artist_playcount", "playcount")):
-                    try:
-                        extras[key] = int(stats[field])
-                    except (KeyError, TypeError, ValueError):
-                        pass
                 similar = (node.get("similar") or {}).get("artist") or []
                 if isinstance(similar, dict):
                     similar = [similar]
@@ -175,18 +160,20 @@ class Provider:
         cache[key] = value  # None for genuine not-found
         return value
 
-    def fetch(self, artist, track, album, isrc):
+    def fetch(self, artist, album):
         enrichment = empty_enrichment(self.name)
         a = _norm(primary_artist(artist))
         raw = {
-            "track": self._cached("track", f"{a}|{_norm(track)}", lambda: self.lookup_track(artist, track)),
-            "album": self._cached("album", f"{a}|{_norm(album)}", lambda: self.lookup_album(artist, album)),
+            "album": self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album)),
             "artist": self._cached("artist", a, lambda: self.lookup_artist(artist)),
         }
+        excluded = {"album": (artist, primary_artist(artist), album, clean_album(album)), "artist": (artist, primary_artist(artist))}
         for name, payload in raw.items():
             if payload is None:
                 continue
-            enrichment["levels"][name] = {"genres": payload.get("genres", []), "tags": payload.get("tags", [])}
+            # Re-clean on read so filter improvements also apply to tags cached earlier.
+            tags = clean_tags(payload.get("tags", []), exclude=excluded[name])
+            enrichment["levels"][name] = {"genres": payload.get("genres", []), "tags": tags}
             enrichment["matched"][name] = payload.get("matched")
             enrichment["extras"].update(payload.get("extras") or {})
         return enrichment

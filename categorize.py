@@ -9,8 +9,8 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 
-from enrichment import coverage_stats, format_for_jev, format_run_stats
-from providers import PROVIDER_NAMES, get_provider
+from enrichment import clean_album, coverage_stats, format_for_jev, format_run_stats, is_unknown_album, primary_artist
+from providers.lastfm import Provider
 
 load_dotenv()
 
@@ -18,6 +18,10 @@ JEV_URL = "https://api.typesafe.ai/v1/systemone"
 
 BUCKETS_PATH = "buckets.json"
 JEV_CACHE_PATH = "jev_cache.json"
+
+# Albums that clear no bucket's threshold land here. jev never sees it: it is not a question,
+# and any bucket with this name in buckets.json is ignored.
+FALLBACK_BUCKET = "other"
 
 GENERIC_LEVELS = [
     "Does not fit this bucket at all",
@@ -42,17 +46,32 @@ def parse_row(line):
 
 
 def build_questions(buckets):
-    return {
-        key: {
+    """One score question per bucket ("other" is the fallback, not a judgment).
+    A bucket may define `levels` (2-10 strings or {summary, signals}) and `not_for`
+    (lookalikes that do not belong); otherwise generic levels are used."""
+    questions = {}
+    for key, bucket in buckets.items():
+        if key == FALLBACK_BUCKET:
+            continue
+        instructions = f"Does the album described in `state` fit this genre bucket? {bucket['description']}"
+        if bucket.get("not_for"):
+            instructions += f" Not for: {bucket['not_for']}"
+        questions[key] = {
             "type": "score",
-            "instructions": bucket["description"],
-            "criteria": GENERIC_LEVELS,
+            "instructions": instructions,
+            "criteria": bucket.get("levels") or GENERIC_LEVELS,
         }
-        for key, bucket in buckets.items()
-    }
+    return questions
 
 
-def score_song(text, artist, track, buckets, jev_cache, usage_totals):
+def group_key(artist, album):
+    """Songs share a jev decision per (primary artist, cleaned album). Songs with no
+    album are grouped per artist, since only artist tags are available for them."""
+    a = primary_artist(artist).lower()
+    return f"{a}|" if is_unknown_album(album) else f"{a}|{clean_album(album).lower()}"
+
+
+def score_group(text, label, buckets, jev_cache, usage_totals):
     cache_key = hashlib.sha256(text.encode("utf-8")).hexdigest()
     if cache_key in jev_cache:
         return jev_cache[cache_key]["scores"]
@@ -77,32 +96,32 @@ def score_song(text, artist, track, buckets, jev_cache, usage_totals):
     data = response.json()
 
     scores = {key: answer["score"] for key, answer in data["answers"].items()}
+    confidence = {key: answer.get("confidence") for key, answer in data["answers"].items()}
 
     usage = data.get("usage", {})
     usage_totals["input_tokens"] += usage.get("input_tokens", 0)
     usage_totals["output_tokens"] += usage.get("output_tokens", 0)
     usage_totals["call_count"] += 1
 
-    jev_cache[cache_key] = {"artist": artist, "track": track, "scores": scores}
+    jev_cache[cache_key] = {"label": label, "scores": scores, "confidence": confidence}
     save_json_cache(JEV_CACHE_PATH, jev_cache)
     return scores
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Sort playlist songs into buckets using jev + enriched song metadata.")
-    parser.add_argument("csv_path", help="Path to the playlist CSV (must include an ISRC column)")
+    parser = argparse.ArgumentParser(description="Sort playlist songs into buckets using jev + Last.fm tags, scored once per album.")
+    parser.add_argument("csv_path", help="Path to the playlist CSV")
     parser.add_argument("--limit", type=int, default=40, help="Max number of data rows to process (ignored with --sample)")
-    parser.add_argument("--source", choices=PROVIDER_NAMES, default="musicbrainz", help="Metadata provider")
     parser.add_argument("--sample", type=int, help="Process N randomly chosen rows (original order kept) instead of the first --limit")
     parser.add_argument("--seed", type=int, default=7, help="Random seed for --sample")
-    parser.add_argument("--threshold", type=float, default=1.0, help="Minimum score for a song to be included in a bucket")
+    parser.add_argument("--threshold", type=float, default=1.0, help="Minimum score for an album to be included in a bucket")
     parser.add_argument("--dry-run", action="store_true", help="Skip jev scoring; only fetch metadata and print what would be sent")
     args = parser.parse_args()
 
     with open(BUCKETS_PATH) as f:
         buckets = json.load(f)
 
-    provider = get_provider(args.source)
+    provider = Provider()
     jev_cache = load_json_cache(JEV_CACHE_PATH)
     usage_totals = {"input_tokens": 0, "output_tokens": 0, "call_count": 0}
 
@@ -119,38 +138,41 @@ def main():
     run_dir = os.path.join("runs", datetime.now().strftime("%Y%m%d-%H%M%S"))
     os.makedirs(run_dir, exist_ok=True)
 
-    bucket_lines = {key: [] for key in buckets}
+    groups = {}  # insertion-ordered: group key -> {"fields": first row's fields, "lines": [...]}
+    for line in data_lines:
+        fields = parse_row(line)
+        key = group_key(fields[0], fields[2])
+        groups.setdefault(key, {"fields": fields, "lines": []})["lines"].append(line.rstrip("\n"))
+
+    destinations = {}  # song line -> bucket keys
     enrichments = []
     started = time.monotonic()
 
-    for i, line in enumerate(data_lines, start=1):
-        fields = parse_row(line)
-        isrc = fields[-1]
-        artist, track, album = fields[0], fields[1], fields[2]
-        print(f"[{i}/{len(data_lines)}] {artist} - {track} ({isrc})")
+    for i, (key, group) in enumerate(groups.items(), start=1):
+        artist, album, release_date = group["fields"][0], group["fields"][2], group["fields"][3]
+        print(f"[{i}/{len(groups)}] {artist} - {album} ({len(group['lines'])} songs)")
 
-        enrichment = provider.fetch(artist, track, album, isrc)
+        enrichment = provider.fetch(artist, album)
         provider.flush()
         enrichments.append(enrichment)
 
-        text = format_for_jev(fields, enrichment)
+        text = format_for_jev(artist, album, release_date, enrichment)
 
         if args.dry_run:
-            print(f"  jev input: {text}")
+            print("  jev input: " + text.replace("\n", "\n             "))
             continue
 
-        scores = score_song(text, artist, track, buckets, jev_cache, usage_totals)
+        scores = score_group(text, key, buckets, jev_cache, usage_totals)
+        matched = [k for k, score in scores.items() if k != FALLBACK_BUCKET and score >= args.threshold]
+        for line in group["lines"]:
+            destinations[line] = matched or [FALLBACK_BUCKET]
 
-        matched_any = False
-        for key, score in scores.items():
-            if key == "other":
-                continue
-            if score >= args.threshold:
-                bucket_lines[key].append(line.rstrip("\n"))
-                matched_any = True
-
-        if not matched_any:
-            bucket_lines["other"].append(line.rstrip("\n"))
+    bucket_lines = {key: [] for key in buckets if key != FALLBACK_BUCKET}
+    bucket_lines[FALLBACK_BUCKET] = []
+    for line in data_lines:
+        line = line.rstrip("\n")
+        for key in destinations.get(line, []):
+            bucket_lines[key].append(line)
 
     for key, matched_lines in bucket_lines.items():
         if not matched_lines:
@@ -163,8 +185,8 @@ def main():
 
     print()
     print(f"run folder: {run_dir}")
-    print(f"songs processed: {len(data_lines)}")
-    print(format_run_stats(args.source, coverage_stats(enrichments), provider.stats, time.monotonic() - started))
+    print(f"songs processed: {len(data_lines)}  albums scored: {len(groups)}")
+    print(format_run_stats("lastfm", coverage_stats(enrichments), provider.stats, time.monotonic() - started))
     for key, matched_lines in bucket_lines.items():
         if matched_lines:
             print(f"  {key}: {len(matched_lines)}")
