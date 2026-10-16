@@ -22,9 +22,9 @@ def group_key(artist: str, album: str) -> str:
     return f"{a}|" if is_unknown_album(album) else f"{a}|{clean_album(album).lower()}"
 
 
-def load_rows(csv_path: str, limit: int, sample: int | None = None, seed: int = 7) -> tuple[str, list[str]]:
+def load_rows(csv_path: str, limit: int | None = None, sample: int | None = None, seed: int = 7) -> tuple[str, list[str]]:
     """Return (header line, song lines). `sample` picks N rows at random (original order kept)
-    instead of the first `limit`. Rows too short to hold an album are skipped with a warning."""
+    instead of the first `limit` (None = all rows). Rows too short to hold an album are skipped with a warning."""
     with open(csv_path) as f:
         lines = f.readlines()
     header = lines[0].rstrip("\n")

@@ -18,7 +18,7 @@ JEV_CACHE_PATH = "jev_cache.json"
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Sort playlist songs into buckets using jev + Last.fm tags, scored once per album.")
     parser.add_argument("csv_path", help="Path to the playlist CSV")
-    parser.add_argument("--limit", type=int, default=40, help="Max number of data rows to process (ignored with --sample)")
+    parser.add_argument("--limit", type=int, help="Only process the first N data rows (default: all; ignored with --sample)")
     parser.add_argument("--sample", type=int, help="Process N randomly chosen rows (original order kept) instead of the first --limit")
     parser.add_argument("--seed", type=int, default=7, help="Random seed for --sample")
     parser.add_argument("--threshold", type=float, default=1.0, help="Minimum score for an album to be included in a bucket")

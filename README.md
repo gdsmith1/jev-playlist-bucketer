@@ -28,6 +28,8 @@ Sorts a playlist CSV into genre buckets. Each **album** is described to `jev` on
 
 ## Install
 
+Requires Python 3.10+ and [Poetry](https://python-poetry.org/).
+
 ```
 poetry install
 ```
@@ -38,11 +40,23 @@ poetry install
 poetry run python -m bucketer path/to/playlist.csv
 ```
 
+Run it from the project root: the caches, `buckets.json` and `runs/` are all resolved relative to the working directory.
+
+With no `--limit` or `--sample` it processes **every row**, and each uncached album is one paid `jev` call. Try `--dry-run` or `--sample` first.
+
 Options:
-- `--limit N` — max rows to process (default 40, ignored with `--sample`)
-- `--sample N` / `--seed S` — process N randomly chosen rows (default seed 7)
+- `--limit N` — only process the first N rows (default: all rows; ignored with `--sample`)
+- `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
 - `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 1.0)
 - `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album
+- `--buckets PATH` — bucket definitions file (default `buckets.json`)
+- `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
+- `--refresh-lastfm` — ignore the Last.fm cache and overwrite it with fresh lookups
+- `--refresh-jev` — ignore the `jev` score cache and overwrite it (spends tokens on a real run)
+
+The two `--refresh-*` flags replace the whole cache file, so it afterwards holds only the albums from that run.
+
+Rows that don't have the expected fields are skipped with a warning on stderr.
 
 ## How it works
 
@@ -59,9 +73,9 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 ## Output
 
-`runs/<timestamp>/<bucket>.csv` per bucket, plus a summary of Last.fm coverage and `jev` usage.
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 
-- Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text. Delete either to force a refresh.
+- Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text. Delete a file, or use the matching `--refresh-*` flag, to force a refresh.
 - Run the tests with `poetry run python -m unittest discover tests`.

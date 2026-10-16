@@ -28,6 +28,10 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(header, HEADER)
         self.assertEqual([l.split(" , ")[0] for l in lines], ["A", "B"])
 
+    def test_no_limit_loads_every_row(self):
+        path = self.csv(*[row(f"A{i}", "t", f"X{i}") for i in range(100)])
+        self.assertEqual(len(load_rows(path)[1]), 100)
+
     def test_sample_is_deterministic_and_keeps_order(self):
         path = self.csv(*[row(f"A{i}", "t", f"X{i}") for i in range(20)])
         first = load_rows(path, limit=0, sample=5, seed=7)[1]
