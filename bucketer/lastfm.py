@@ -1,19 +1,17 @@
+"""Last.fm client: crowd tags at album and artist level, plus similar artists, cached on disk."""
+
 import os
 import time
+from typing import Any, Callable
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-from enrichment import (
-    JsonCache,
-    Throttle,
-    artist_candidates,
-    clean_album,
-    clean_tags,
-    empty_enrichment,
-    http_get_json,
-    is_unknown_album,
-    primary_artist,
-)
+from .cache import JsonCache
+from .models import Enrichment
+from .names import artist_candidates, clean_album, is_unknown_album, primary_artist
+from .tags import clean_tags
 
 LASTFM_URL = "https://ws.audioscrobbler.com/2.0/"
 LASTFM_MIN_INTERVAL = 0.25  # <= 4 req/s
@@ -21,15 +19,36 @@ RATE_LIMIT_ERROR = 29
 NOT_FOUND_ERROR = 6
 MAX_RATE_LIMIT_RETRIES = 4
 
+HTTP_TIMEOUT = 20
+# Transport-level retries (429/5xx/connection errors, Retry-After honored) are urllib3's job.
+HTTP_RETRY = Retry(total=4, backoff_factor=1.0, backoff_max=30, status_forcelist=(429, 500, 502, 503, 504), raise_on_status=False)
+
 OK, NOT_FOUND, ERROR = "ok", "not_found", "error"
 
 
-def _norm(s):
+class Throttle:
+    """Ensures consecutive `wait()` calls are at least `min_interval` seconds apart."""
+
+    def __init__(self, min_interval: float, clock: Callable[[], float] = time.monotonic, sleep: Callable[[float], None] = time.sleep) -> None:
+        self.min_interval = min_interval
+        self._clock = clock
+        self._sleep = sleep
+        self._last: float | None = None
+
+    def wait(self) -> None:
+        if self._last is not None:
+            elapsed = self._clock() - self._last
+            if elapsed < self.min_interval:
+                self._sleep(self.min_interval - elapsed)
+        self._last = self._clock()
+
+
+def _norm(s: str | None) -> str:
     return (s or "").strip().lower()
 
 
-def _dedupe(names):
-    out = []
+def _dedupe(names: list[str | None]) -> list[str]:
+    out: list[str] = []
     for n in names:
         n = (n or "").strip()
         if n and n not in out:
@@ -37,34 +56,41 @@ def _dedupe(names):
     return out
 
 
-class Provider:
-    """Last.fm crowd tags at album and artist level, plus similar artists."""
-
-    name = "lastfm"
-
-    def __init__(self, cache_dir=".", sleep=time.sleep):
+class LastfmClient:
+    def __init__(self, cache_dir: str = ".", sleep: Callable[[float], None] = time.sleep, refresh: bool = False) -> None:
         self.api_key = os.environ.get("LASTFM_API_KEY")
         if not self.api_key:
             raise SystemExit("LASTFM_API_KEY is not set (add it to .env)")
-        self.cache = JsonCache(os.path.join(cache_dir, "lastfm_cache.json"))
+        self.cache = JsonCache(os.path.join(cache_dir, "lastfm_cache.json"), fresh=refresh)
         for section in ("artist", "album"):
             self.cache.section(section)
         self.throttle = Throttle(LASTFM_MIN_INTERVAL)
         self.session = requests.Session()
+        self.session.mount("https://", HTTPAdapter(max_retries=HTTP_RETRY))
         self._sleep = sleep
         self.stats = {"calls": 0, "cache_hits": 0, "errors": 0}
 
     # -- HTTP ---------------------------------------------------------------
 
-    def _call(self, method, **params):
+    def _get_json(self, query: dict) -> tuple[int, Any]:
+        """GET one Last.fm API call, throttled. Returns (status, parsed JSON or None); never raises for network problems (status 0)."""
+        self.throttle.wait()
+        try:
+            resp = self.session.get(LASTFM_URL, params=query, timeout=HTTP_TIMEOUT)
+        except requests.RequestException:
+            return 0, None
+        try:
+            return resp.status_code, resp.json()
+        except ValueError:
+            return resp.status_code, None
+
+    def _call(self, method: str, **params: Any) -> tuple[str, dict | None]:
         """Return (OK, data) | (NOT_FOUND, None) | (ERROR, None)."""
         query = {"method": method, "api_key": self.api_key, "format": "json", "autocorrect": 1, **params}
         backoff = 2.0
         for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
             self.stats["calls"] += 1
-            status, data = http_get_json(
-                self.session, LASTFM_URL, params=query, throttle=self.throttle, sleep=self._sleep
-            )
+            status, data = self._get_json(query)
             if isinstance(data, dict) and "error" in data:
                 code = data["error"]
                 if code == NOT_FOUND_ERROR:
@@ -82,15 +108,15 @@ class Provider:
         return ERROR, None
 
     @staticmethod
-    def _tags(data, exclude=()):
+    def _tags(data: dict, exclude: tuple = ()) -> list[dict]:
         raw = (data.get("toptags") or {}).get("tag") or []
         if isinstance(raw, dict):
             raw = [raw]
         tags = [{"name": t.get("name"), "count": int(t.get("count") or 0)} for t in raw if isinstance(t, dict)]
         return clean_tags(tags, exclude=exclude)
 
-    def _top_tags(self, method, candidates, exclude=(), **fixed):
-        """Try each candidate in order. Returns (status, tags, matched_name).
+    def _top_tags(self, method: str, candidates: list[tuple[str, str]], exclude: tuple = (), **fixed: Any) -> tuple[str, list[dict]]:
+        """Try each candidate in order. Returns (status, tags).
         `exclude` names (artist/album) are dropped from the tags as echoes."""
         errored = False
         for key, value in candidates:
@@ -101,31 +127,29 @@ class Provider:
             if status == OK:
                 tags = self._tags(data, exclude)
                 if tags:
-                    attr = (data.get("toptags") or {}).get("@attr") or {}
-                    matched = attr.get("track") or attr.get("album") or attr.get("artist") or value
-                    return OK, tags, _norm(matched)
-        return (ERROR if errored else NOT_FOUND), [], None
+                    return OK, tags
+        return (ERROR if errored else NOT_FOUND), []
 
     # -- lookups ------------------------------------------------------------
 
-    def lookup_album(self, artist, album):
+    def lookup_album(self, artist: str, album: str) -> tuple[str, dict | None]:
         if is_unknown_album(album):
             return NOT_FOUND, None
         titles = _dedupe([clean_album(album), album])
         errored = False
         for a in artist_candidates(artist):
-            status, tags, matched = self._top_tags(
+            status, tags = self._top_tags(
                 "album.getTopTags", [("album", t) for t in titles], exclude=(a, album, clean_album(album)), artist=a
             )
             if status == OK:
-                return OK, {"genres": [], "tags": tags, "matched": matched}
+                return OK, {"tags": tags}
             errored = errored or status == ERROR
         return (ERROR if errored else NOT_FOUND), None
 
-    def lookup_artist(self, artist):
+    def lookup_artist(self, artist: str) -> tuple[str, dict | None]:
         errored = False
         for a in artist_candidates(artist):
-            status, tags, matched = self._top_tags("artist.getTopTags", [("artist", a)], exclude=(a,))
+            status, tags = self._top_tags("artist.getTopTags", [("artist", a)], exclude=(a,))
             if status == ERROR:
                 errored = True
                 continue
@@ -142,13 +166,12 @@ class Provider:
                 if isinstance(similar, dict):
                     similar = [similar]
                 extras["similar_artists"] = [s["name"] for s in similar if s.get("name")][:5]
-                matched = matched or _norm(node.get("name"))
-            return OK, {"genres": [], "tags": tags, "matched": matched, "extras": extras}
+            return OK, {"tags": tags, "extras": extras}
         return (ERROR if errored else NOT_FOUND), None
 
-    # -- contract -----------------------------------------------------------
+    # -- public -------------------------------------------------------------
 
-    def _cached(self, section, key, lookup):
+    def _cached(self, section: str, key: str, lookup: Callable[[], tuple[str, dict | None]]) -> dict | None:
         cache = self.cache.section(section)
         if key in cache:
             self.stats["cache_hits"] += 1
@@ -160,23 +183,19 @@ class Provider:
         cache[key] = value  # None for genuine not-found
         return value
 
-    def fetch(self, artist, album):
-        enrichment = empty_enrichment(self.name)
+    def fetch(self, artist: str, album: str) -> Enrichment:
         a = _norm(primary_artist(artist))
-        raw = {
-            "album": self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album)),
-            "artist": self._cached("artist", a, lambda: self.lookup_artist(artist)),
-        }
-        excluded = {"album": (artist, primary_artist(artist), album, clean_album(album)), "artist": (artist, primary_artist(artist))}
-        for name, payload in raw.items():
-            if payload is None:
-                continue
-            # Re-clean on read so filter improvements also apply to tags cached earlier.
-            tags = clean_tags(payload.get("tags", []), exclude=excluded[name])
-            enrichment["levels"][name] = {"genres": payload.get("genres", []), "tags": tags}
-            enrichment["matched"][name] = payload.get("matched")
-            enrichment["extras"].update(payload.get("extras") or {})
+        album_payload = self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album))
+        artist_payload = self._cached("artist", a, lambda: self.lookup_artist(artist))
+        enrichment = Enrichment()
+        # Re-clean on read so filter improvements also apply to tags cached earlier.
+        if album_payload is not None:
+            exclude = (artist, primary_artist(artist), album, clean_album(album))
+            enrichment.album_tags = clean_tags(album_payload.get("tags", []), exclude=exclude)
+        if artist_payload is not None:
+            enrichment.artist_tags = clean_tags(artist_payload.get("tags", []), exclude=(artist, primary_artist(artist)))
+            enrichment.similar_artists = list((artist_payload.get("extras") or {}).get("similar_artists") or [])
         return enrichment
 
-    def flush(self):
+    def flush(self) -> None:
         self.cache.flush()

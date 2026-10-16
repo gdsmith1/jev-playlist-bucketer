@@ -35,7 +35,7 @@ poetry install
 ## Usage
 
 ```
-poetry run python categorize.py path/to/playlist.csv
+poetry run python -m bucketer path/to/playlist.csv
 ```
 
 Options:

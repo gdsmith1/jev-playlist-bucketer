@@ -1,6 +1,7 @@
 import unittest
 
-from categorize import FALLBACK_BUCKET, GENERIC_LEVELS, build_questions, group_key
+from bucketer.jev import FALLBACK_BUCKET, GENERIC_LEVELS, build_questions
+from bucketer.pipeline import group_key
 
 
 class GroupKeyTest(unittest.TestCase):
@@ -19,10 +20,10 @@ class BuildQuestionsTest(unittest.TestCase):
     def test_other_is_not_a_question_and_defaults_apply(self):
         q = build_questions({"punk": {"description": "Fast punk."}, "other": {"description": "Rest."}})
         self.assertEqual(list(q), ["punk"])
-        self.assertEqual(q["punk"]["type"], "score")
-        self.assertEqual(q["punk"]["criteria"], GENERIC_LEVELS)
-        self.assertIn("album described in `state`", q["punk"]["instructions"])
-        self.assertIn("Fast punk.", q["punk"]["instructions"])
+        self.assertEqual(q["punk"].type, "score")
+        self.assertEqual(list(q["punk"].criteria), GENERIC_LEVELS)
+        self.assertIn("album described in `state`", q["punk"].instructions)
+        self.assertIn("Fast punk.", q["punk"].instructions)
 
     def test_fallback_bucket_in_buckets_json_is_never_asked(self):
         q = build_questions({"punk": {"description": "p"}, FALLBACK_BUCKET: {"description": "x"}})
@@ -31,8 +32,8 @@ class BuildQuestionsTest(unittest.TestCase):
     def test_custom_levels_and_not_for(self):
         levels = [{"summary": "No", "signals": []}, {"summary": "Yes", "signals": ["fast"]}]
         q = build_questions({"punk": {"description": "Fast punk.", "levels": levels, "not_for": "pop punk"}})
-        self.assertEqual(q["punk"]["criteria"], levels)
-        self.assertTrue(q["punk"]["instructions"].endswith("Not for: pop punk"))
+        self.assertEqual(list(q["punk"].criteria), levels)
+        self.assertTrue(q["punk"].instructions.endswith("Not for: pop punk"))
 
 
 if __name__ == "__main__":

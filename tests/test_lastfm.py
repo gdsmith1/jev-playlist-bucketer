@@ -3,8 +3,10 @@ import tempfile
 import unittest
 from unittest import mock
 
-from providers import lastfm
-from providers.lastfm import Provider
+import requests
+
+from bucketer import lastfm
+from bucketer.lastfm import LastfmClient, Throttle
 
 
 def tags_resp(*pairs, **attr):
@@ -24,15 +26,15 @@ class Base(unittest.TestCase):
         env.start()
         self.addCleanup(env.stop)
         self.sleeps = []
-        self.p = Provider(cache_dir=self.tmp.name, sleep=self.sleeps.append)
+        self.p = LastfmClient(cache_dir=self.tmp.name, sleep=self.sleeps.append)
         self.p.throttle = mock.Mock()
         self.calls = []
 
     def script(self, fn):
-        def fake(client, url, *, params=None, **kw):
+        def fake(params):
             self.calls.append(params)
             return fn(params)
-        patcher = mock.patch.object(lastfm, "http_get_json", side_effect=fake)
+        patcher = mock.patch.object(LastfmClient, "_get_json", side_effect=fake)
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -44,7 +46,7 @@ class LastfmTest(Base):
     def test_missing_key(self):
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit):
-                Provider(cache_dir=self.tmp.name)
+                LastfmClient(cache_dir=self.tmp.name)
 
     def test_full_fetch_and_tag_cleanup(self):
         def fn(p):
@@ -56,9 +58,9 @@ class LastfmTest(Base):
             return 200, info_resp()
         self.script(fn)
         e = self.p.fetch("Kyuss", "Wretch (Deluxe Edition)")
-        self.assertEqual([t["name"] for t in e["levels"]["album"]["tags"]], ["stoner metal"])
-        self.assertEqual([t["name"] for t in e["levels"]["artist"]["tags"]], ["stoner rock"])
-        self.assertEqual(e["extras"], {"similar_artists": ["a", "b", "c", "d", "e"]})
+        self.assertEqual([t["name"] for t in e.album_tags], ["stoner metal"])
+        self.assertEqual([t["name"] for t in e.artist_tags], ["stoner rock"])
+        self.assertEqual(e.similar_artists, ["a", "b", "c", "d", "e"])
         self.assertNotIn("track.getTopTags", self.methods())
         self.assertNotIn("bio", str(e))
 
@@ -69,16 +71,16 @@ class LastfmTest(Base):
             return 200, {"error": 6, "message": "nf"}
         self.script(fn)
         e = self.p.fetch("Band", "Alb (Deluxe Edition)")
-        self.assertEqual(e["levels"]["album"]["tags"][0]["name"], "grunge")
+        self.assertEqual(e.album_tags[0]["name"], "grunge")
         self.assertEqual([c["album"] for c in self.calls if c["method"] == "album.getTopTags"], ["Alb", "Alb (Deluxe Edition)"])
-        self.assertIsNone(e["levels"]["artist"])
+        self.assertIsNone(e.artist_tags)
         self.assertIn("band", self.p.cache.section("artist"))
         self.assertEqual(self.p.stats["errors"], 0)
 
     def test_unknown_album_skips_lookup(self):
         self.script(lambda p: (200, {"error": 6, "message": "nf"}))
         e = self.p.fetch("Band", "Unknown")
-        self.assertIsNone(e["levels"]["album"])
+        self.assertIsNone(e.album_tags)
         self.assertNotIn("album.getTopTags", self.methods())
 
     def test_deluxe_and_plain_album_share_cache(self):
@@ -90,7 +92,7 @@ class LastfmTest(Base):
     def test_error_not_cached(self):
         self.script(lambda p: (200, {"error": 10, "message": "bad key"}))
         e = self.p.fetch("Band", "Alb")
-        self.assertEqual(e["levels"], {"album": None, "artist": None})
+        self.assertEqual((e.album_tags, e.artist_tags), (None, None))
         self.assertEqual(self.p.stats["errors"], 2)
         self.assertEqual(self.p.cache.section("artist"), {})
         self.assertEqual(self.p.cache.section("album"), {})
@@ -103,7 +105,7 @@ class LastfmTest(Base):
                 return 200, {"error": 29, "message": "rate"}
             return 200, tags_resp(("rock", 100))
         self.script(fn)
-        status, tags, _ = self.p._top_tags("artist.getTopTags", [("artist", "x")])
+        status, tags = self.p._top_tags("artist.getTopTags", [("artist", "x")])
         self.assertEqual(status, lastfm.OK)
         self.assertEqual(self.sleeps, [2.0, 4.0])
 
@@ -131,8 +133,59 @@ class LastfmTest(Base):
         self.script(lambda p: (200, info_resp() if p["method"] == "artist.getInfo" else tags_resp(("rock", 100))))
         self.p.fetch("Kyuss", "X")
         self.p.flush()
-        p2 = Provider(cache_dir=self.tmp.name)
+        p2 = LastfmClient(cache_dir=self.tmp.name)
         self.assertIn("kyuss", p2.cache.section("artist"))
+
+
+class ThrottleTest(unittest.TestCase):
+    def test_spaces_calls(self):
+        now = [100.0]
+        sleeps = []
+
+        def sleep(seconds):
+            sleeps.append(seconds)
+            now[0] += seconds
+
+        throttle = Throttle(1.0, clock=lambda: now[0], sleep=sleep)
+        throttle.wait()  # first call never sleeps
+        now[0] += 0.25
+        throttle.wait()
+        now[0] += 5
+        throttle.wait()  # already past the interval
+        self.assertEqual(sleeps, [0.75])
+
+
+class GetJsonTest(Base):
+    def resp(self, status, body=None):
+        r = mock.Mock(status_code=status)
+        if body is None:
+            r.json.side_effect = ValueError("no json")
+        else:
+            r.json.return_value = body
+        return r
+
+    def test_success_and_throttled(self):
+        self.p.session = mock.Mock()
+        self.p.session.get.return_value = self.resp(200, {"ok": 1})
+        self.assertEqual(self.p._get_json({"a": 1}), (200, {"ok": 1}))
+        self.p.throttle.wait.assert_called_once()
+        self.assertIn("timeout", self.p.session.get.call_args.kwargs)
+
+    def test_network_error_never_raises(self):
+        self.p.session = mock.Mock()
+        self.p.session.get.side_effect = requests.ConnectionError("down")
+        self.assertEqual(self.p._get_json({}), (0, None))
+
+    def test_non_json_body(self):
+        self.p.session = mock.Mock()
+        self.p.session.get.return_value = self.resp(503)
+        self.assertEqual(self.p._get_json({}), (503, None))
+
+    def test_retry_adapter_is_mounted_for_transient_statuses(self):
+        adapter = self.p.session.get_adapter(lastfm.LASTFM_URL)
+        self.assertEqual(adapter.max_retries.total, 4)
+        self.assertIn(429, adapter.max_retries.status_forcelist)
+        self.assertIn(503, adapter.max_retries.status_forcelist)
 
 
 if __name__ == "__main__":
