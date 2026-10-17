@@ -1,31 +1,34 @@
 # jev-playlist-bucketer
 
-Sorts a playlist CSV into genre buckets using MusicBrainz tags + a `jev` scoring API call per song.
+Sorts a playlist CSV into genre buckets. Each **album** is described to `jev` once, using Last.fm crowd tags (album + artist level) and similar artists; every song on that album inherits the album's buckets.
 
 ## Requirements
 
-1. **API key** — set `TYPESAFE_API_KEY` in a `.env` file in the project root:
+1. **API keys** in a `.env` file in the project root:
    ```
-   TYPESAFE_API_KEY=your-key-here
+   TYPESAFE_API_KEY=your-jev-key      # not needed with --dry-run
+   LASTFM_API_KEY=your-lastfm-key     # a PAT from last.fm, required
    ```
-2. **Bucket definitions** — a `buckets.json` file in the project root defining each genre bucket to score against, e.g.:
+2. **Bucket definitions** — a `buckets.json` in the project root:
    ```json
    {
      "grunge_stoner": {
-       "description": "Heavy, sludgy alt-rock in the vein of Kyuss, Soundgarden, Alice in Chains"
-     },
-     "pop_rock": {
-       "description": "Radio-friendly rock with strong melodic hooks"
-     },
-     "other": {
-       "description": "Doesn't fit any other bucket"
+       "description": "Heavy, sludgy alt-rock in the vein of Kyuss, Soundgarden, Alice in Chains",
+       "not_for": "polished radio rock",
+       "levels": [
+         "Not grunge or stoner rock",
+         {"summary": "Some grunge or stoner influence", "signals": ["alternative rock with heavy riffs"]},
+         {"summary": "Clearly grunge or stoner rock", "signals": ["stoner rock", "desert rock", "grunge"]}
+       ]
      }
    }
    ```
-   Include an `other` catch-all — songs that don't clear the threshold for any bucket land there.
-3. **Song list CSV** — export a playlist from [Spotlistr](https://www.spotlistr.com/) to CSV. Rows must be `Artist(s) Name , Track Name , Album Name , Release Date , Length , ISRC` (fields separated by ` , `, ISRC as the last column — required for MusicBrainz lookups).
+   `description` is required. `levels` (2-10 strings or `{summary, signals}` objects) and `not_for` are optional; without `levels` three generic levels are used. `other` is built in: it collects albums that clear no bucket's threshold. jev never sees it, and you don't need to define it (an entry named `other` is ignored).
+3. **Song list CSV** — a [Spotlistr](https://www.spotlistr.com/) export. Rows are `Artist(s) Name , Track Name , Album Name , Release Date , Length , ISRC` (fields separated by ` , `).
 
 ## Install
+
+Requires Python 3.10+ and [Poetry](https://python-poetry.org/).
 
 ```
 poetry install
@@ -34,20 +37,45 @@ poetry install
 ## Usage
 
 ```
-poetry run python categorize.py path/to/playlist.csv
+poetry run python -m bucketer path/to/playlist.csv
 ```
 
+Run it from the project root: the caches, `buckets.json` and `runs/` are all resolved relative to the working directory.
+
+With no `--limit` or `--sample` it processes **every row**, and each uncached album is one paid `jev` call. Try `--dry-run` or `--sample` first.
+
 Options:
-- `--limit N` — max number of rows to process (default 40)
-- `--threshold X` — minimum score (0–2) for a song to be included in a bucket (default 1.0)
-- `--dry-run` — skip the `jev` API call entirely; still fetches/caches MusicBrainz tags and prints the text that would be sent for scoring (no buckets are written)
+- `--limit N` — only process the first N rows (default: all rows; ignored with `--sample`)
+- `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
+- `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 1.0)
+- `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album
+- `--buckets PATH` — bucket definitions file (default `buckets.json`)
+- `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
+- `--refresh-lastfm` — ignore the Last.fm cache and overwrite it with fresh lookups
+- `--refresh-jev` — ignore the `jev` score cache and overwrite it (spends tokens on a real run)
+
+The two `--refresh-*` flags replace the whole cache file, so it afterwards holds only the albums from that run.
+
+Rows that don't have the expected fields are skipped with a warning on stderr.
+
+## How it works
+
+Songs are grouped by (primary artist, cleaned album title); songs with no album are grouped per artist. Each group gets one `jev` request: the state below, plus one score question per bucket.
+
+```
+Album: Manic Compression by Quicksand (1995)
+Album tags (strongest first): post-hardcore, alternative rock, post-grunge
+Artist tags (strongest first): hardcore, emo
+Similar artists: Rival Schools, Jawbox, Shiner
+```
+
+Tags are cleaned (junk and list tags dropped, nationalities kept, spelling variants merged, generic tags like `rock` ranked last); counts, track titles and ids are never sent.
 
 ## Output
 
-Each run writes bucketed CSVs to `runs/<timestamp>/<bucket>.csv`, plus a summary of MusicBrainz hit/miss counts and `jev` API usage (call count, tokens).
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 
-- MusicBrainz lookups are cached in `mb_cache.json` and throttled to ~1 request/sec.
-- `jev` scoring results are cached in `jev_cache.json`, keyed by the exact input text, so re-runs skip already-scored songs.
-- Both cache files are safe to delete to force a full re-fetch/re-score.
+- Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text. Delete a file, or use the matching `--refresh-*` flag, to force a refresh.
+- Run the tests with `poetry run python -m unittest discover tests`.
