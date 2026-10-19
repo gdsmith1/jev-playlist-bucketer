@@ -6,6 +6,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 
+from .dashboard import write_dashboard
 from .formatting import coverage_stats, format_for_jev, format_run_stats
 from .jev import FALLBACK_BUCKET, JevClient
 from .lastfm import LastfmClient
@@ -23,6 +24,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=7, help="Random seed for --sample")
     parser.add_argument("--threshold", type=float, default=1.0, help="Minimum score for an album to be included in a bucket")
     parser.add_argument("--dry-run", action="store_true", help="Skip jev scoring; only fetch metadata and print what would be sent")
+    parser.add_argument("--no-dashboard", action="store_true", help="With --dry-run, skip writing the genre dashboard (dashboard.html in the run folder)")
     parser.add_argument("--buckets", default=BUCKETS_PATH, help="Path to the bucket definitions JSON")
     parser.add_argument("--refresh-lastfm", action="store_true", help="Ignore the existing Last.fm cache and overwrite it with fresh lookups")
     parser.add_argument("--refresh-jev", action="store_true", help="Ignore the existing jev score cache and overwrite it (spends jev tokens on a real run)")
@@ -67,11 +69,18 @@ def main(argv=None) -> None:
         for index in group.rows:
             destinations[index] = matched
 
+    dashboard_path = None
+    if args.dry_run and not args.no_dashboard:
+        dashboard_path = write_dashboard(run_dir, list(zip(groups, enrichments)), lastfm.tag_info)
+        lastfm.flush()
+
     bucket_lines = assign_to_buckets(lines, destinations, buckets)
     write_buckets(run_dir, header, bucket_lines)
 
     print()
     print(f"run folder: {run_dir}")
+    if dashboard_path:
+        print(f"dashboard: {dashboard_path}")
     print(f"songs processed: {len(lines)}  albums scored: {len(groups)}")
     print(format_run_stats(coverage_stats(enrichments), lastfm.stats, time.monotonic() - started))
     for key, matched_lines in bucket_lines.items():

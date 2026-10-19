@@ -42,6 +42,29 @@ class Base(unittest.TestCase):
         return [c["method"] for c in self.calls]
 
 
+class TagInfoTest(Base):
+    WIKI = "Stoner rock is slow. <a href=\"https://x\">Read more on Last.fm</a>"
+
+    def test_parses_and_strips_html(self):
+        self.script(lambda p: (200, {"tag": {"name": "stoner rock", "total": 9, "reach": 3, "wiki": {"summary": self.WIKI}}}))
+        self.assertEqual(self.p.tag_info("Stoner Rock"), {"summary": "Stoner rock is slow.", "reach": 3, "taggings": 9})
+
+    def test_no_wiki_is_empty_summary(self):
+        self.script(lambda p: (200, {"tag": {"name": "x", "total": 1, "reach": 1}}))
+        self.assertEqual(self.p.tag_info("x")["summary"], "")
+
+    def test_not_found_cached_as_none(self):
+        self.script(lambda p: (200, {"error": 6, "message": "no"}))
+        self.assertIsNone(self.p.tag_info("zzz"))
+        self.assertIsNone(self.p.tag_info("zzz"))
+        self.assertEqual(self.methods(), ["tag.getInfo"])
+
+    def test_error_not_cached(self):
+        self.script(lambda p: (500, None))
+        self.assertIsNone(self.p.tag_info("x"))
+        self.assertNotIn("x", self.p.cache.section("tag"))
+
+
 class LastfmTest(Base):
     def test_missing_key(self):
         with mock.patch.dict(os.environ, {}, clear=True):

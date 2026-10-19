@@ -1,6 +1,8 @@
 """Last.fm client: crowd tags at album and artist level, plus similar artists, cached on disk."""
 
+import html
 import os
+import re
 import time
 from typing import Any, Callable
 
@@ -47,6 +49,19 @@ def _norm(s: str | None) -> str:
     return (s or "").strip().lower()
 
 
+_HTML_TAG = re.compile(r"<[^>]+>")
+TAG_SUMMARY_MAX = 400
+
+
+def clean_wiki(summary: str | None) -> str:
+    """Last.fm wiki summaries carry anchor tags and a trailing 'Read more' link; return plain, shortened text."""
+    text = html.unescape(_HTML_TAG.sub("", summary or ""))
+    text = re.sub(r"\s*Read more on Last\.fm\.?\s*$", "", " ".join(text.split()))
+    if len(text) > TAG_SUMMARY_MAX:
+        text = text[:TAG_SUMMARY_MAX].rsplit(" ", 1)[0] + "…"
+    return text
+
+
 def _dedupe(names: list[str | None]) -> list[str]:
     out: list[str] = []
     for n in names:
@@ -62,7 +77,7 @@ class LastfmClient:
         if not self.api_key:
             raise SystemExit("LASTFM_API_KEY is not set (add it to .env)")
         self.cache = JsonCache(os.path.join(cache_dir, "lastfm_cache.json"), fresh=refresh)
-        for section in ("artist", "album"):
+        for section in ("artist", "album", "tag"):
             self.cache.section(section)
         self.throttle = Throttle(LASTFM_MIN_INTERVAL)
         self.session = requests.Session()
@@ -169,6 +184,17 @@ class LastfmClient:
             return OK, {"tags": tags, "extras": extras}
         return (ERROR if errored else NOT_FOUND), None
 
+    def lookup_tag(self, name: str) -> tuple[str, dict | None]:
+        status, data = self._call("tag.getInfo", tag=name)
+        if status != OK:
+            return status, None
+        node = data.get("tag") or {}
+        return OK, {
+            "summary": clean_wiki((node.get("wiki") or {}).get("summary")),
+            "reach": int(node.get("reach") or 0),
+            "taggings": int(node.get("total") or 0),
+        }
+
     # -- public -------------------------------------------------------------
 
     def _cached(self, section: str, key: str, lookup: Callable[[], tuple[str, dict | None]]) -> dict | None:
@@ -196,6 +222,10 @@ class LastfmClient:
             enrichment.artist_tags = clean_tags(artist_payload.get("tags", []), exclude=(artist, primary_artist(artist)))
             enrichment.similar_artists = list((artist_payload.get("extras") or {}).get("similar_artists") or [])
         return enrichment
+
+    def tag_info(self, name: str) -> dict | None:
+        """Description and usage stats for one tag (None if unknown). Cached under `tag`."""
+        return self._cached("tag", _norm(name), lambda: self.lookup_tag(name))
 
     def flush(self) -> None:
         self.cache.flush()

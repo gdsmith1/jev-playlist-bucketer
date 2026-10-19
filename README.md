@@ -48,9 +48,10 @@ Options:
 - `--limit N` — only process the first N rows (default: all rows; ignored with `--sample`)
 - `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
 - `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 1.0)
-- `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album
+- `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album, and writes `dashboard.html` (see Output)
 - `--buckets PATH` — bucket definitions file (default `buckets.json`)
 - `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
+- `--no-dashboard` — with `--dry-run`, skip writing the genre dashboard
 - `--refresh-lastfm` — ignore the Last.fm cache and overwrite it with fresh lookups
 - `--refresh-jev` — ignore the `jev` score cache and overwrite it (spends tokens on a real run)
 
@@ -73,9 +74,12 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 ## Output
 
-`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus a summary of Last.fm coverage and `jev` usage.
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus, with `--dry-run`, `dashboard.html` (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster), plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 
+- Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
+- Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
+- Tag descriptions on the dashboard come from Last.fm `tag.getInfo` for the top ~40 tags, cached in the `tag` section of `lastfm_cache.json`. `tag.getSimilar` returns nothing in practice, so suggested buckets come from tag co-occurrence in your own playlist.
 - Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text. Delete a file, or use the matching `--refresh-*` flag, to force a refresh.
 - Run the tests with `poetry run python -m unittest discover tests`.
