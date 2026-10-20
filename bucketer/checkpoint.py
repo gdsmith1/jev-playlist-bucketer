@@ -32,12 +32,20 @@ def describe(tags: list[str], artists: list[str]) -> str:
     return text + "."
 
 
+def example_artists(examples: list[dict]) -> list[str]:
+    artists: list[str] = []
+    for e in examples:
+        if e["artist"] not in artists:
+            artists.append(e["artist"])
+    return artists
+
+
 def suggest_buckets(clusters: list[dict]) -> dict[str, dict]:
     """One suggested bucket per cluster, keyed by a slug of the cluster's seed tag."""
     suggested: dict[str, dict] = {}
     for c in clusters:
         key = bucket_key(c["seed"], set(suggested))
-        suggested[key] = {"description": describe(c["tags"], c.get("examples", [])), "tags": c["tags"][:CHOICE_TAGS], "albums": c["albums"], "songs": c["songs"]}
+        suggested[key] = {"description": describe(c["tags"], example_artists(c.get("examples", []))), "tags": c["tags"][:CHOICE_TAGS], "albums": c["albums"], "songs": c["songs"]}
     return suggested
 
 

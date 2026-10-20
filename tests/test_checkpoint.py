@@ -9,7 +9,7 @@ from unittest import mock
 from bucketer import checkpoint
 
 CLUSTERS = [
-    {"seed": "stoner rock", "tags": ["stoner rock", "desert rock", "fuzz"], "examples": ["Kyuss", "Sleep"], "albums": 4, "songs": 9},
+    {"seed": "stoner rock", "tags": ["stoner rock", "desert rock", "fuzz"], "examples": [{"artist": "Kyuss", "album": "Blues", "songs": 3}, {"artist": "Sleep", "album": "Dopesmoker", "songs": 1}], "albums": 4, "songs": 9},
     {"seed": "Post-Punk!", "tags": ["post-punk"], "examples": [], "albums": 2, "songs": 3},
 ]
 
