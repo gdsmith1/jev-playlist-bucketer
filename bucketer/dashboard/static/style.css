@@ -26,3 +26,11 @@ table.hm td{width:30px;height:30px;min-width:30px;font-size:12px;font-weight:600
 table.hm th[tabindex]:hover,table.hm th[tabindex]:focus-visible{color:var(--fg);outline:2px solid var(--blue);outline-offset:-2px}
 .hmscale{display:flex;align-items:center;gap:8px;margin-bottom:4px}.hmscale i{width:160px;height:10px;border-radius:2px;background:linear-gradient(90deg,rgba(174,129,255,.08),var(--purple))}
 table.hm thead th{height:200px}
+/* data quality */
+.qlist{max-height:360px}details summary{cursor:pointer;color:var(--yellow);margin:8px 0}
+/* tag noise */
+td input[type=checkbox]{width:auto;margin:0}
+/* decades */
+.decs{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px}.drow{margin:8px 0}.dname{color:var(--blue)}.flag{color:var(--orange)}
+.dec{display:flex;gap:4px;height:48px;align-items:flex-end}.dbar{flex:1;max-width:48px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--muted)}
+.dbar i{display:block;width:100%;background:var(--green);border-radius:2px 2px 0 0}.daxis{height:auto;border-top:1px solid var(--line)}.daxis span{flex:1;max-width:48px;text-align:center;font-size:10px;color:var(--muted)}
