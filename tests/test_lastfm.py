@@ -65,6 +65,57 @@ class TagInfoTest(Base):
         self.assertNotIn("x", self.p.cache.section("tag"))
 
 
+def album_info(**sizes):
+    return {"album": {"name": "Wretch", "image": [{"size": k, "#text": v} for k, v in sizes.items()]}}
+
+
+class CoverTest(Base):
+    def test_prefers_extralarge(self):
+        self.script(lambda p: (200, album_info(small="s.jpg", extralarge="xl.jpg", large="l.jpg")))
+        self.assertEqual(self.p.lookup_cover("Kyuss", "Wretch"), (lastfm.OK, "xl.jpg"))
+
+    def test_placeholder_image_means_no_cover(self):
+        ph = f"https://x/i/u/300x300/{lastfm.PLACEHOLDER_IMAGE_ID}.png"
+        self.script(lambda p: (200, album_info(extralarge=ph, large=ph, medium="")))
+        status, url = self.p.lookup_cover("Kyuss", "Wretch")
+        self.assertEqual((status, url), (lastfm.NOT_FOUND, ""))
+
+    def test_unknown_album_makes_no_call(self):
+        self.script(lambda p: (200, album_info()))
+        self.assertEqual(self.p.lookup_cover("Kyuss", "[unknown]")[0], lastfm.NOT_FOUND)
+        self.assertEqual(self.calls, [])
+
+    def test_fetch_stores_cover_once_in_album_cache(self):
+        def respond(p):
+            if p["method"] == "album.getTopTags":
+                return 200, tags_resp(("stoner rock", 100))
+            if p["method"] == "album.getInfo":
+                return 200, album_info(extralarge="xl.jpg")
+            if p["method"] == "artist.getTopTags":
+                return 200, tags_resp(("stoner rock", 100))
+            return 200, info_resp()
+        self.script(respond)
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").cover, "xl.jpg")
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").cover, "xl.jpg")
+        self.assertEqual(self.methods().count("album.getInfo"), 1)
+
+    def test_old_cache_entry_without_cover_is_upgraded_and_missing_art_remembered(self):
+        self.p.cache.section("album")["kyuss|wretch"] = {"tags": [{"name": "stoner rock", "count": 100}]}
+        self.p.cache.section("artist")["kyuss"] = {"tags": [], "extras": {}}
+        self.script(lambda p: (200, album_info()))
+        self.assertIsNone(self.p.fetch("Kyuss", "Wretch").cover)
+        self.assertEqual(self.p.cache.section("album")["kyuss|wretch"]["cover"], "")
+        self.p.fetch("Kyuss", "Wretch")
+        self.assertEqual(self.methods().count("album.getInfo"), 1)  # "no art" is remembered, so the second fetch makes no call
+
+    def test_cover_error_not_cached(self):
+        self.p.cache.section("album")["kyuss|wretch"] = {"tags": []}
+        self.p.cache.section("artist")["kyuss"] = {"tags": [], "extras": {}}
+        self.script(lambda p: (500, None))
+        self.assertIsNone(self.p.fetch("Kyuss", "Wretch").cover)
+        self.assertNotIn("cover", self.p.cache.section("album")["kyuss|wretch"])
+
+
 class LastfmTest(Base):
     def test_missing_key(self):
         with mock.patch.dict(os.environ, {}, clear=True):

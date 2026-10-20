@@ -65,6 +65,14 @@ class DashboardTest(unittest.TestCase):
         o = next(o for o in a["outliers"] if o["artist"] == "Generic")
         self.assertEqual(o["reason"], "only umbrella tags")
 
+    def test_covers_flow_to_clusters_and_outliers(self):
+        pairs = [pair("A", "1", [("stoner rock", 100)], songs=3), pair("B", "2", [("stoner rock", 90)]), pair("C", "3", None)]  # untagged, so always an outlier
+        pairs[0][1].cover, pairs[2][1].cover = "a.jpg", "c.jpg"
+        a = analyze(pairs)
+        stoner = next(c for c in a["clusters"] if "stoner rock" in c["tags"])
+        self.assertEqual(stoner["covers"], [{"url": "a.jpg", "title": "A - 1"}])  # B has no cover, so it is skipped
+        self.assertEqual(next(o for o in a["outliers"] if o["artist"] == "C")["cover"], "c.jpg")
+
     def test_untagged_albums_are_outliers(self):
         a = analyze(PAIRS)
         reasons = {o["artist"]: o["reason"] for o in a["outliers"]}

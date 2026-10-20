@@ -18,6 +18,7 @@ JOIN_SIMILARITY = 0.25  # Jaccard needed for a tag to join an existing cluster i
 MAX_CLUSTERS = 12
 OUTLIER_FIT = 0.3  # an album is an outlier when less than this share of its tag weight lands in its best cluster
 EXAMPLES_PER_CLUSTER = 6
+COVERS_PER_CLUSTER = 5
 UNCOUNTED_WEIGHT = 0.5  # weight for a tag that came without a count
 
 
@@ -39,7 +40,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     albums = []
     for group, enrichment in pairs:
         albums.append({"artist": group.artist, "album": group.album, "songs": len(group.rows), "tags": album_tags(enrichment),
-                       "similar": list(enrichment.similar_artists)})
+                       "similar": list(enrichment.similar_artists), "cover": enrichment.cover or ""})
 
     members: dict[str, set[int]] = {}  # tag -> indexes of albums carrying it
     for i, a in enumerate(albums):
@@ -77,6 +78,8 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
         c["albums"], c["songs"] = len(mine), songs_of(mine)
         c["examples"] = [f"{albums[i]['artist']}" for i in sorted(mine, key=lambda i: -affinity[i])][:EXAMPLES_PER_CLUSTER]
         c["examples"] = list(dict.fromkeys(c["examples"]))
+        ordered = sorted(mine, key=lambda i: (-affinity[i], -albums[i]["songs"]))
+        c["covers"] = [{"url": albums[i]["cover"], "title": f"{albums[i]['artist']} - {albums[i]['album']}"} for i in ordered if albums[i]["cover"]][:COVERS_PER_CLUSTER]
     clusters.sort(key=lambda c: -c["songs"])
 
     outliers = []
@@ -87,7 +90,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
         fit, nearest = max(fits, default=(0.0, None))
         if total == 0 or fit < OUTLIER_FIT:
             outliers.append({"artist": a["artist"], "album": a["album"], "songs": a["songs"], "reason": ("untagged" if not a["tags"] else "only umbrella tags") if total == 0 else "no cluster fits",
-                             "fit": round(fit, 2), "nearest": nearest if fit > 0 else None,
+                             "cover": a["cover"], "fit": round(fit, 2), "nearest": nearest if fit > 0 else None,
                              "tags": sorted(specific or a["tags"], key=lambda t: -a["tags"][t])[:6], "similar": a["similar"]})
     outliers.sort(key=lambda o: (o["fit"], -o["songs"]))
 
@@ -134,6 +137,8 @@ th,td{padding:4px 8px;text-align:left;border-bottom:1px solid var(--line);vertic
 input{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:6px 10px;border-radius:6px;font:inherit;width:100%;max-width:320px;margin-bottom:8px}
 #detail{position:sticky;bottom:8px;background:var(--panel);border:1px solid var(--blue);border-radius:6px;padding:10px 14px;margin-top:16px;display:none}
 #detail b{color:var(--blue)}.heat{display:grid;gap:1px;font-size:10px}.heat div{aspect-ratio:1;background:var(--purple)}.legend{color:var(--muted);margin-top:4px}
+.thumbs{display:flex;gap:4px;margin:8px 0 2px}.thumbs img,.ph{width:48px;height:48px;border-radius:3px;object-fit:cover;background:var(--line)}
+.ph{display:inline-flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}.cv{width:40px;padding-right:0}.cv img,.cv .ph{width:40px;height:40px}
 .bar.umb{opacity:.45}.bar.umb .t::after{content:" (umbrella)";color:var(--muted)}
 table.hm{border-collapse:separate;border-spacing:1px;width:auto}table.hm th{position:static;background:none;font-weight:400;color:var(--blue);padding:0 4px;white-space:nowrap;border:0}
 table.hm thead th{writing-mode:vertical-rl;transform:rotate(180deg);height:170px;text-align:left;vertical-align:bottom}
@@ -155,11 +160,13 @@ const D=/*DATA*/null;const COLORS=["#a6e22e","#66d9ef","#f92672","#fd971f","#ae8
 const $=id=>document.getElementById(id);
 function el(tag,props,...kids){const e=document.createElement(tag);Object.assign(e,props||{});kids.forEach(k=>e.append(k));return e}
 function show(tag){const i=D.info[tag];const d=$("detail");d.style.display="block";d.replaceChildren(el("b",{},tag),i?el("span",{}," ("+i.reach.toLocaleString()+" listeners) "+i.summary):el("span",{className:"sub"}," no description on Last.fm"))}
+function art(url,title,cls){if(!url)return el("span",{className:"ph",textContent:"♪",title:title||"no cover on Last.fm"});
+ const i=el("img",{src:url,alt:title||"",title:title||"",loading:"lazy",referrerPolicy:"no-referrer"});i.onerror=()=>i.replaceWith(el("span",{className:"ph",textContent:"♪",title:"cover failed to load"}));return i}
 function chip(t){return el("button",{className:"chip",textContent:t,onclick:()=>show(t),title:D.info[t]?D.info[t].summary:""})}
 [["albums",D.albums],["songs",D.songs],["outlier albums",D.outliers.length],["outlier songs",D.outlier_songs],["suggested buckets",D.clusters.length]]
  .forEach(([k,v])=>$("stats").append(el("div",{className:"stat"},el("b",{textContent:v}),k)));
 D.clusters.forEach((c,i)=>{const card=el("div",{className:"card"},el("h3",{textContent:c.seed}),el("div",{className:"sub",textContent:c.albums+" albums · "+c.songs+" songs"}));
- card.style.setProperty("--c",COLORS[i%COLORS.length]);c.tags.forEach(t=>card.append(chip(t)));card.append(el("div",{className:"ex",textContent:"e.g. "+c.examples.join(", ")}));$("clusters").append(card)});
+ card.style.setProperty("--c",COLORS[i%COLORS.length]);c.tags.forEach(t=>card.append(chip(t)));if(c.covers.length)card.append(el("div",{className:"thumbs"},...c.covers.map(v=>art(v.url,v.title))));card.append(el("div",{className:"ex",textContent:"e.g. "+c.examples.join(", ")}));$("clusters").append(card)});
 const max=Math.max(1,...D.tags.map(t=>t.songs));
 D.tags.forEach(t=>{const f=el("div",{className:"fill"});f.style.width=(100*t.songs/max)+"%";$("tags").append(el("div",{className:"bar"+(t.umbrella?" umb":"")},el("span",{className:"t",textContent:t.tag,onclick:()=>show(t.tag)}),el("div",{},f),el("span",{className:"n",textContent:t.songs+" songs"})))});
 const HT=D.heat_tags;const peak=Math.max(0.01,...D.heat.flatMap((r,x)=>r.filter((v,y)=>x!=y)));
@@ -168,11 +175,11 @@ const HT=D.heat_tags;const peak=Math.max(0.01,...D.heat.flatMap((r,x)=>r.filter(
   row.forEach((v,y)=>{const td=el("td",{title:HT[x]+" × "+HT[y]+": "+Math.round(v*100)+"% of albums in common",textContent:x!=y&&v>=0.05?Math.round(v*100):""});
    if(x==y)td.className="self";else td.style.setProperty("--a",Math.max(0.05,v/peak).toFixed(2));tr.append(td)});body.append(tr)});hm.append(body)}
 $("heatlegend").textContent="Hover a cell for the tag pair; click a tag name for its description.";
-let sortKey="fit",asc=true;const cols=[["artist","artist"],["album","album"],["songs","songs"],["reason","reason"],["fit","fit"],["nearest","nearest bucket"],["tags","tags"]];
+let sortKey="fit",asc=true;const cols=[["cover",""],["artist","artist"],["album","album"],["songs","songs"],["reason","reason"],["fit","fit"],["nearest","nearest bucket"],["tags","tags"]];
 function draw(){const q=$("q").value.toLowerCase();const rows=D.outliers.filter(o=>(o.artist+" "+o.album+" "+o.tags.join(" ")).toLowerCase().includes(q))
  .sort((a,b)=>{const x=a[sortKey],y=b[sortKey];const r=typeof x=="number"?x-y:String(x).localeCompare(String(y));return asc?r:-r});
  $("oh").replaceChildren(...cols.map(([k,l])=>el("th",{textContent:l+(sortKey==k?(asc?" ▲":" ▼"):""),onclick:()=>{asc=sortKey==k?!asc:true;sortKey=k;draw()}})));
- $("ob").replaceChildren(...rows.map(o=>{const tr=el("tr");[o.artist,o.album,o.songs,o.reason,o.fit,o.nearest||"",""].forEach((v,i)=>tr.append(i==6?el("td",{},...o.tags.map(chip)):el("td",{textContent:v})));return tr}))}
+ $("ob").replaceChildren(...rows.map(o=>{const tr=el("tr");[o.cover,o.artist,o.album,o.songs,o.reason,o.fit,o.nearest||"",""].forEach((v,i)=>tr.append(i==0?el("td",{className:"cv"},art(v,o.artist+" - "+o.album)):i==7?el("td",{},...o.tags.map(chip)):el("td",{textContent:v})));return tr}))}
 $("q").oninput=draw;draw();
 </script></main></body></html>
 """

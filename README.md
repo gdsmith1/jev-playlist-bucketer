@@ -80,6 +80,7 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 - Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
 - Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
+- Album covers on the dashboard come from Last.fm `album.getInfo` (one call per album, stored as `cover` on the `album` cache entry; `""` = Last.fm has none). The page links the Last.fm image URLs, so covers need internet to display; a ♪ placeholder shows when there is none or the image fails to load.
 - Tag descriptions on the dashboard come from Last.fm `tag.getInfo` for the top ~40 tags, cached in the `tag` section of `lastfm_cache.json`. `tag.getSimilar` returns nothing in practice, so suggested buckets come from tag co-occurrence in your own playlist.
 - Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text. Delete a file, or use the matching `--refresh-*` flag, to force a refresh.
 - Run the tests with `poetry run python -m unittest discover tests`.
