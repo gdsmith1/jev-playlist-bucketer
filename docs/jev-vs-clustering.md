@@ -59,21 +59,21 @@ What the 10 albums cannot test: description-defined buckets ("in the vein of", `
 
 Yes, moderately (Pearson 0.76, Spearman 0.50 on 120 pairs). The strongest jev scores (Mondo Generator 1.99, Power Trip 1.8, Mew 1.22) are exactly the albums with the highest tag fit (0.75, 0.54, 0.67). Where they diverge (Bowie, Soulwax, Slint, Mastodon) jev either withholds a call or uses information tags do not carry (similar artists, release context, description match). With n=10 do not read more into it.
 
-## Hybrid (what DASH-11 implies): what jev adds
+## Hybrid: what jev adds
 
 In the design "clustering proposes buckets, the user ticks, jev assigns", jev's value, as far as 10 albums show:
 
 1. It can say "none of these" (Cash, Bowie, Sublime) where a tag rule produces a false positive from a single generic tag (Bowie via `classic rock`).
 2. It handles secondary or fuzzy membership with a graded score (Mew, Soulwax, Mastodon) where tags give all-or-nothing.
-3. It can use evidence beyond the tag share (similar artists, album-vs-artist, year) and a bucket's written description. That matters most once the user ticks a suggested bucket that is a tag cluster turned into a description by a fixed template (DASH-11b); jev then judges against "tagged X, Y, Z, in the vein of A, B, C", not against a tag set.
+3. It can use evidence beyond the tag share (similar artists, album-vs-artist, year) and a bucket's written description. That matters most once the user ticks a suggested bucket that is a tag cluster turned into a description by a fixed template (the checkpoint step); jev then judges against "tagged X, Y, Z, in the vein of A, B, C", not against a tag set.
 4. It costs money and is stricter: at threshold 1.0 it assigned 3 of 10 albums. In a hybrid that threshold needs re-tuning (or `other` will swallow most of the playlist).
 
 What clustering adds on top of jev: it picks the bucket set from the library itself and gives a free, instant first pass, which already gets 6 of 10 albums to the same bucket set as jev at the project threshold.
 
 ## Recommendation
 
-- **Keep jev, as the assignment step in the DASH-11 hybrid.** Replace is not supported: tag-only misassigns on generic or single-tag evidence (Bowie), cannot express description-defined buckets, and leaves 16.5% of songs unplaced with the hand mapping.
-- **Build DASH-11a and 11b as planned.** They are worth it either way.
+- **Keep jev, as the assignment step in the hybrid.** Replace is not supported: tag-only misassigns on generic or single-tag evidence (Bowie), cannot express description-defined buckets, and leaves 16.5% of songs unplaced with the hand mapping.
+- **Build the two-pass flow and bucket selection.** They are worth it either way.
 - Optional cost saver for 11c, to test before relying on it: skip jev for albums where the tag fit is already very high and unambiguous (for example fit >= 0.7 in one bucket, such as Mondo Generator at 0.75) and send only the middle and the no-fit albums. On the 10 albums this would have skipped 1 call; it needs more data to know whether it is safe.
 - Re-check the default threshold of 1.0: it produced 7 of 10 `other` here.
 
