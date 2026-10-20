@@ -74,12 +74,13 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 ## Output
 
-`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus, with `--dry-run`, `dashboard.html` (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster), plus a summary of Last.fm coverage and `jev` usage.
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus, with `--dry-run`, `dashboard.html` (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, outlier albums that fit no cluster, Last.fm data-quality tiles, a tag noise audit, and release decades per bucket), plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 
 - Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
 - Wide umbrella tags (rock, pop, alternative, indie, metal, electronic, instrumental, folk, ...) are listed in `UMBRELLA_TAGS` in `bucketer/dashboard.py`; the dashboard dims them in Top tags and never suggests them as buckets. Edit that set to taste.
+- The tag noise audit flags single-album tags and tags in `NOISE_TAGS` in `bucketer/dashboard/noise.py` (countries, nationalities, junk). It is dashboard-only: it does not change tag cleaning or the text sent to jev. Ticked tags can be copied as JSON from the page.
 - Album covers on the dashboard come from Last.fm `album.getInfo` (one call per album, stored as `cover` on the `album` cache entry; `""` = Last.fm has none). The page links the Last.fm image URLs, so covers need internet to display; a ♪ placeholder shows when there is none or the image fails to load.
 - Tag descriptions on the dashboard come from Last.fm `tag.getInfo` for the top ~40 tags, cached in the `tag` section of `lastfm_cache.json`. `tag.getSimilar` returns nothing in practice, so suggested buckets come from tag co-occurrence in your own playlist.
 - Last.fm responses are cached in `lastfm_cache.json` (~4 req/s); `jev` scores in `jev_cache.json`, keyed by the exact state text plus a fingerprint of the bucket questions (keys, descriptions, `not_for`, levels), so editing a bucket re-scores instead of reusing stale scores (old entries stay in the file). Entries from before fingerprints existed are adopted automatically when their bucket keys match the current ones. Delete a file, or use the matching `--refresh-*` flag, to force a refresh.

@@ -3,6 +3,7 @@
 import re
 
 from ..models import Enrichment, Group
+from .decades import decade_stats
 from .noise import noise_audit
 from .quality import quality_stats
 
@@ -117,4 +118,5 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     total_songs = sum(a["songs"] for a in albums)
     return {"albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
             "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records,
-            "quality": quality_stats(records), "noise": noise_audit(records)}
+            "quality": quality_stats(records), "noise": noise_audit(records),
+            "decades": decade_stats(records, [c["seed"] for c in clusters])}

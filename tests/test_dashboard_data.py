@@ -63,5 +63,32 @@ class NoiseTest(unittest.TestCase):
         self.assertEqual(analyze([])["noise"]["flagged"], 0)
 
 
+class DecadeTest(unittest.TestCase):
+    def pairs(self):
+        dates = ["1994-05-01", "1996", "1999-01-01", "1991", "1998-02-02", "2012-01-01", "", "0000-00-00", "garbage"]
+        return [pair(f"A{i}", "x", album_tags=[("stoner rock", 100)], date=d) for i, d in enumerate(dates)]
+
+    def test_histogram_counts_decades_and_undated(self):
+        s = analyze(self.pairs())["decades"]
+        self.assertEqual(s["decades"], [1990, 2000, 2010])
+        self.assertEqual(s["overall"], {"counts": [5, 0, 1], "unknown": 3})
+
+    def test_cluster_dominated_by_one_decade(self):
+        s = analyze(self.pairs())["decades"]
+        c = s["clusters"][0]
+        self.assertEqual((c["seed"], c["counts"], c["dated"], c["top_decade"]), ("stoner rock", [5, 0, 1], 6, 1990))
+        self.assertTrue(c["dominated"])
+
+    def test_small_or_mixed_clusters_are_not_flagged(self):
+        few = analyze([pair("A", "1", album_tags=[("x", 100)], date="1990"), pair("B", "2", album_tags=[("x", 100)], date="1991")])
+        self.assertFalse(few["decades"]["clusters"][0]["dominated"])
+        mixed = analyze([pair(f"A{i}", "1", album_tags=[("x", 100)], date=d) for i, d in enumerate(["1970", "1980", "1990", "2000", "2010", "2020"])])
+        self.assertFalse(mixed["decades"]["clusters"][0]["dominated"])
+
+    def test_no_usable_dates(self):
+        s = analyze([pair("A", "1", album_tags=[("x", 100)], date="n/a")])["decades"]
+        self.assertEqual((s["decades"], s["clusters"], s["overall"]["unknown"]), ([], [], 1))
+
+
 if __name__ == "__main__":
     unittest.main()
