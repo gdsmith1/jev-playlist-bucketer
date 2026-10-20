@@ -9,21 +9,7 @@ Sorts a playlist CSV into genre buckets. Each **album** is described to `jev` on
    TYPESAFE_API_KEY=your-jev-key      # not needed with --dry-run
    LASTFM_API_KEY=your-lastfm-key     # a PAT from last.fm, required
    ```
-2. **Bucket definitions** — a `buckets.json` in the project root:
-   ```json
-   {
-     "grunge_stoner": {
-       "description": "Heavy, sludgy alt-rock in the vein of Kyuss, Soundgarden, Alice in Chains",
-       "not_for": "polished radio rock",
-       "levels": [
-         "Not grunge or stoner rock",
-         {"summary": "Some grunge or stoner influence", "signals": ["alternative rock with heavy riffs"]},
-         {"summary": "Clearly grunge or stoner rock", "signals": ["stoner rock", "desert rock", "grunge"]}
-       ]
-     }
-   }
-   ```
-   `description` is required. `levels` (2-10 strings or `{summary, signals}` objects) and `not_for` are optional; without `levels` three generic levels are used. `other` is built in: it collects albums that clear no bucket's threshold. jev never sees it, and you don't need to define it (an entry named `other` is ignored).
+2. **Buckets** are suggested from your own playlist: a real run writes the dashboard, then offers the suggested buckets (tag clusters) in a terminal checklist. Before any jev call it prints how many calls are needed (albums not already cached for the chosen buckets), the bucket count and a few sample inputs, and waits for an explicit yes. Each ticked bucket gets a description built from a fixed template ("Albums tagged X, Y, Z, in the vein of A, B, C.") and is saved to `runs/<timestamp>/selected_buckets.json`, which you can inspect and edit. Only suggestions are offered; `buckets.json` is no longer read. `other` is built in: it collects albums that clear no bucket's threshold, and jev never sees it. A bucket entry may also carry `levels` (2-10 strings or `{summary, signals}` objects) and `not_for` in `selected_buckets.json`; without `levels` three generic levels are used.
 3. **Song list CSV** — a [Spotlistr](https://www.spotlistr.com/) export. Rows are `Artist(s) Name , Track Name , Album Name , Release Date , Length , ISRC` (fields separated by ` , `).
 
 ## Install
@@ -40,7 +26,7 @@ poetry install
 poetry run python -m bucketer path/to/playlist.csv
 ```
 
-Run it from the project root: the caches, `buckets.json` and `runs/` are all resolved relative to the working directory.
+Run it from the project root: the caches and `runs/` are all resolved relative to the working directory.
 
 With no `--limit` or `--sample` it processes **every row**, and each uncached album is one paid `jev` call. Try `--dry-run` or `--sample` first.
 
@@ -49,9 +35,10 @@ Options:
 - `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
 - `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 1.0)
 - `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album, and writes `dashboard.html` (see Output)
-- `--buckets PATH` — bucket definitions file (default `buckets.json`)
+- `--yes` — proceed with the jev calls without the confirmation prompt (needed when there is no terminal)
+- `--select all|a,b,c` — score with these suggested buckets instead of showing the checklist (needed when there is no terminal)
 - `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
-- `--no-dashboard` — with `--dry-run`, skip writing the genre dashboard
+- `--no-dashboard` — skip writing the genre dashboard
 - `--refresh-lastfm` — ignore the Last.fm cache and overwrite it with fresh lookups
 - `--refresh-jev` — ignore the `jev` score cache and overwrite it (spends tokens on a real run)
 
@@ -74,7 +61,7 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 ## Output
 
-`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus, with `--dry-run`, `dashboard.html` (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster), plus a summary of Last.fm coverage and `jev` usage.
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus `dashboard.html` (unless `--no-dashboard`) (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster), plus `selected_buckets.json` on a real run, plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 

@@ -64,6 +64,16 @@ class JevClient:
         """A legacy entry (no fingerprint) is only trusted if it scored exactly today's bucket keys."""
         return "fingerprint" not in entry and set(entry.get("scores", {})) == set(self.questions)
 
+    def is_cached(self, text: str) -> bool:
+        """True when `score(text, ...)` would be answered without a jev call."""
+        if self._cache_key(text) in self.cache:
+            return True
+        legacy = self.cache.get(hashlib.sha256(text.encode("utf-8")).hexdigest())
+        return legacy is not None and self._adoptable(legacy)
+
+    def _cache_key(self, text: str) -> str:
+        return hashlib.sha256(f"{self.fingerprint}\n{text}".encode("utf-8")).hexdigest()
+
     def _sdk(self) -> Any:
         if self._client is None:
             api_key = os.environ.get("TYPESAFE_API_KEY")
@@ -75,7 +85,7 @@ class JevClient:
     def score(self, text: str, label: str) -> dict[str, float]:
         """Scores per bucket for the album `text`. Cached by the sha256 of the exact text."""
         text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
-        cache_key = hashlib.sha256(f"{self.fingerprint}\n{text}".encode("utf-8")).hexdigest()
+        cache_key = self._cache_key(text)
         if cache_key in self.cache:
             return self.cache.get(cache_key)["scores"]
         legacy = self.cache.get(text_hash)

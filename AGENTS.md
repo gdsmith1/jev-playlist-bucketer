@@ -18,7 +18,7 @@ All paths are relative to the repo root, which is also where commands must be ru
 | Last.fm cache | `lastfm_cache.json` | sections `album` (`artist\|clean album`; entries also carry `cover`, `""` = none, fetched lazily for older entries) `artist` (primary artist) and `tag` (`tag.getInfo` summary), lowercase keys; `null` = genuinely not found, errors are never cached |
 | jev score cache | `jev_cache.json` | key = sha256 of bucket fingerprint + `\n` + the exact `format_for_jev` text; value `{label, scores, confidence, fingerprint}`. Legacy entries (key = sha256(text), no fingerprint) are lazily copied under the new key when their score keys equal the current bucket keys, never deleted |
 | Run output | `runs/<timestamp>/<bucket>.csv` | one folder per run, including dry runs (empty) |
-| Buckets | `buckets.json` | user-owned and not final; do not edit unless asked |
+| Buckets | `runs/<ts>/selected_buckets.json` | chosen from the dashboard's suggestions by `bucketer/checkpoint.py`; `buckets.json` is user-owned, no longer read, do not edit |
 | Playlist input | `spotlistr-exported-playlist.csv` | local, gitignored |
 | Secrets | `.env` | `LASTFM_API_KEY`, `TYPESAFE_API_KEY` |
 
@@ -40,13 +40,13 @@ poetry run python -m bucketer spotlistr-exported-playlist.csv --sample 300 --see
 # real run (spends jev tokens, needs explicit user approval)
 poetry run python -m bucketer spotlistr-exported-playlist.csv --sample 300 --seed 7
 ```
-Other flags: `--limit N` (first N rows; **default is all rows**, so always pass `--dry-run`, `--sample` or `--limit` when testing), `--threshold X` (default 1.0), `--buckets PATH`, `--jev-cache PATH`, `--refresh-lastfm`, `--refresh-jev` (see README or `-h`). The `--refresh-*` flags replace the whole cache file with only the albums from that run, so back the file up first.
+Other flags: `--limit N` (first N rows; **default is all rows**, so always pass `--dry-run`, `--sample` or `--limit` when testing), `--threshold X` (default 1.0), `--select all|a,b,c` (needed for real runs without a TTY), `--yes` (skips the confirmation; never pass it without owner approval), `--jev-cache PATH`, `--refresh-lastfm`, `--refresh-jev` (see README or `-h`). The `--refresh-*` flags replace the whole cache file with only the albums from that run, so back the file up first.
 
 ## Rules for working here
 - **Never run `python -m bucketer` without `--dry-run` unless the user explicitly approves.** Real runs spend jev tokens (a 300-song sample is about 270 calls). Dry runs only call Last.fm, and cached entries make them nearly free.
 - Changing `format_for_jev` output changes every jev cache key, so previously paid-for scores stop being reused. Do it deliberately and say so.
 - Tag filtering in `clean_tags` is re-applied when reading the Last.fm cache, so filter changes need no cache clearing. Changing what gets *fetched* does.
-- `other` is a built-in fallback bucket (`FALLBACK_BUCKET` in `bucketer/jev.py`), never sent to jev; a bucket of that name in `buckets.json` is ignored.
+- `other` is a built-in fallback bucket (`FALLBACK_BUCKET` in `bucketer/jev.py`), never sent to jev; a suggested bucket named `other` is renamed `other_genre`.
 - `--sample N --seed S` picks the same rows every time for a given playlist; use seed 7 to compare against earlier runs.
 - Tests: `poetry run python -m unittest discover tests` (offline). Add tests alongside new behavior.
 - Last.fm is throttled to about 4 requests/s (`LASTFM_MIN_INTERVAL` in `bucketer/lastfm.py`); don't parallelize calls.
