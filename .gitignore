@@ -6,4 +6,3 @@
 runs/
 *.csv
 __pycache__/
-docs/
