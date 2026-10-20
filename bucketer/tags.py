@@ -44,7 +44,7 @@ NOISE_TAGS = frozenset(
         "stretchsaysabigyesto these albums", "fun to skateboard to", "drunk tank singalong tune",
         "when we were older and our hair was longer", "you know her life was saved by last fm free music player",
         "shows you that swedes are not only good in making furniture", "blacker than the blackest black times infinity",
-        "like if opeth played tool", "not of this world", "thrash like its 86", "rock and roll party", "growing-up",
+        "not of this world", "rock and roll party", "growing-up",
         "male vocalists", "female vocalists", "male vocalist", "female vocalist",
         # tail: praise, chatter, meta, test tags
         "test", "testing", "api test", "misstagged", "misspelled", "overrated", "officially shit", "terrible", "bad", "not good",
