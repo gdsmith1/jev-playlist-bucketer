@@ -101,6 +101,20 @@ class JevClientTest(unittest.TestCase):
         self.assertEqual(self.client().score("t", "l"), {"punk": 0.5})
         self.sdk.system_one.assert_not_called()
 
+    def test_is_cached_matches_what_score_would_do(self):
+        self.assertFalse(self.client().is_cached("t"))
+        self.client().score("t", "l")
+        self.assertTrue(self.client().is_cached("t"))
+        self.assertFalse(self.client().is_cached("other"))
+        other = JevClient({"doom": {"description": "Slow."}}, cache_path=self.path, client=self.sdk)
+        self.assertFalse(other.is_cached("t"))
+
+    def test_is_cached_counts_adoptable_legacy_entry_without_writing(self):
+        self._write_legacy()
+        c = self.client()
+        self.assertTrue(c.is_cached("t"))
+        self.assertEqual(len(c.cache.data), 1)
+
     def test_legacy_entry_with_different_bucket_keys_is_not_adopted(self):
         self._write_legacy()
         other = {"doom": {"description": "Slow."}}

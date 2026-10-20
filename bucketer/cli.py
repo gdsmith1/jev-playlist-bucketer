@@ -5,7 +5,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 
-from .checkpoint import choose_buckets, suggest_buckets, write_selected
+from .checkpoint import choose_buckets, confirm_spend, suggest_buckets, write_selected
 from .dashboard import analyze, write_dashboard
 from .formatting import coverage_stats, format_for_jev, format_run_stats
 from .jev import FALLBACK_BUCKET, JevClient
@@ -23,6 +23,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=7, help="Random seed for --sample")
     parser.add_argument("--threshold", type=float, default=1.0, help="Minimum score for an album to be included in a bucket")
     parser.add_argument("--dry-run", action="store_true", help="Skip jev scoring; only fetch metadata and print what would be sent")
+    parser.add_argument("--yes", action="store_true", help="Proceed with the jev calls without asking for confirmation (needed when there is no terminal)")
     parser.add_argument("--no-dashboard", action="store_true", help="Skip writing the genre dashboard (dashboard.html in the run folder)")
     parser.add_argument("--select", help="Suggested buckets to score with, skipping the checklist: 'all' or a comma-separated list of bucket names")
     parser.add_argument("--refresh-lastfm", action="store_true", help="Ignore the existing Last.fm cache and overwrite it with fresh lookups")
@@ -67,6 +68,7 @@ def main(argv=None) -> None:
         buckets = choose_buckets(suggested, args.select)
         print(f"selected buckets: {write_selected(run_dir, buckets)}")
         jev = JevClient(buckets, cache_path=args.jev_cache, refresh=args.refresh_jev)
+        confirm_spend(jev, texts, len(buckets), args.yes)
 
     # Pass 2: score with jev.
     destinations: dict[int, list[str]] = {}  # song index -> bucket keys

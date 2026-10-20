@@ -9,7 +9,7 @@ Sorts a playlist CSV into genre buckets. Each **album** is described to `jev` on
    TYPESAFE_API_KEY=your-jev-key      # not needed with --dry-run
    LASTFM_API_KEY=your-lastfm-key     # a PAT from last.fm, required
    ```
-2. **Buckets** are suggested from your own playlist: a real run writes the dashboard, then offers the suggested buckets (tag clusters) in a terminal checklist. Each ticked bucket gets a description built from a fixed template ("Albums tagged X, Y, Z, in the vein of A, B, C.") and is saved to `runs/<timestamp>/selected_buckets.json`, which you can inspect and edit. Only suggestions are offered; `buckets.json` is no longer read. `other` is built in: it collects albums that clear no bucket's threshold, and jev never sees it. A bucket entry may also carry `levels` (2-10 strings or `{summary, signals}` objects) and `not_for` in `selected_buckets.json`; without `levels` three generic levels are used.
+2. **Buckets** are suggested from your own playlist: a real run writes the dashboard, then offers the suggested buckets (tag clusters) in a terminal checklist. Before any jev call it prints how many calls are needed (albums not already cached for the chosen buckets), the bucket count and a few sample inputs, and waits for an explicit yes. Each ticked bucket gets a description built from a fixed template ("Albums tagged X, Y, Z, in the vein of A, B, C.") and is saved to `runs/<timestamp>/selected_buckets.json`, which you can inspect and edit. Only suggestions are offered; `buckets.json` is no longer read. `other` is built in: it collects albums that clear no bucket's threshold, and jev never sees it. A bucket entry may also carry `levels` (2-10 strings or `{summary, signals}` objects) and `not_for` in `selected_buckets.json`; without `levels` three generic levels are used.
 3. **Song list CSV** — a [Spotlistr](https://www.spotlistr.com/) export. Rows are `Artist(s) Name , Track Name , Album Name , Release Date , Length , ISRC` (fields separated by ` , `).
 
 ## Install
@@ -35,6 +35,7 @@ Options:
 - `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
 - `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 1.0)
 - `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album, and writes `dashboard.html` (see Output)
+- `--yes` — proceed with the jev calls without the confirmation prompt (needed when there is no terminal)
 - `--select all|a,b,c` — score with these suggested buckets instead of showing the checklist (needed when there is no terminal)
 - `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
 - `--no-dashboard` — skip writing the genre dashboard

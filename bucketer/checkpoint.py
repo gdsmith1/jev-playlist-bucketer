@@ -12,6 +12,7 @@ from .jev import FALLBACK_BUCKET
 SELECTED_PATH = "selected_buckets.json"
 DESCRIPTION_TAGS = 5
 CHOICE_TAGS = 4
+SAMPLE_TEXTS = 3
 
 
 def bucket_key(seed: str, taken: set[str]) -> str:
@@ -86,3 +87,19 @@ def write_selected(run_dir: str, selected: dict[str, dict]) -> str:
     with open(path, "w") as f:
         json.dump(selected, f, indent=2)
     return path
+
+
+def confirm_spend(jev, texts: list[str], bucket_count: int, yes: bool = False, sample: int = SAMPLE_TEXTS) -> None:
+    """Show what scoring will cost (calls for albums not already cached) and exit unless the user explicitly proceeds."""
+    pending = [t for t in dict.fromkeys(texts) if not jev.is_cached(t)]
+    print(f"\njev: {len(pending)} call(s) needed for {len(texts)} album(s) ({len(texts) - len(pending)} cached), each asking {bucket_count} bucket question(s)")
+    if not pending:
+        return
+    for text in pending[:sample]:
+        print("  sample input: " + text.replace("\n", "\n                "))
+    if yes:
+        return
+    if not interactive():
+        raise SystemExit("No terminal to confirm in. Pass --yes to proceed with the jev calls above.")
+    if not ask_confirm(f"Send {len(pending)} call(s) to jev?"):
+        raise SystemExit("Not confirmed. Nothing was sent to jev.")

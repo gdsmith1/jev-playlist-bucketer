@@ -15,8 +15,8 @@ ROWS = ["Kyuss , Green Machine , Wretch , 1991 , 3:00 , X", "Kyuss , Demon Clean
 
 
 class EndToEndTest(unittest.TestCase):
-    def run_main(self, *extra, scores=None, select="all"):
-        extra = ("--select", select, *extra) if select else extra
+    def run_main(self, *extra, scores=None, select="all", yes=True):
+        extra = (*(("--select", select) if select else ()), *(("--yes",) if yes else ()), *extra)
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         cwd = os.getcwd()
@@ -28,6 +28,7 @@ class EndToEndTest(unittest.TestCase):
         fake_lastfm.fetch.return_value = Enrichment(artist_tags=[{"name": "stoner rock", "count": 100}])
         fake_lastfm.tag_info.return_value = {"summary": "Heavy.", "reach": 5, "taggings": 9}
         fake_jev = mock.Mock(usage={"input_tokens": 0, "output_tokens": 0, "call_count": 0})
+        fake_jev.is_cached.return_value = False
         fake_jev.score.side_effect = lambda text, label: (scores or {})[label]
         with mock.patch.object(cli, "load_dotenv"), mock.patch.object(cli, "LastfmClient", return_value=fake_lastfm), \
                 mock.patch.object(cli, "JevClient", return_value=fake_jev) as self.jev_cls, contextlib.redirect_stdout(io.StringIO()):
@@ -80,6 +81,17 @@ class EndToEndTest(unittest.TestCase):
     def test_real_run_no_dashboard_flag(self):
         _, run_dir = self.run_main("--no-dashboard", scores={"kyuss|wretch": {"stoner_rock": 0}, "sleep|dopesmoker": {"stoner_rock": 0}})
         self.assertNotIn("dashboard.html", os.listdir(run_dir))
+
+    def test_real_run_declined_at_confirmation_never_scores(self):
+        with mock.patch("bucketer.checkpoint.interactive", return_value=True), mock.patch("bucketer.checkpoint.ask_confirm", return_value=False), \
+                self.assertRaises(SystemExit):
+            self.run_main(yes=False)
+        self.jev_cls.return_value.score.assert_not_called()
+
+    def test_real_run_without_yes_and_without_terminal_never_scores(self):
+        with mock.patch("bucketer.checkpoint.interactive", return_value=False), self.assertRaisesRegex(SystemExit, "--yes"):
+            self.run_main(yes=False)
+        self.jev_cls.return_value.score.assert_not_called()
 
     def test_real_run_without_terminal_or_select_exits_before_jev(self):
         with mock.patch("bucketer.checkpoint.interactive", return_value=False), self.assertRaises(SystemExit):

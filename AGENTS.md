@@ -40,7 +40,7 @@ poetry run python -m bucketer spotlistr-exported-playlist.csv --sample 300 --see
 # real run (spends jev tokens, needs explicit user approval)
 poetry run python -m bucketer spotlistr-exported-playlist.csv --sample 300 --seed 7
 ```
-Other flags: `--limit N` (first N rows; **default is all rows**, so always pass `--dry-run`, `--sample` or `--limit` when testing), `--threshold X` (default 1.0), `--select all|a,b,c` (needed for real runs without a TTY), `--jev-cache PATH`, `--refresh-lastfm`, `--refresh-jev` (see README or `-h`). The `--refresh-*` flags replace the whole cache file with only the albums from that run, so back the file up first.
+Other flags: `--limit N` (first N rows; **default is all rows**, so always pass `--dry-run`, `--sample` or `--limit` when testing), `--threshold X` (default 1.0), `--select all|a,b,c` (needed for real runs without a TTY), `--yes` (skips the confirmation; never pass it without owner approval), `--jev-cache PATH`, `--refresh-lastfm`, `--refresh-jev` (see README or `-h`). The `--refresh-*` flags replace the whole cache file with only the albums from that run, so back the file up first.
 
 ## Rules for working here
 - **Never run `python -m bucketer` without `--dry-run` unless the user explicitly approves.** Real runs spend jev tokens (a 300-song sample is about 270 calls). Dry runs only call Last.fm, and cached entries make them nearly free.
