@@ -7,12 +7,17 @@
 <h1>Genre Dashboard</h1><div class="sub">Built from Last.fm tags; no jev involved. Click any tag for its Last.fm description (when it has one).</div>
 <div class="stats" id="stats"></div>
 <h2>Suggested buckets</h2><div class="sub">Tags that tend to appear on the same albums, biggest first. A starting point, not a final answer.</div><div class="cards" id="clusters"></div>
+<div class="drill" id="bucketdrill" hidden></div>
 <h2>Top tags</h2><div id="tags"></div>
 <h2>Tag overlap</h2><div class="sub">Share of albums two tags have in common (Jaccard, shown as a percentage in each cell; brighter = more overlap, on the fixed scale below). Umbrella tags are left out.</div>
 <div class="scroll" style="padding:8px"><table class="hm" id="heat"></table></div><div class="legend" id="heatlegend"></div>
-<h2>Outliers</h2><div class="sub">Albums where under 30% of the tag weight lands in any suggested bucket, plus untagged albums.</div>
+<h2>Outliers</h2><div class="sub" id="outsub"></div>
 <input id="q" placeholder="filter artist, album or tag" aria-label="filter outliers">
 <div class="scroll"><table><thead><tr id="oh"></tr></thead><tbody id="ob"></tbody></table></div>
+<button class="more" id="zerotoggle" aria-expanded="false"></button>
+<div class="scroll" id="zerobox" hidden><table><tbody id="oz"></tbody></table></div>
+<h2>All albums</h2><div class="sub">Every album in the run. Click a row (or press Enter) for its tags, fit to each bucket and similar artists.</div>
+<input id="aq" placeholder="search artist, album or tag" aria-label="search all albums"><div class="scroll" id="allalbums"></div>
 <div id="detail"></div>
 <script>
 /*JS*/
