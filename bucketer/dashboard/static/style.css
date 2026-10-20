@@ -21,3 +21,8 @@ table.hm{border-collapse:separate;border-spacing:1px;width:auto}table.hm th{posi
 table.hm thead th{writing-mode:vertical-rl;transform:rotate(180deg);height:170px;text-align:left;vertical-align:bottom}
 table.hm td{width:24px;height:24px;min-width:24px;padding:0;border:0;text-align:center;font-size:9px;color:var(--bg);background:rgba(174,129,255,var(--a))}
 table.hm td.self{background:var(--line)}table.hm th.rh{text-align:right;position:sticky;left:0;background:var(--bg)}
+/* suggested buckets */
+.cards{align-items:start}.card .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;width:100%;padding:0;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.card .head:focus-visible{outline:1px solid var(--c)}.card .head h3{margin:0}.card .rank{color:var(--muted)}.card .head .sub{flex-basis:100%}
+.card .more{display:none;margin-top:6px}.card.open .more{display:block}.tools{margin:0 0 8px}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--blue);border-radius:6px;padding:2px 10px;font:inherit;cursor:pointer;margin-right:6px}

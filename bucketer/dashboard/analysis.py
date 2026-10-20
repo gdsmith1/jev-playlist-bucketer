@@ -7,10 +7,14 @@ from ..models import Enrichment, Group
 # Wide umbrella tags: shown in Top tags (dimmed) but never suggested as buckets, never used for clustering or outlier fit. Edit freely.
 UMBRELLA_TAGS = frozenset({"rock", "pop", "alternative", "alternative rock", "indie", "metal", "electronic", "instrumental", "folk"})
 HEAT_TAGS = 24  # tags in the overlap matrix
-TOP_TAGS = 40  # tags considered for clusters, heatmap and descriptions
+TOP_TAGS = 150  # tags considered as bucket candidates
+SHOWN_TAGS = 40  # bars in the Top tags chart
+MIN_TAG_ALBUMS = 3  # a tag on fewer albums is too thin to seed or join a bucket
 MIN_WEIGHT = 0.15  # a tag only counts for an album above this share of its top tag
 JOIN_SIMILARITY = 0.25  # Jaccard needed for a tag to join an existing cluster instead of seeding its own
-MAX_CLUSTERS = 12
+MAX_CLUSTERS = 30
+MIN_CLUSTER_ALBUMS = 8  # smaller clusters are not suggested
+MIN_CLUSTER_SONGS = 20
 OUTLIER_FIT = 0.3  # an album is an outlier when less than this share of its tag weight lands in its best cluster
 EXAMPLES_PER_CLUSTER = 6
 COVERS_PER_CLUSTER = 5
@@ -58,8 +62,8 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
             members.setdefault(tag, set()).add(i)
     songs_of = lambda idx: sum(albums[i]["songs"] for i in idx)  # noqa: E731
     ranked = sorted(members, key=lambda t: (-songs_of(members[t]), -len(members[t]), t))
-    top = [t for t in ranked if t not in UMBRELLA_TAGS][:TOP_TAGS]  # bucket candidates
-    keep = set(top) | set(ranked[:TOP_TAGS])
+    top = [t for t in ranked if t not in UMBRELLA_TAGS and len(members[t]) >= MIN_TAG_ALBUMS][:TOP_TAGS]  # bucket candidates
+    keep = set(top[:SHOWN_TAGS]) | set(ranked[:SHOWN_TAGS])
     shown = [t for t in ranked if t in keep]  # Top tags chart also keeps umbrella tags
 
     tag_stats = [{"tag": t, "albums": len(members[t]), "songs": songs_of(members[t]), "umbrella": t in UMBRELLA_TAGS} for t in shown]
@@ -78,8 +82,6 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
             best["tags"].append(tag)
         elif len(clusters) < MAX_CLUSTERS:
             clusters.append({"seed": tag, "tags": [tag]})
-        elif best is not None:
-            best["tags"].append(tag)
 
     for c in clusters:
         tagset = set(c["tags"])
@@ -90,6 +92,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
         c["examples"] = list(dict.fromkeys(c["examples"]))
         ordered = sorted(mine, key=lambda i: (-affinity[i], -albums[i]["songs"]))
         c["covers"] = [{"url": albums[i]["cover"], "title": f"{albums[i]['artist']} - {albums[i]['album']}"} for i in ordered if albums[i]["cover"]][:COVERS_PER_CLUSTER]
+    clusters = [c for c in clusters if c["albums"] >= MIN_CLUSTER_ALBUMS and c["songs"] >= MIN_CLUSTER_SONGS]
     clusters.sort(key=lambda c: -c["songs"])
 
     outliers = []
