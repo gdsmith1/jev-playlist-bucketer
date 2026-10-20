@@ -264,3 +264,37 @@ class GetJsonTest(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SimilarFullTest(Base):
+    def seed(self):
+        self.p.cache.section("artist")["kyuss"] = {"tags": [], "extras": {"similar_artists": ["a"]}}
+
+    def similar_resp(self):
+        return {"similarartists": {"artist": [{"name": "Fu Manchu", "match": "0.9"}, {"name": "Unida", "match": "0.5"}]}}
+
+    def test_old_entry_upgraded_once(self):
+        self.seed()
+        self.script(lambda p: (200, self.similar_resp()))
+        expected = [{"name": "Fu Manchu", "match": 0.9}, {"name": "Unida", "match": 0.5}]
+        self.assertEqual(self.p.similar_artists("Kyuss"), expected)
+        self.assertEqual(self.p.similar_artists("Kyuss"), expected)
+        self.assertEqual(self.methods(), ["artist.getSimilar"])
+        self.assertEqual(self.p.cache.section("artist")["kyuss"]["extras"]["similar_artists"], ["a"])
+
+    def test_error_not_cached(self):
+        self.seed()
+        self.script(lambda p: (500, None))
+        self.assertEqual(self.p.similar_artists("Kyuss"), [])
+        self.assertNotIn("similar_full", self.p.cache.section("artist")["kyuss"]["extras"])
+
+    def test_not_found_remembered_as_empty(self):
+        self.seed()
+        self.script(lambda p: (200, {"error": 6, "message": "no"}))
+        self.assertEqual(self.p.similar_artists("Kyuss"), [])
+        self.assertEqual(self.p.cache.section("artist")["kyuss"]["extras"]["similar_full"], [])
+
+    def test_unknown_artist_makes_no_call(self):
+        self.script(lambda p: (200, self.similar_resp()))
+        self.assertEqual(self.p.similar_artists("Nobody"), [])
+        self.assertEqual(self.calls, [])
