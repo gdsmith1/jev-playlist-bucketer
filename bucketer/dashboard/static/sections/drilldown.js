@@ -5,7 +5,8 @@ function albumDetail(r){
  const tags=el("div",{className:"dcol"},el("h4",{textContent:"Tags"}),...(r.tags.length?r.tags.map(t=>el("div",{className:"drow"},el("span",{textContent:t.name}),meter(t.weight),el("span",{className:"sub",textContent:pct(t.weight)+" · "+t.source}))):[el("div",{className:"sub",textContent:"no tags"})]));
  const fits=Object.entries(r.cluster_fits).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
  const fit=el("div",{className:"dcol"},el("h4",{textContent:"Fit to buckets"}),...(fits.length?fits.map(([k,v])=>el("div",{className:"drow"},el("span",{textContent:k}),meter(v,"var(--blue)"),el("span",{className:"sub",textContent:pct(v)}))):[el("div",{className:"sub",textContent:"fits no bucket"})]));
- return el("div",{className:"detailgrid"},tags,fit)}
+ const sim=el("div",{className:"dcol"},el("h4",{textContent:"Similar artists"}),el("div",{className:r.similar.length?"":"sub",textContent:r.similar.length?r.similar.join(", "):"none on Last.fm"}));
+ return el("div",{className:"detailgrid"},tags,fit,sim)}
 function albumTable(records,host,seed){
  let shown=PAGE;
  function draw(){

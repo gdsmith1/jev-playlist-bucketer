@@ -14,6 +14,8 @@ MAX_CLUSTERS = 12
 OUTLIER_FIT = 0.3  # an album is an outlier when less than this share of its tag weight lands in its best cluster
 EXAMPLES_PER_CLUSTER = 6
 COVERS_PER_CLUSTER = 5
+LABEL_TAGS = 3  # tags in a card title
+SIMILAR_PER_CLUSTER = 5
 UNCOUNTED_WEIGHT = 0.5  # weight for a tag that came without a count
 
 
@@ -41,6 +43,22 @@ def release_year(release_date: str) -> int | None:
 
 def _jaccard(a: set[int], b: set[int]) -> float:
     return len(a & b) / len(a | b) if a | b else 0.0
+
+
+def cohesion(tags: list[str], members: dict[str, set[int]]) -> float | None:
+    """Mean pairwise Jaccard overlap between the albums carrying each tag of a cluster; None for a single-tag cluster."""
+    pairs = [(a, b) for i, a in enumerate(tags) for b in tags[i + 1:]]
+    return round(sum(_jaccard(members[a], members[b]) for a, b in pairs) / len(pairs), 3) if pairs else None
+
+
+def similar_artists(albums: list[dict], own_artists: set[str]) -> list[str]:
+    """Artists Last.fm calls similar to a cluster's albums, most often suggested first, leaving out artists already in the playlist."""
+    counts: dict[str, int] = {}
+    for a in albums:
+        for name in a["similar"]:
+            if name not in own_artists:
+                counts[name] = counts.get(name, 0) + 1
+    return sorted(counts, key=lambda n: (-counts[n], n))[:SIMILAR_PER_CLUSTER]
 
 
 def outlier_reason(tags: dict[str, float], specific_total: float, fits: list[tuple[float, str]]) -> str:
@@ -116,9 +134,11 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
         affinity = {i: sum(w for t, w in a["tags"].items() if t in tagset) for i, a in enumerate(albums)}
         mine = {i for i, v in affinity.items() if v > 0}
         c["albums"], c["songs"] = len(mine), songs_of(mine)
-        c["examples"] = [f"{albums[i]['artist']}" for i in sorted(mine, key=lambda i: -affinity[i])][:EXAMPLES_PER_CLUSTER]
-        c["examples"] = list(dict.fromkeys(c["examples"]))
         ordered = sorted(mine, key=lambda i: (-affinity[i], -albums[i]["songs"]))
+        c["examples"] = [{"artist": albums[i]["artist"], "album": albums[i]["album"], "songs": albums[i]["songs"]} for i in ordered[:EXAMPLES_PER_CLUSTER]]
+        c["label_tags"] = sorted(c["tags"], key=lambda t: (-songs_of(members[t]), t))[:LABEL_TAGS]
+        c["cohesion"] = cohesion(c["tags"], members)
+        c["similar"] = similar_artists([albums[i] for i in ordered], {a["artist"] for a in albums})
         c["covers"] = [{"url": albums[i]["cover"], "title": f"{albums[i]['artist']} - {albums[i]['album']}"} for i in ordered if albums[i]["cover"]][:COVERS_PER_CLUSTER]
     clusters.sort(key=lambda c: -c["songs"])
 

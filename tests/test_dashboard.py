@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from bucketer.dashboard import UMBRELLA_TAGS, album_tags, analyze, render, write_dashboard
-from bucketer.dashboard.analysis import merge_by_artist, outlier_reason, release_year
+from bucketer.dashboard.analysis import cohesion, merge_by_artist, outlier_reason, release_year, similar_artists
 from bucketer.models import Enrichment, Group
 
 
@@ -100,6 +100,24 @@ class DashboardTest(unittest.TestCase):
         rows = [o for o in a["outliers"] if o["artist"] == "Nobody"]
         self.assertEqual(len(rows), 1)
         self.assertEqual((rows[0]["songs"], rows[0]["albums"]), (3, ["Nothing", "Else"]))
+
+    def test_cluster_label_examples_and_cohesion(self):
+        a = analyze(PAIRS)
+        c = next(c for c in a["clusters"] if "stoner rock" in c["tags"])
+        self.assertEqual(c["label_tags"][0], "stoner rock")
+        self.assertLessEqual(len(c["label_tags"]), 3)
+        self.assertEqual(c["examples"][0], {"artist": "Sleep", "album": "Dopesmoker", "songs": 2})
+        self.assertGreater(c["cohesion"], 0)
+
+    def test_cohesion_is_mean_pairwise_overlap(self):
+        members = {"a": {1, 2}, "b": {2, 3}, "c": {1, 2}}
+        self.assertEqual(cohesion(["a"], members), None)
+        self.assertEqual(cohesion(["a", "c"], members), 1.0)
+        self.assertEqual(cohesion(["a", "b", "c"], members), round((1 / 3 + 1.0 + 1 / 3) / 3, 3))
+
+    def test_similar_artists_skip_own_and_rank_by_frequency(self):
+        albums = [{"similar": ["X", "Mine", "Y"]}, {"similar": ["Y", "X", "Y2"]}, {"similar": ["Y"]}]
+        self.assertEqual(similar_artists(albums, {"Mine"}), ["Y", "X", "Y2"])
 
     def test_empty_input(self):
         a = analyze([])
