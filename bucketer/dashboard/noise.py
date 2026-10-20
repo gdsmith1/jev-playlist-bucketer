@@ -1,11 +1,13 @@
 """Tag noise audit: tags that sit on a single album or match a dashboard-only blocklist. Never changes what is sent to jev."""
 
-# Dashboard-only: not applied by clean_tags, so jev text and cache keys are unaffected. Edit freely.
+# Dashboard-only and uncertain: people/band-name tags that clean_tags keeps. The definite noise (favourites, owned,
+# junk, ratings, labels, ...) lives in bucketer/tags.py and never reaches here. Nationalities/countries are kept.
 NOISE_TAGS = frozenset({
-    "k1r7m", "kaufekaufenkaufen", "pwnage", "jb recommendation", "randomvalue", "sftri", "queued", "liblistened", "my cds", "rock-avg", "rock-good",
-    "american", "british", "english", "swedish", "german", "french", "finnish", "norwegian", "danish", "dutch", "canadian", "australian", "irish",
-    "scottish", "welsh", "italian", "spanish", "japanese", "usa", "uk", "united states", "sweden", "germany", "france", "finland", "norway", "denmark",
-    "canada", "australia", "ireland", "scotland", "japan", "seen live", "favorites", "favourites", "albums i own", "cover",
+    "steve albini", "les claypool", "josh homme", "dave grohl", "brant bjork", "jello biafra", "mike patton", "ozzy", "dio",
+    "ronnie james dio", "dave mustaine", "joe satriani", "satriani", "perry farrell", "debbie harry", "deborah harry", "tool",
+    "primus", "pinback", "jack white", "devin townsend", "chuck schuldiner", "steve vai", "kim deal", "rick rubin", "albini",
+    "ian mackaye", "paul gilbert", "pete sandoval", "david bowie", "the smiths", "police", "elo", "nirvana", "pantera",
+    "motorhead", "u2", "pearl jam", "kyuss", "creed", "nickelback", "zappa", "rush", "foo fighters", "pixies",
 })
 NOISE_LIMIT = 300  # rows kept; the counts always cover every flagged tag
 
