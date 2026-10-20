@@ -1,6 +1,8 @@
 """Last.fm client: crowd tags at album and artist level, plus similar artists, cached on disk."""
 
+import html
 import os
+import re
 import time
 from typing import Any, Callable
 
@@ -47,6 +49,21 @@ def _norm(s: str | None) -> str:
     return (s or "").strip().lower()
 
 
+_HTML_TAG = re.compile(r"<[^>]+>")
+TAG_SUMMARY_MAX = 400
+PLACEHOLDER_IMAGE_ID = "2a96cbd8b46e442fc41c2b86b821562f"  # Last.fm's grey default art, same for every missing cover
+COVER_SIZES = ("extralarge", "large", "medium")
+
+
+def clean_wiki(summary: str | None) -> str:
+    """Last.fm wiki summaries carry anchor tags and a trailing 'Read more' link; return plain, shortened text."""
+    text = html.unescape(_HTML_TAG.sub("", summary or ""))
+    text = re.sub(r"\s*Read more on Last\.fm\.?\s*$", "", " ".join(text.split()))
+    if len(text) > TAG_SUMMARY_MAX:
+        text = text[:TAG_SUMMARY_MAX].rsplit(" ", 1)[0] + "…"
+    return text
+
+
 def _dedupe(names: list[str | None]) -> list[str]:
     out: list[str] = []
     for n in names:
@@ -62,7 +79,7 @@ class LastfmClient:
         if not self.api_key:
             raise SystemExit("LASTFM_API_KEY is not set (add it to .env)")
         self.cache = JsonCache(os.path.join(cache_dir, "lastfm_cache.json"), fresh=refresh)
-        for section in ("artist", "album"):
+        for section in ("artist", "album", "tag"):
             self.cache.section(section)
         self.throttle = Throttle(LASTFM_MIN_INTERVAL)
         self.session = requests.Session()
@@ -169,6 +186,43 @@ class LastfmClient:
             return OK, {"tags": tags, "extras": extras}
         return (ERROR if errored else NOT_FOUND), None
 
+    @staticmethod
+    def _cover_url(data: dict) -> str:
+        images = (data.get("album") or {}).get("image") or []
+        by_size = {i.get("size"): i.get("#text") for i in images if isinstance(i, dict)}
+        for size in COVER_SIZES:
+            url = by_size.get(size) or ""
+            if url and PLACEHOLDER_IMAGE_ID not in url:
+                return url
+        return ""
+
+    def lookup_cover(self, artist: str, album: str) -> tuple[str, str]:
+        """(status, url). url is "" when Last.fm knows the album but has no art."""
+        if is_unknown_album(album):
+            return NOT_FOUND, ""
+        errored = False
+        for a in artist_candidates(artist):
+            for title in _dedupe([clean_album(album), album]):
+                status, data = self._call("album.getInfo", artist=a, album=title)
+                if status == ERROR:
+                    errored = True
+                elif status == OK:
+                    url = self._cover_url(data)
+                    if url:
+                        return OK, url
+        return (ERROR if errored else NOT_FOUND), ""
+
+    def lookup_tag(self, name: str) -> tuple[str, dict | None]:
+        status, data = self._call("tag.getInfo", tag=name)
+        if status != OK:
+            return status, None
+        node = data.get("tag") or {}
+        return OK, {
+            "summary": clean_wiki((node.get("wiki") or {}).get("summary")),
+            "reach": int(node.get("reach") or 0),
+            "taggings": int(node.get("total") or 0),
+        }
+
     # -- public -------------------------------------------------------------
 
     def _cached(self, section: str, key: str, lookup: Callable[[], tuple[str, dict | None]]) -> dict | None:
@@ -183,11 +237,25 @@ class LastfmClient:
         cache[key] = value  # None for genuine not-found
         return value
 
+    def _cover_for(self, payload: dict, artist: str, album: str) -> str | None:
+        """Cover URL stored on the album cache entry; fetched once and remembered ("" = none found). Errors leave it unset."""
+        if "cover" not in payload:
+            status, url = self.lookup_cover(artist, album)
+            if status == ERROR:
+                self.stats["errors"] += 1
+                return None
+            payload["cover"] = url
+        else:
+            self.stats["cache_hits"] += 1
+        return payload["cover"] or None
+
     def fetch(self, artist: str, album: str) -> Enrichment:
         a = _norm(primary_artist(artist))
         album_payload = self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album))
         artist_payload = self._cached("artist", a, lambda: self.lookup_artist(artist))
         enrichment = Enrichment()
+        if album_payload is not None:
+            enrichment.cover = self._cover_for(album_payload, artist, album)
         # Re-clean on read so filter improvements also apply to tags cached earlier.
         if album_payload is not None:
             exclude = (artist, primary_artist(artist), album, clean_album(album))
@@ -196,6 +264,10 @@ class LastfmClient:
             enrichment.artist_tags = clean_tags(artist_payload.get("tags", []), exclude=(artist, primary_artist(artist)))
             enrichment.similar_artists = list((artist_payload.get("extras") or {}).get("similar_artists") or [])
         return enrichment
+
+    def tag_info(self, name: str) -> dict | None:
+        """Description and usage stats for one tag (None if unknown). Cached under `tag`."""
+        return self._cached("tag", _norm(name), lambda: self.lookup_tag(name))
 
     def flush(self) -> None:
         self.cache.flush()

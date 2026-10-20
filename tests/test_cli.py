@@ -27,6 +27,7 @@ class EndToEndTest(unittest.TestCase):
             json.dump({"stoner": {"description": "d"}, "doom": {"description": "d"}}, f)
         fake_lastfm = mock.Mock(stats={"calls": 0, "cache_hits": 0, "errors": 0})
         fake_lastfm.fetch.return_value = Enrichment(artist_tags=[{"name": "stoner rock", "count": 1}])
+        fake_lastfm.tag_info.return_value = {"summary": "Heavy.", "reach": 5, "taggings": 9}
         fake_jev = mock.Mock(usage={"input_tokens": 0, "output_tokens": 0, "call_count": 0})
         fake_jev.score.side_effect = lambda text, label: (scores or {})[label]
         with mock.patch.object(cli, "load_dotenv"), mock.patch.object(cli, "LastfmClient", return_value=fake_lastfm), \
@@ -48,7 +49,16 @@ class EndToEndTest(unittest.TestCase):
     def test_dry_run_never_scores_and_writes_nothing(self):
         jev, run_dir = self.run_main("--dry-run")
         jev.score.assert_not_called()
+        self.assertEqual(os.listdir(run_dir), ["dashboard.html"])
+
+    def test_dry_run_no_dashboard_writes_nothing(self):
+        jev, run_dir = self.run_main("--dry-run", "--no-dashboard")
+        jev.score.assert_not_called()
         self.assertEqual(os.listdir(run_dir), [])
+
+    def test_real_run_writes_no_dashboard(self):
+        _, run_dir = self.run_main(scores={"kyuss|wretch": {"stoner": 0, "doom": 0}, "sleep|dopesmoker": {"stoner": 0, "doom": 0}})
+        self.assertNotIn("dashboard.html", os.listdir(run_dir))
 
 
 if __name__ == "__main__":

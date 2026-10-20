@@ -10,6 +10,7 @@ class Enrichment:
     album_tags: list[dict] | None = None  # [{"name", "count"}]
     artist_tags: list[dict] | None = None
     similar_artists: list[str] = field(default_factory=list)
+    cover: str | None = None  # album art URL (dashboard only; never part of the jev text)
 
 
 @dataclass
