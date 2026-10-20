@@ -15,7 +15,7 @@ JEV_TIMEOUT = 120  # total seconds per scoring call, retries included
 RETRY = RetryPolicy(max_retries=3, http_statuses={429, 502, 503, 504}, timeout=JEV_TIMEOUT)
 
 # Albums that clear no bucket's threshold land here. jev never sees it: it is not a question,
-# and any bucket with this name in buckets.json is ignored.
+# and a bucket with this name is skipped.
 FALLBACK_BUCKET = "other"
 
 GENERIC_LEVELS = [
@@ -83,7 +83,7 @@ class JevClient:
         return self._client
 
     def score(self, text: str, label: str) -> dict[str, float]:
-        """Scores per bucket for the album `text`. Cached by the sha256 of the exact text."""
+        """Scores per bucket for the album `text`. Cached by the bucket fingerprint plus the exact text."""
         text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
         cache_key = self._cache_key(text)
         if cache_key in self.cache:

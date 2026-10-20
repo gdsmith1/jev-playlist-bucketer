@@ -25,7 +25,7 @@ class BuildQuestionsTest(unittest.TestCase):
         self.assertIn("album described in `state`", q["punk"].instructions)
         self.assertIn("Fast punk.", q["punk"].instructions)
 
-    def test_fallback_bucket_in_buckets_json_is_never_asked(self):
+    def test_fallback_bucket_is_never_asked(self):
         q = build_questions({"punk": {"description": "p"}, FALLBACK_BUCKET: {"description": "x"}})
         self.assertNotIn(FALLBACK_BUCKET, q)
 

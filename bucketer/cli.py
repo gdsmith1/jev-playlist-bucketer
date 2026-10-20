@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from .checkpoint import choose_buckets, confirm_spend, suggest_buckets, write_selected
 from .dashboard import analyze, write_dashboard
 from .formatting import coverage_stats, format_for_jev, format_run_stats
-from .jev import FALLBACK_BUCKET, JevClient
+from .jev import JevClient
 from .lastfm import LastfmClient
 from .pipeline import assign_to_buckets, group_rows, load_rows, matching_buckets, write_buckets
 
