@@ -3,6 +3,7 @@
 import re
 
 from ..models import Enrichment, Group
+from .quality import quality_stats
 
 # Wide umbrella tags: shown in Top tags (dimmed) but never suggested as buckets, never used for clustering or outlier fit. Edit freely.
 UMBRELLA_TAGS = frozenset({"rock", "pop", "alternative", "alternative rock", "indie", "metal", "electronic", "instrumental", "folk"})
@@ -114,4 +115,5 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
 
     total_songs = sum(a["songs"] for a in albums)
     return {"albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
-            "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records}
+            "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records,
+            "quality": quality_stats(records)}
