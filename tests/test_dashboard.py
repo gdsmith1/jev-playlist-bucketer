@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from bucketer.dashboard import UMBRELLA_TAGS, album_tags, analyze, render, write_dashboard
-from bucketer.dashboard.analysis import release_year
+from bucketer.dashboard.analysis import merge_by_artist, outlier_reason, release_year
 from bucketer.models import Enrichment, Group
 
 
@@ -79,6 +79,27 @@ class DashboardTest(unittest.TestCase):
         reasons = {o["artist"]: o["reason"] for o in a["outliers"]}
         self.assertEqual(reasons["Nobody"], "untagged")
         self.assertNotIn("Kyuss", reasons)
+
+    def test_outlier_reasons(self):
+        fits = lambda *shares: [(s, f"b{i}") for i, s in enumerate(shares)]  # noqa: E731
+        self.assertEqual(outlier_reason({}, 0, fits(0.0)), "untagged")
+        self.assertEqual(outlier_reason({"rock": 1.0}, 0, fits(0.0)), "only umbrella tags")
+        self.assertEqual(outlier_reason({"x": 1.0}, 1.0, fits(0.0, 0.0)), "no tag in a suggested bucket")
+        self.assertEqual(outlier_reason({"x": 1.0}, 1.0, fits(0.1, 0.1, 0.05, 0.0)), "tags spread across 3 buckets")
+        self.assertEqual(outlier_reason({"x": 1.0}, 1.0, fits(0.05, 0.2)), "best bucket is b1 at 20%")
+
+    def test_outliers_merge_by_artist(self):
+        def row(album, songs, fit, reason):
+            return {"artist": "A", "album": album, "albums": [album], "songs": songs, "reason": reason, "cover": "", "fit": fit, "nearest": None, "tags": ["t"], "similar": []}
+        merged = merge_by_artist([row("one", 2, 0.0, "untagged"), row("two", 3, 0.2, "best bucket is x at 20%"), {**row("z", 1, 0.0, "untagged"), "artist": "Z"}])
+        a = next(m for m in merged if m["artist"] == "A")
+        self.assertEqual((len(merged), a["songs"], a["album"], a["albums"], a["fit"], a["reason"]), (2, 5, "one, two", ["one", "two"], 0.2, "best bucket is x at 20%"))
+
+    def test_repeat_albums_by_one_artist_are_one_outlier_row(self):
+        a = analyze(PAIRS + [pair("Nobody", "Else", None, songs=2)])
+        rows = [o for o in a["outliers"] if o["artist"] == "Nobody"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual((rows[0]["songs"], rows[0]["albums"]), (3, ["Nothing", "Else"]))
 
     def test_empty_input(self):
         a = analyze([])

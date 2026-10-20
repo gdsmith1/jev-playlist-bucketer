@@ -10,9 +10,11 @@
 <h2>Top tags</h2><div id="tags"></div>
 <h2>Tag overlap</h2><div class="sub">Share of albums two tags have in common (Jaccard, shown as a percentage in each cell; brighter = more overlap). Umbrella tags are left out.</div>
 <div class="scroll" style="padding:8px"><table class="hm" id="heat"></table></div><div class="legend" id="heatlegend"></div>
-<h2>Outliers</h2><div class="sub">Albums where under 30% of the tag weight lands in any suggested bucket, plus untagged albums.</div>
+<h2>Outliers</h2><div class="sub" id="outsub"></div>
 <input id="q" placeholder="filter artist, album or tag" aria-label="filter outliers">
 <div class="scroll"><table><thead><tr id="oh"></tr></thead><tbody id="ob"></tbody></table></div>
+<button class="more" id="zerotoggle" aria-expanded="false"></button>
+<div class="scroll" id="zerobox" hidden><table><tbody id="oz"></tbody></table></div>
 <div id="detail"></div>
 <script>
 /*JS*/
