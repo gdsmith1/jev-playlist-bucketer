@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
 class NoiseFilterTest(unittest.TestCase):
     def names(self, *names):
-        return [t["name"] for t in clean_tags([tag(n, 50) for n in names])]
+        return [t["name"] for t in clean_tags([tag(n, 50) for n in names], max_n=20)]
 
     def test_drops_personal_listening_state_tags(self):
         self.assertEqual(self.names("favourite albums", "Seen Live", "owned", "my collection", "vinyl", "albums i own",

@@ -58,7 +58,7 @@ Artist tags (strongest first): hardcore, emo
 Similar artists: Rival Schools, Jawbox, Shiner
 ```
 
-Tags are cleaned (junk and list tags dropped, nationalities kept, spelling variants merged, generic tags like `rock` ranked last); counts, track titles and ids are never sent.
+Tags are cleaned (personal/listening-state tags like favourites, owned, seen live, ratings, recommendations, labels, junk and list tags dropped, nationalities kept, spelling variants merged, generic tags like `rock` ranked last); counts, track titles and ids are never sent.
 
 ## Output
 

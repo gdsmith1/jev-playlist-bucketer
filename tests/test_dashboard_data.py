@@ -48,7 +48,7 @@ class QualityTest(unittest.TestCase):
 class NoiseTest(unittest.TestCase):
     def test_flags_single_album_and_blocklist_tags(self):
         pairs = [pair("A", "1", album_tags=[("stoner rock", 100), ("nirvana", 90), ("gloomy", 80)], songs=2),
-                 pair("B", "2", album_tags=[("stoner rock", 100), ("swedish", 90)], songs=1)]
+                 pair("B", "2", album_tags=[("stoner rock", 100), ("nirvana", 90)], songs=1)]
         noise = analyze(pairs)["noise"]
         rows = {r["tag"]: r for r in noise["rows"]}
         self.assertEqual(set(rows), {"nirvana", "gloomy"})
