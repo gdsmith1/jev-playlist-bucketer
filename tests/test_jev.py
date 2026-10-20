@@ -36,8 +36,9 @@ class JevClientTest(unittest.TestCase):
         self.assertEqual(c.score("Album: X by Y", "y|x"), {"punk": 1.7})
         self.assertEqual(self.sdk.system_one.call_count, 1)
         self.assertEqual(c.usage, {"input_tokens": 10, "output_tokens": 2, "call_count": 1})
-        entry = self.client().cache.get(hashlib.sha256(b"Album: X by Y").hexdigest())
-        self.assertEqual(entry, {"label": "y|x", "scores": {"punk": 1.7}, "confidence": {"punk": 0.9}})
+        c2 = self.client()
+        key = hashlib.sha256(f"{c2.fingerprint}\nAlbum: X by Y".encode()).hexdigest()
+        self.assertEqual(c2.cache.get(key), {"label": "y|x", "scores": {"punk": 1.7}, "confidence": {"punk": 0.9}, "fingerprint": c2.fingerprint})
 
     def test_request_sends_state_and_score_questions(self):
         self.client().score("t", "l")
@@ -64,6 +65,50 @@ class JevClientTest(unittest.TestCase):
             self.assertEqual(offline.score("t", "l"), {"punk": 1.7})
             with self.assertRaises(SystemExit):
                 offline.score("other", "l")
+
+    def test_changed_buckets_do_not_reuse_stale_scores(self):
+        self.client().score("t", "l")
+        changed = {"punk": {**BUCKETS["punk"], "description": "Different."}}
+        JevClient(changed, cache_path=self.path, client=self.sdk).score("t", "l")
+        self.assertEqual(self.sdk.system_one.call_count, 2)
+        # both entries survive, and the original buckets still hit
+        self.client().score("t", "l")
+        self.assertEqual(self.sdk.system_one.call_count, 2)
+
+    def test_unchanged_buckets_hit_cache_across_clients(self):
+        self.client().score("t", "l")
+        self.client().score("t", "l")
+        self.assertEqual(self.sdk.system_one.call_count, 1)
+
+    def test_fallback_bucket_does_not_change_fingerprint(self):
+        self.assertEqual(jev.fingerprint(BUCKETS), jev.fingerprint({**BUCKETS, "other": {"description": "x"}}))
+
+    def _write_legacy(self):
+        import json
+        legacy = {"label": "l", "scores": {"punk": 0.5}, "confidence": {"punk": 1.0}}
+        with open(self.path, "w") as f:
+            json.dump({hashlib.sha256(b"t").hexdigest(): legacy}, f)
+        return legacy
+
+    def test_legacy_entry_is_migrated_not_discarded(self):
+        legacy = self._write_legacy()
+        c = self.client()
+        self.assertEqual(c.score("t", "l"), {"punk": 0.5})
+        self.sdk.system_one.assert_not_called()
+        data = self.client().cache.data
+        self.assertEqual(data[hashlib.sha256(b"t").hexdigest()], legacy)  # original kept
+        self.assertEqual(len(data), 2)
+        self.assertEqual(self.client().score("t", "l"), {"punk": 0.5})
+        self.sdk.system_one.assert_not_called()
+
+    def test_legacy_entry_with_different_bucket_keys_is_not_adopted(self):
+        self._write_legacy()
+        other = {"doom": {"description": "Slow."}}
+        self.sdk.system_one.return_value.scores = {"doom": mock.Mock(score=2.0, confidence=1.0)}
+        c = JevClient(other, cache_path=self.path, client=self.sdk)
+        self.assertEqual(c.score("t", "l"), {"doom": 2.0})
+        self.assertEqual(self.sdk.system_one.call_count, 1)
+        self.assertIn(hashlib.sha256(b"t").hexdigest(), c.cache.data)
 
     def test_refresh_ignores_existing_cache(self):
         self.client().score("t", "l")

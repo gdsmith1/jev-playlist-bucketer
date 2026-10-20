@@ -32,6 +32,11 @@ def parse_args(argv=None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def select_buckets(buckets: dict, groups: list, enrichments: list) -> dict:
+    """Selection seam between the dashboard and jev scoring. Pass-through until DASH-11b."""
+    return buckets
+
+
 def main(argv=None) -> None:
     load_dotenv()
     args = parse_args(argv)
@@ -40,39 +45,42 @@ def main(argv=None) -> None:
         buckets = json.load(f)
 
     lastfm = LastfmClient(refresh=args.refresh_lastfm)
-    jev = JevClient(buckets, cache_path=args.jev_cache, refresh=args.refresh_jev)
-
     header, lines = load_rows(args.csv_path, args.limit, args.sample, args.seed)
 
     run_dir = os.path.join("runs", datetime.now().strftime("%Y%m%d-%H%M%S"))
     os.makedirs(run_dir, exist_ok=True)
 
     groups = group_rows(lines)
-    destinations: dict[int, list[str]] = {}  # song index -> bucket keys
-    enrichments = []
     started = time.monotonic()
 
+    # Pass 1: fetch Last.fm for every album.
+    enrichments = []
     for i, group in enumerate(groups, start=1):
         print(f"[{i}/{len(groups)}] {group.artist} - {group.album} ({len(group.rows)} songs)")
-
         enrichment = lastfm.fetch(group.artist, group.album)
         lastfm.flush()
         enrichments.append(enrichment)
+    texts = [format_for_jev(g.artist, g.album, g.release_date, e) for g, e in zip(groups, enrichments)]
 
-        text = format_for_jev(group.artist, group.album, group.release_date, enrichment)
-
-        if args.dry_run:
-            print("  jev input: " + text.replace("\n", "\n             "))
-            continue
-
-        matched = matching_buckets(jev.score(text, group.key), args.threshold)
-        for index in group.rows:
-            destinations[index] = matched
-
+    # Analyse and write the dashboard (dry runs only).
     dashboard_path = None
     if args.dry_run and not args.no_dashboard:
         dashboard_path = write_dashboard(run_dir, list(zip(groups, enrichments)), lastfm.tag_info)
         lastfm.flush()
+
+    # Selection hook: DASH-11b picks the buckets to score against here.
+    buckets = select_buckets(buckets, groups, enrichments)
+    jev = None if args.dry_run else JevClient(buckets, cache_path=args.jev_cache, refresh=args.refresh_jev)
+
+    # Pass 2: score with jev.
+    destinations: dict[int, list[str]] = {}  # song index -> bucket keys
+    for group, text in zip(groups, texts):
+        if args.dry_run:
+            print(f"{group.artist} - {group.album}\n  jev input: " + text.replace("\n", "\n             "))
+            continue
+        matched = matching_buckets(jev.score(text, group.key), args.threshold)
+        for index in group.rows:
+            destinations[index] = matched
 
     bucket_lines = assign_to_buckets(lines, destinations, buckets)
     write_buckets(run_dir, header, bucket_lines)
@@ -86,6 +94,7 @@ def main(argv=None) -> None:
     for key, matched_lines in bucket_lines.items():
         if matched_lines:
             print(f"  {key}: {len(matched_lines)}")
-    print(f"jev calls: {jev.usage['call_count']}")
-    print(f"jev input_tokens: {jev.usage['input_tokens']}")
-    print(f"jev output_tokens: {jev.usage['output_tokens']}")
+    if jev:
+        print(f"jev calls: {jev.usage['call_count']}")
+        print(f"jev input_tokens: {jev.usage['input_tokens']}")
+        print(f"jev output_tokens: {jev.usage['output_tokens']}")

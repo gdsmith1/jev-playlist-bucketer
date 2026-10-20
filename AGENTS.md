@@ -9,13 +9,14 @@ All paths are relative to the repo root, which is also where commands must be ru
 |---|---|---|
 | CLI entry point | `bucketer/__main__.py` | run as `python -m bucketer`; the CLI lives in `bucketer/cli.py` |
 | Row loading, grouping, bucket output | `bucketer/pipeline.py` | |
+| Run flow | `bucketer/cli.py` | pass 1 fetch all Last.fm, dashboard (dry run), `select_buckets` seam (pass-through until DASH-11b), pass 2 jev scoring, write CSVs; `JevClient` is built after selection and never in dry runs |
 | jev client, question building, `FALLBACK_BUCKET` | `bucketer/jev.py` | uses the official `typesafe-sdk`; the only code that spends tokens; owns `jev_cache.json` |
 | Last.fm client, `Throttle` | `bucketer/lastfm.py` | `requests` + urllib3 `Retry` for transport errors; owns `lastfm_cache.json` |
 | Genre dashboard | `bucketer/dashboard.py` | dry-run only; `analyze` (clusters, outliers) + `render` to `runs/<ts>/dashboard.html`; no jev; `--no-dashboard` skips |
 | Tag cleaning / name cleaning / jev text | `bucketer/tags.py`, `names.py`, `formatting.py` | `format_for_jev` is in `formatting.py` |
 | JSON cache / data shapes | `bucketer/cache.py`, `models.py` | |
 | Last.fm cache | `lastfm_cache.json` | sections `album` (`artist\|clean album`; entries also carry `cover`, `""` = none, fetched lazily for older entries) `artist` (primary artist) and `tag` (`tag.getInfo` summary), lowercase keys; `null` = genuinely not found, errors are never cached |
-| jev score cache | `jev_cache.json` | key = sha256 of the exact `format_for_jev` text; value `{label, scores, confidence}` |
+| jev score cache | `jev_cache.json` | key = sha256 of bucket fingerprint + `\n` + the exact `format_for_jev` text; value `{label, scores, confidence, fingerprint}`. Legacy entries (key = sha256(text), no fingerprint) are lazily copied under the new key when their score keys equal the current bucket keys, never deleted |
 | Run output | `runs/<timestamp>/<bucket>.csv` | one folder per run, including dry runs (empty) |
 | Buckets | `buckets.json` | user-owned and not final; do not edit unless asked |
 | Playlist input | `spotlistr-exported-playlist.csv` | local, gitignored |

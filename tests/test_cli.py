@@ -51,6 +51,23 @@ class EndToEndTest(unittest.TestCase):
         jev.score.assert_not_called()
         self.assertEqual(os.listdir(run_dir), ["dashboard.html"])
 
+    def test_dry_run_never_builds_jev_client(self):
+        with mock.patch.object(cli, "JevClient") as jev_cls:
+            self.run_main("--dry-run", "--no-dashboard")
+        jev_cls.assert_not_called()
+
+    def test_all_albums_fetched_before_any_scoring_and_selection_sees_them(self):
+        calls = []
+        seen = {}
+        def fake_select(buckets, groups, enrichments):
+            calls.append("select")
+            seen["n"] = (len(groups), len(enrichments))
+            return {"stoner": buckets["stoner"]}
+        with mock.patch.object(cli, "select_buckets", side_effect=fake_select):
+            jev, _ = self.run_main(scores={"kyuss|wretch": {"stoner": 0}, "sleep|dopesmoker": {"stoner": 0}})
+        self.assertEqual(calls, ["select"])
+        self.assertEqual(seen["n"], (2, 2))
+
     def test_dry_run_no_dashboard_writes_nothing(self):
         jev, run_dir = self.run_main("--dry-run", "--no-dashboard")
         jev.score.assert_not_called()
