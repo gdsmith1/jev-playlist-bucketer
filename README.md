@@ -39,6 +39,7 @@ Options:
 - `--select all|a,b,c` — score with these suggested buckets instead of showing the checklist (needed when there is no terminal)
 - `--jev-cache PATH` — `jev` score cache file (default `jev_cache.json`)
 - `--no-dashboard` — skip writing the genre dashboard
+- `--similar` — also fetch up to 30 similar artists per artist (one extra Last.fm call per uncached artist, cached afterwards) for the dashboard's "Similar to your outliers" section; without it the section uses whatever is already cached
 - `--refresh-lastfm` — ignore the Last.fm cache and overwrite it with fresh lookups
 - `--refresh-jev` — ignore the `jev` score cache and overwrite it (spends tokens on a real run)
 

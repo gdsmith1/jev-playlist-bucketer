@@ -259,7 +259,7 @@ class LastfmClient:
             self.stats["cache_hits"] += 1
         return payload["cover"] or None
 
-    def fetch(self, artist: str, album: str) -> Enrichment:
+    def fetch(self, artist: str, album: str, similar: bool = False) -> Enrichment:
         a = _norm(primary_artist(artist))
         album_payload = self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album))
         artist_payload = self._cached("artist", a, lambda: self.lookup_artist(artist))
@@ -272,7 +272,9 @@ class LastfmClient:
             enrichment.album_tags = clean_tags(album_payload.get("tags", []), exclude=exclude)
         if artist_payload is not None:
             enrichment.artist_tags = clean_tags(artist_payload.get("tags", []), exclude=(artist, primary_artist(artist)))
-            enrichment.similar_artists = list((artist_payload.get("extras") or {}).get("similar_artists") or [])
+            extras = artist_payload.get("extras") or {}
+            enrichment.similar_artists = list(extras.get("similar_artists") or [])
+            enrichment.similar_full = self.similar_artists(artist) if similar else list(extras.get("similar_full") or [])
         return enrichment
 
     def similar_artists(self, artist: str) -> list[dict]:

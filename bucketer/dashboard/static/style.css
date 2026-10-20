@@ -45,3 +45,5 @@ td input[type=checkbox]{width:auto;margin:0}
 .drow{display:grid;grid-template-columns:minmax(120px,200px) 90px 1fr;gap:8px;align-items:center}.drow>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .detailgrid{display:flex;flex-wrap:wrap;gap:24px}.dcol{min-width:300px;flex:1}.arow{cursor:pointer}.arow:hover,.arow:focus{background:var(--panel);outline:1px solid var(--blue)}.adetail td{background:var(--panel)}.pad{padding:8px}
 .card .more{margin:8px 0 0}
+/* similar artists */
+.simrec{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0}.simrec b{color:var(--yellow)}

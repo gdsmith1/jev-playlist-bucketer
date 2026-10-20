@@ -6,6 +6,7 @@ from ..models import Enrichment, Group
 from .decades import decade_stats
 from .noise import noise_audit
 from .quality import quality_stats
+from .similar import similar_to_outliers
 
 # Wide umbrella tags: shown in Top tags (dimmed) but never suggested as buckets, never used for clustering or outlier fit. Edit freely.
 UMBRELLA_TAGS = frozenset({"rock", "pop", "alternative", "alternative rock", "indie", "metal", "electronic", "instrumental", "folk"})
@@ -99,7 +100,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     for group, enrichment in pairs:
         weighted = _weighted_tags(enrichment)
         albums.append({"artist": group.artist, "album": group.album, "songs": len(group.rows), "tags": {n: w for n, (w, _) in weighted.items()},
-                       "sources": {n: s for n, (_, s) in weighted.items()}, "similar": list(enrichment.similar_artists), "cover": enrichment.cover or "",
+                       "sources": {n: s for n, (_, s) in weighted.items()}, "similar": list(enrichment.similar_artists), "similar_full": list(enrichment.similar_full), "cover": enrichment.cover or "",
                        "year": release_year(group.release_date), "has_album_tags": bool(enrichment.album_tags),
                        "has_artist_tags": bool(enrichment.artist_tags)})
 
@@ -169,5 +170,5 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     total_songs = sum(a["songs"] for a in albums)
     return {"albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
             "outlier_fit": OUTLIER_FIT, "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records,
-            "quality": quality_stats(records), "noise": noise_audit(records),
+            "similar_network": similar_to_outliers(albums, records, outliers), "quality": quality_stats(records), "noise": noise_audit(records),
             "decades": decade_stats(records, [c["seed"] for c in clusters])}

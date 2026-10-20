@@ -298,3 +298,25 @@ class SimilarFullTest(Base):
         self.script(lambda p: (200, self.similar_resp()))
         self.assertEqual(self.p.similar_artists("Nobody"), [])
         self.assertEqual(self.calls, [])
+
+
+class FetchSimilarTest(Base):
+    def script_all(self):
+        def answer(p):
+            if p["method"] == "artist.getSimilar":
+                return 200, {"similarartists": {"artist": [{"name": "Unida", "match": "0.5"}]}}
+            if p["method"].endswith("getTopTags"):
+                return 200, tags_resp(("stoner rock", 100))
+            return 200, info_resp()
+        self.script(answer)
+
+    def test_fetch_without_flag_makes_no_similar_call(self):
+        self.script_all()
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").similar_full, [])
+        self.assertNotIn("artist.getSimilar", self.methods())
+
+    def test_fetch_with_flag_returns_and_caches_similar(self):
+        self.script_all()
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch", similar=True).similar_full, [{"name": "Unida", "match": 0.5}])
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").similar_full, [{"name": "Unida", "match": 0.5}])
+        self.assertEqual(self.methods().count("artist.getSimilar"), 1)
