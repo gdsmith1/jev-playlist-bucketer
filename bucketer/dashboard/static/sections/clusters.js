@@ -1,0 +1,2 @@
+D.clusters.forEach((c,i)=>{const card=el("div",{className:"card"},el("h3",{textContent:c.seed}),el("div",{className:"sub",textContent:c.albums+" albums · "+c.songs+" songs"}));
+ card.style.setProperty("--c",COLORS[i%COLORS.length]);c.tags.forEach(t=>card.append(chip(t)));if(c.covers.length)card.append(el("div",{className:"thumbs"},...c.covers.map(v=>art(v.url,v.title))));card.append(el("div",{className:"ex",textContent:"e.g. "+c.examples.join(", ")}));$("clusters").append(card)});

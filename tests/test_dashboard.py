@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from bucketer.dashboard import UMBRELLA_TAGS, album_tags, analyze, render, write_dashboard
+from bucketer.dashboard.analysis import release_year
 from bucketer.models import Enrichment, Group
 
 
@@ -88,6 +89,27 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(html.count("</script>"), 1)  # only the page's own closing tag
         embedded = re.search(r"const D=(.*?);const COLORS", html, re.S).group(1)
         self.assertEqual(json.loads(embedded)["info"]["t"]["summary"], "</script>")
+
+    def test_album_records_cover_every_album(self):
+        a = analyze(PAIRS)
+        self.assertEqual(len(a["album_records"]), len(PAIRS))
+        kyuss = a["album_records"][0]
+        self.assertEqual((kyuss["artist"], kyuss["songs"], kyuss["release_year"]), ("Kyuss", 3, None))
+        self.assertEqual(kyuss["tags"][0], {"name": "stoner rock", "weight": 1.0, "source": "album"})
+        self.assertEqual(set(kyuss["cluster_fits"]), {c["seed"] for c in a["clusters"]})
+        self.assertEqual(kyuss["best_cluster"], "stoner rock")
+        self.assertTrue(kyuss["has_album_tags"])
+        self.assertFalse(kyuss["has_artist_tags"])
+
+    def test_album_record_without_tags_and_artist_source(self):
+        a = analyze([pair("a", "b", None, artist_tags=[("x", 90)]), PAIRS[-1]])
+        artist_only, nothing = a["album_records"]
+        self.assertEqual(artist_only["tags"][0]["source"], "artist")
+        self.assertEqual((artist_only["has_album_tags"], artist_only["has_artist_tags"]), (False, True))
+        self.assertEqual((nothing["tags"], nothing["best_cluster"], nothing["second_best_cluster"]), ([], None, None))
+
+    def test_release_year_is_parsed_defensively(self):
+        self.assertEqual([release_year(d) for d in ("2004-05-01", "1999", "", "0000-00-00", "n/a", "12345")], [2004, 1999, None, None, None, None])
 
     def test_write_dashboard_fetches_info_for_top_tags(self):
         asked = []
