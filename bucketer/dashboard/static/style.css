@@ -53,3 +53,5 @@ td input[type=checkbox]{width:auto;margin:0}
 /* coverage */
 .stack{display:flex;height:18px;border-radius:4px;overflow:hidden;margin:8px 0 4px;border:1px solid var(--line)}.stack div{height:100%}
 .bar .fill.small{background:var(--pink)}#bordwrap{display:none;margin-top:8px;max-height:420px}label.sub input{width:auto;margin:0 6px 0 0}
+/* similar artists */
+.simrec{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0}.simrec b{color:var(--yellow)}

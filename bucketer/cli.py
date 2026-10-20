@@ -25,6 +25,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", help="Skip jev scoring; only fetch metadata and print what would be sent")
     parser.add_argument("--yes", action="store_true", help="Proceed with the jev calls without asking for confirmation (needed when there is no terminal)")
     parser.add_argument("--no-dashboard", action="store_true", help="Skip writing the genre dashboard (dashboard.html in the run folder)")
+    parser.add_argument("--similar", action="store_true", help="Fetch up to 30 similar artists per artist for the dashboard (one extra Last.fm call per uncached artist)")
     parser.add_argument("--select", help="Suggested buckets to score with, skipping the checklist: 'all' or a comma-separated list of bucket names")
     parser.add_argument("--refresh-lastfm", action="store_true", help="Ignore the existing Last.fm cache and overwrite it with fresh lookups")
     parser.add_argument("--refresh-jev", action="store_true", help="Ignore the existing jev score cache and overwrite it (spends jev tokens on a real run)")
@@ -49,7 +50,7 @@ def main(argv=None) -> None:
     enrichments = []
     for i, group in enumerate(groups, start=1):
         print(f"[{i}/{len(groups)}] {group.artist} - {group.album} ({len(group.rows)} songs)")
-        enrichment = lastfm.fetch(group.artist, group.album)
+        enrichment = lastfm.fetch(group.artist, group.album, similar=args.similar)
         lastfm.flush()
         enrichments.append(enrichment)
     texts = [format_for_jev(g.artist, g.album, g.release_date, e) for g, e in zip(groups, enrichments)]

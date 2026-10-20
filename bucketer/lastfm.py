@@ -52,6 +52,7 @@ def _norm(s: str | None) -> str:
 _HTML_TAG = re.compile(r"<[^>]+>")
 TAG_SUMMARY_MAX = 400
 PLACEHOLDER_IMAGE_ID = "2a96cbd8b46e442fc41c2b86b821562f"  # Last.fm's grey default art, same for every missing cover
+SIMILAR_LIMIT = 30
 COVER_SIZES = ("extralarge", "large", "medium")
 
 
@@ -186,6 +187,15 @@ class LastfmClient:
             return OK, {"tags": tags, "extras": extras}
         return (ERROR if errored else NOT_FOUND), None
 
+    def lookup_similar(self, artist: str, limit: int = SIMILAR_LIMIT) -> tuple[str, list[dict]]:
+        status, data = self._call("artist.getSimilar", artist=artist, limit=limit)
+        if status != OK:
+            return status, []
+        raw = (data.get("similarartists") or {}).get("artist") or []
+        if isinstance(raw, dict):
+            raw = [raw]
+        return OK, [{"name": s["name"], "match": round(float(s.get("match") or 0), 4)} for s in raw if isinstance(s, dict) and s.get("name")]
+
     @staticmethod
     def _cover_url(data: dict) -> str:
         images = (data.get("album") or {}).get("image") or []
@@ -249,7 +259,7 @@ class LastfmClient:
             self.stats["cache_hits"] += 1
         return payload["cover"] or None
 
-    def fetch(self, artist: str, album: str) -> Enrichment:
+    def fetch(self, artist: str, album: str, similar: bool = False) -> Enrichment:
         a = _norm(primary_artist(artist))
         album_payload = self._cached("album", f"{a}|{_norm(clean_album(album))}", lambda: self.lookup_album(artist, album))
         artist_payload = self._cached("artist", a, lambda: self.lookup_artist(artist))
@@ -262,8 +272,27 @@ class LastfmClient:
             enrichment.album_tags = clean_tags(album_payload.get("tags", []), exclude=exclude)
         if artist_payload is not None:
             enrichment.artist_tags = clean_tags(artist_payload.get("tags", []), exclude=(artist, primary_artist(artist)))
-            enrichment.similar_artists = list((artist_payload.get("extras") or {}).get("similar_artists") or [])
+            extras = artist_payload.get("extras") or {}
+            enrichment.similar_artists = list(extras.get("similar_artists") or [])
+            enrichment.similar_full = self.similar_artists(artist) if similar else list(extras.get("similar_full") or [])
         return enrichment
+
+    def similar_artists(self, artist: str) -> list[dict]:
+        """Up to SIMILAR_LIMIT [{name, match}] for an artist, stored on its artist cache entry (extras.similar_full); fetched lazily, errors not cached."""
+        key = _norm(primary_artist(artist))
+        payload = self.cache.section("artist").get(key)
+        if payload is None:
+            return []
+        extras = payload.setdefault("extras", {})
+        if "similar_full" not in extras:
+            status, similar = self.lookup_similar(key)
+            if status == ERROR:
+                self.stats["errors"] += 1
+                return []
+            extras["similar_full"] = similar
+        else:
+            self.stats["cache_hits"] += 1
+        return extras["similar_full"]
 
     def tag_info(self, name: str) -> dict | None:
         """Description and usage stats for one tag (None if unknown). Cached under `tag`."""

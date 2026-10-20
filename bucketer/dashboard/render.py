@@ -9,7 +9,7 @@ from ..models import Enrichment, Group
 from .analysis import analyze
 
 STATIC = Path(__file__).parent / "static"
-SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades"]  # page order; each file draws one section
+SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar"]  # page order; each file draws one section
 
 
 def _read(relative: str) -> str:
