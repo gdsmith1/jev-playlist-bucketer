@@ -7,6 +7,7 @@ import unittest
 from unittest import mock
 
 from bucketer import cli
+from bucketer.dashboard import analysis as analysis_module
 from bucketer.models import Enrichment
 
 HEADER = "Artist(s) Name , Track Name , Album Name , Release Date , Length , ISRC"
@@ -15,6 +16,12 @@ ROWS = ["Kyuss , Green Machine , Wretch , 1991 , 3:00 , X", "Kyuss , Demon Clean
 
 
 class EndToEndTest(unittest.TestCase):
+    def setUp(self):
+        for name in ("MIN_CLUSTER_ALBUMS", "MIN_CLUSTER_SONGS", "MIN_TAG_ALBUMS"):
+            patcher = mock.patch.object(analysis_module, name, 1)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     def run_main(self, *extra, scores=None, select="all", yes=True):
         extra = (*(("--select", select) if select else ()), *(("--yes",) if yes else ()), *extra)
         tmp = tempfile.TemporaryDirectory()

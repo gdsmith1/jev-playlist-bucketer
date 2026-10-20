@@ -7,6 +7,8 @@
 <h1>Genre Dashboard</h1><div class="sub">Built from Last.fm tags; no jev involved. Click any tag for its Last.fm description (when it has one).</div>
 <div class="stats" id="stats"></div>
 <h2>Suggested buckets</h2><div class="sub">Tags that tend to appear on the same albums, biggest first. A starting point, not a final answer.</div><div class="cards" id="clusters"></div>
+<h2>Bucket sizes and coverage</h2><div class="sub" id="covsub"></div><div class="stack" id="covstack"></div><div class="legend" id="covlegend"></div><div id="covbars"></div>
+<label class="sub"><input type="checkbox" id="bord"> show borderline albums only (top two fits within 10 points)</label><div class="scroll" id="bordwrap"><table><tbody id="bordbody"></tbody></table></div>
 <div class="drill" id="bucketdrill" hidden></div>
 <h2>Top tags</h2><div id="tags"></div>
 <h2>Tag overlap</h2><div class="sub">Share of albums two tags have in common (Jaccard, shown as a percentage in each cell; brighter = more overlap, on the fixed scale below). Umbrella tags are left out.</div>

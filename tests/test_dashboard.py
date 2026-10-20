@@ -3,7 +3,9 @@ import os
 import re
 import tempfile
 import unittest
+from unittest import mock
 
+from bucketer.dashboard import analysis as analysis_module
 from bucketer.dashboard import UMBRELLA_TAGS, album_tags, analyze, render, write_dashboard
 from bucketer.dashboard.analysis import cohesion, merge_by_artist, outlier_reason, release_year, similar_artists
 from bucketer.models import Enrichment, Group
@@ -25,6 +27,12 @@ PAIRS = [
 
 
 class DashboardTest(unittest.TestCase):
+    def setUp(self):
+        for name in ("MIN_CLUSTER_ALBUMS", "MIN_CLUSTER_SONGS", "MIN_TAG_ALBUMS"):
+            patcher = mock.patch.object(analysis_module, name, 1)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     def test_album_tags_merges_levels_and_drops_weak(self):
         _, e = pair("a", "b", [("x", 100), ("faint", 5)], artist_tags=[("x", 40), ("y", 0)])
         self.assertEqual(album_tags(e), {"x": 1.0, "y": 0.5})
@@ -119,6 +127,30 @@ class DashboardTest(unittest.TestCase):
         albums = [{"similar": ["X", "Mine", "Y"]}, {"similar": ["Y", "X", "Y2"]}, {"similar": ["Y"]}]
         self.assertEqual(similar_artists(albums, {"Mine"}), ["Y", "X", "Y2"])
 
+    def test_coverage_counts_every_album_once(self):
+        pairs = [pair("K", "1", [("stoner rock", 100)], songs=3), pair("D", "2", [("doom metal", 100)], songs=2),
+                 pair("M", "3", [("stoner rock", 100), ("post-punk", 100)], songs=4), pair("N", "4", None), pair("J", "5", [("post-punk", 100)], songs=1)]
+        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0):  # every tag its own bucket
+            a = analyze(pairs)
+        cov = a["coverage"]
+        self.assertEqual([cov[k]["albums"] for k in ("none", "one", "several")], [1, 3, 1])
+        self.assertEqual([cov[k]["songs"] for k in ("none", "one", "several")], [1, 6, 4])
+        self.assertEqual(sum(cov[k]["albums"] for k in ("none", "one", "several")), a["albums"])
+        self.assertEqual(cov["none"]["albums"], len(a["outliers"]))
+        sizes = {b["seed"]: b["songs"] for b in cov["buckets"]}
+        self.assertEqual(sizes, {"stoner rock": 7, "doom metal": 2, "post-punk": 5})
+        self.assertEqual(cov["bucket_song_sum"], 14)  # more than the 11 real songs: buckets overlap
+        self.assertTrue(all(b["small"] for b in cov["buckets"]))
+
+    def test_borderline_albums_have_close_top_two_fits(self):
+        pairs = [pair("A", "1", [("x", 100), ("y", 90)]), pair("B", "2", [("x", 100), ("y", 20)]), pair("C", "3", [("x", 100)])]
+        pairs += [pair(f"X{i}", "n", [("x", 100)]) for i in range(3)] + [pair(f"Y{i}", "n", [("y", 100)]) for i in range(3)]
+        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0):
+            a = analyze(pairs)
+        flags = {r["artist"]: r["borderline"] for r in a["album_records"][:3]}
+        self.assertEqual(flags, {"A": True, "B": False, "C": False})
+        self.assertEqual(a["coverage"]["borderline"]["albums"], 1)
+
     def test_empty_input(self):
         a = analyze([])
         self.assertEqual((a["albums"], a["songs"], a["clusters"], a["outliers"]), (0, 0, [], []))
@@ -163,6 +195,39 @@ class DashboardTest(unittest.TestCase):
             with open(path, encoding="utf-8") as f:
                 self.assertIn("Heavy.", f.read())
         self.assertIn("doom metal", asked)
+
+
+class ClusterLimitsTest(unittest.TestCase):
+    def test_cluster_count_is_capped_and_overflow_tags_are_left_out(self):
+        pairs = [pair(f"A{i}", "x", [(f"tag{i}", 100)], songs=2) for i in range(5) for _ in range(3)]
+        with mock.patch.object(analysis_module, "MAX_CLUSTERS", 3), mock.patch.object(analysis_module, "MIN_CLUSTER_ALBUMS", 1), \
+                mock.patch.object(analysis_module, "MIN_CLUSTER_SONGS", 1):
+            a = analyze(pairs)
+        self.assertEqual(len(a["clusters"]), 3)
+        self.assertEqual(sum(len(c["tags"]) for c in a["clusters"]), 3)  # tag3 and tag4 attach nowhere
+
+    def test_small_clusters_are_not_suggested(self):
+        pairs = [pair(f"A{i}", "x", [("big", 100)], songs=5) for i in range(10)] + [pair("B", "y", [("tiny", 100)]) for _ in range(3)]
+        a = analyze(pairs)
+        self.assertEqual([c["seed"] for c in a["clusters"]], ["big"])
+        with mock.patch.object(analysis_module, "MIN_CLUSTER_ALBUMS", 2), mock.patch.object(analysis_module, "MIN_CLUSTER_SONGS", 2):
+            self.assertEqual({c["seed"] for c in analyze(pairs)["clusters"]}, {"big", "tiny"})
+
+    def test_rare_tags_are_not_bucket_candidates(self):
+        a = analyze([pair("A", "1", [("one off", 100)], songs=50)])
+        self.assertEqual(a["clusters"], [])
+        self.assertIn("one off", [t["tag"] for t in a["tags"]])  # still listed in Top tags
+
+    def test_unrelated_tag_never_attaches_at_zero_similarity(self):
+        pairs = [pair(f"A{i}", "x", [("alpha", 100)], songs=5) for i in range(10)] + [pair(f"B{i}", "y", [("beta", 100)], songs=5) for i in range(9)]
+        with mock.patch.object(analysis_module, "MAX_CLUSTERS", 1):
+            a = analyze(pairs)
+        self.assertEqual([c["tags"] for c in a["clusters"]], [["alpha"]])
+
+    def test_thirty_clusters_fit_in_one_analysis(self):
+        pairs = [pair(f"A{i}-{j}", "x", [(f"tag{i}", 100)], songs=3) for i in range(35) for j in range(10)]
+        a = analyze(pairs)
+        self.assertEqual(len(a["clusters"]), 30)
 
 
 if __name__ == "__main__":

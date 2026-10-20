@@ -61,7 +61,7 @@ Tags are cleaned (junk and list tags dropped, nationalities kept, spelling varia
 
 ## Output
 
-`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus `dashboard.html` (unless `--no-dashboard`) (a self-contained Monokai page: suggested buckets from tag clusters, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster, Last.fm data-quality tiles, a tag noise audit, release decades per bucket, and a searchable all-albums list; click a bucket's Browse button or any album row for drill-down), plus `selected_buckets.json` on a real run, plus a summary of Last.fm coverage and `jev` usage.
+`runs/<timestamp>/<bucket>.csv` per bucket (same header and row format as the input; a song can appear in several buckets, and `other.csv` holds songs that matched none), plus `dashboard.html` (unless `--no-dashboard`) (a self-contained Monokai page: up to 30 suggested buckets from tag clusters, bucket size and coverage, top tags with Last.fm descriptions, tag overlap, and outlier albums that fit no cluster, Last.fm data-quality tiles, a tag noise audit, release decades per bucket, and a searchable all-albums list; click a bucket's Browse button or any album row for drill-down), plus `selected_buckets.json` on a real run, plus a summary of Last.fm coverage and `jev` usage.
 
 ## Notes
 

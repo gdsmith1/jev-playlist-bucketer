@@ -1,5 +1,7 @@
 import unittest
+from unittest import mock
 
+from bucketer.dashboard import analysis as analysis_module
 from bucketer.dashboard import analyze
 from bucketer.formatting import coverage_stats
 from bucketer.models import Enrichment, Group
@@ -64,6 +66,12 @@ class NoiseTest(unittest.TestCase):
 
 
 class DecadeTest(unittest.TestCase):
+    def setUp(self):
+        for name in ("MIN_CLUSTER_ALBUMS", "MIN_CLUSTER_SONGS", "MIN_TAG_ALBUMS"):
+            patcher = mock.patch.object(analysis_module, name, 1)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     def pairs(self):
         dates = ["1994-05-01", "1996", "1999-01-01", "1991", "1998-02-02", "2012-01-01", "", "0000-00-00", "garbage"]
         return [pair(f"A{i}", "x", album_tags=[("stoner rock", 100)], date=d) for i, d in enumerate(dates)]
