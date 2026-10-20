@@ -25,3 +25,10 @@ table.hm td.self{background:var(--line)}table.hm th.rh{text-align:right;position
 .fit{white-space:nowrap}.fitbar{display:inline-block;width:48px;height:8px;background:var(--line);border-radius:2px;vertical-align:middle}.fitbar i{display:block;height:100%;background:var(--green);border-radius:2px}
 .more{background:none;border:1px dashed var(--line);color:var(--blue);padding:6px 12px;border-radius:6px;font:inherit;cursor:pointer;margin:8px 0}.more:hover,.more:focus{border-color:var(--blue);outline:none}
 [hidden]{display:none!important}
+/* drill-down */
+.drill{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;margin-top:12px}.drill h3{color:var(--yellow);margin:0}.drill h4,.dcol h4{color:var(--purple);margin:8px 0 4px}
+.drillhead{display:flex;justify-content:space-between;align-items:center;gap:12px}.drillhead .more{margin:0}
+.meter{display:inline-block;width:90px;height:8px;background:var(--line);border-radius:2px}.meter i{display:block;height:100%;background:var(--green);border-radius:2px}
+.drow{display:grid;grid-template-columns:minmax(120px,200px) 90px 1fr;gap:8px;align-items:center}.drow>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detailgrid{display:flex;flex-wrap:wrap;gap:24px}.dcol{min-width:300px;flex:1}.arow{cursor:pointer}.arow:hover,.arow:focus{background:var(--panel);outline:1px solid var(--blue)}.adetail td{background:var(--panel)}.pad{padding:8px}
+.card .more{margin:8px 0 0}

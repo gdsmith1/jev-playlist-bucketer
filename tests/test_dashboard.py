@@ -111,6 +111,11 @@ class DashboardTest(unittest.TestCase):
         embedded = re.search(r"const D=(.*?);const COLORS", html, re.S).group(1)
         self.assertEqual(json.loads(embedded)["info"]["t"]["summary"], "</script>")
 
+    def test_render_includes_drilldown_section(self):
+        html = render(analyze(PAIRS), {})
+        self.assertIn("function openBucket", html)
+        self.assertIn('id="allalbums"', html)
+
     def test_album_records_cover_every_album(self):
         a = analyze(PAIRS)
         self.assertEqual(len(a["album_records"]), len(PAIRS))
