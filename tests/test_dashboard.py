@@ -88,6 +88,30 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(reasons["Nobody"], "untagged")
         self.assertNotIn("Kyuss", reasons)
 
+    def test_coverage_counts_every_album_once(self):
+        pairs = [pair("K", "1", [("stoner rock", 100)], songs=3), pair("D", "2", [("doom metal", 100)], songs=2),
+                 pair("M", "3", [("stoner rock", 100), ("post-punk", 100)], songs=4), pair("N", "4", None), pair("J", "5", [("post-punk", 100)], songs=1)]
+        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0):  # every tag its own bucket
+            a = analyze(pairs)
+        cov = a["coverage"]
+        self.assertEqual([cov[k]["albums"] for k in ("none", "one", "several")], [1, 3, 1])
+        self.assertEqual([cov[k]["songs"] for k in ("none", "one", "several")], [1, 6, 4])
+        self.assertEqual(sum(cov[k]["albums"] for k in ("none", "one", "several")), a["albums"])
+        self.assertEqual(cov["none"]["albums"], len(a["outliers"]))
+        sizes = {b["seed"]: b["songs"] for b in cov["buckets"]}
+        self.assertEqual(sizes, {"stoner rock": 7, "doom metal": 2, "post-punk": 5})
+        self.assertEqual(cov["bucket_song_sum"], 14)  # more than the 11 real songs: buckets overlap
+        self.assertTrue(all(b["small"] for b in cov["buckets"]))
+
+    def test_borderline_albums_have_close_top_two_fits(self):
+        pairs = [pair("A", "1", [("x", 100), ("y", 90)]), pair("B", "2", [("x", 100), ("y", 20)]), pair("C", "3", [("x", 100)])]
+        pairs += [pair(f"X{i}", "n", [("x", 100)]) for i in range(3)] + [pair(f"Y{i}", "n", [("y", 100)]) for i in range(3)]
+        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0):
+            a = analyze(pairs)
+        flags = {r["artist"]: r["borderline"] for r in a["album_records"][:3]}
+        self.assertEqual(flags, {"A": True, "B": False, "C": False})
+        self.assertEqual(a["coverage"]["borderline"]["albums"], 1)
+
     def test_empty_input(self):
         a = analyze([])
         self.assertEqual((a["albums"], a["songs"], a["clusters"], a["outliers"]), (0, 0, [], []))

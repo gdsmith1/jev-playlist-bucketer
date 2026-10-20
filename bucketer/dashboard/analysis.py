@@ -16,6 +16,8 @@ MAX_CLUSTERS = 30
 MIN_CLUSTER_ALBUMS = 8  # smaller clusters are not suggested
 MIN_CLUSTER_SONGS = 20
 OUTLIER_FIT = 0.3  # an album is an outlier when less than this share of its tag weight lands in its best cluster
+BORDERLINE_GAP = 0.1  # an album is borderline when its top two cluster fits differ by at most this
+SMALL_BUCKET_SONGS = 10
 EXAMPLES_PER_CLUSTER = 6
 COVERS_PER_CLUSTER = 5
 UNCOUNTED_WEIGHT = 0.5  # weight for a tag that came without a count
@@ -45,6 +47,20 @@ def release_year(release_date: str) -> int | None:
 
 def _jaccard(a: set[int], b: set[int]) -> float:
     return len(a & b) / len(a | b) if a | b else 0.0
+
+
+def coverage_of(records: list[dict], clusters: list[dict]) -> dict:
+    """Songs and albums in no bucket, one bucket or several (an album is in a bucket when its fit reaches OUTLIER_FIT), plus per-bucket sizes."""
+    groups = {"none": [], "one": [], "several": []}
+    for r in records:
+        groups["none" if not r["buckets"] else "one" if len(r["buckets"]) == 1 else "several"].append(r)
+    size = lambda rs: {"albums": len(rs), "songs": sum(r["songs"] for r in rs)}  # noqa: E731
+    buckets = [{"seed": c["seed"], "albums": sum(c["seed"] in r["buckets"] for r in records),
+                "songs": sum(r["songs"] for r in records if c["seed"] in r["buckets"])} for c in clusters]
+    for b in buckets:
+        b["small"] = b["songs"] < SMALL_BUCKET_SONGS
+    return {"threshold": OUTLIER_FIT, "none": size(groups["none"]), "one": size(groups["one"]), "several": size(groups["several"]), "buckets": buckets,
+            "bucket_song_sum": sum(b["songs"] for b in buckets), "borderline": size([r for r in records if r["borderline"]])}
 
 
 def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
@@ -108,7 +124,9 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
                         "similar": a["similar"], "cluster_fits": {seed: round(share, 3) for share, seed in fits},
                         "best_cluster": ranked_fits[0][1] if ranked_fits and ranked_fits[0][0] > 0 else None,
                         "second_best_cluster": ranked_fits[1][1] if len(ranked_fits) > 1 and ranked_fits[1][0] > 0 else None,
-                        "has_album_tags": a["has_album_tags"], "has_artist_tags": a["has_artist_tags"]})
+                        "has_album_tags": a["has_album_tags"], "has_artist_tags": a["has_artist_tags"],
+                        "buckets": [seed for share, seed in fits if share >= OUTLIER_FIT],
+                        "borderline": len(ranked_fits) > 1 and ranked_fits[1][0] > 0 and ranked_fits[0][0] - ranked_fits[1][0] <= BORDERLINE_GAP})
         if total == 0 or fit < OUTLIER_FIT:
             outliers.append({"artist": a["artist"], "album": a["album"], "songs": a["songs"], "reason": ("untagged" if not a["tags"] else "only umbrella tags") if total == 0 else "no cluster fits",
                              "cover": a["cover"], "fit": round(fit, 2), "nearest": nearest if fit > 0 else None,
@@ -116,5 +134,6 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     outliers.sort(key=lambda o: (o["fit"], -o["songs"]))
 
     total_songs = sum(a["songs"] for a in albums)
+    coverage = coverage_of(records, clusters)
     return {"albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
-            "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records}
+            "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records, "coverage": coverage}
