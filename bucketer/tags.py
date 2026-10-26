@@ -63,6 +63,14 @@ NOISE_TAGS = frozenset(
         "ipecac recordings", "interscope records", "rise above records", "wax trax", "roadrunner records", "sub pop", "sire",
         "matador records", "jagjaguwar", "beggars banquet records", "spinefarm records", "warner music", "universal music",
         "music for nations", "grand royal",
+        # instrument and era chatter, tv, praise and listening-state phrasing
+        "guitar", "guitar hero", "classic", "oldies", "headbangers ball", "fucking brilliant", "fuck yes", "kick ass", "kickasstic",
+        "flawless", "orgasmic", "greatest hits", "criminally underrated albums", "underrated and overlooked", "underrated essentials",
+        "record collection", "cd collection", "buy", "buy the lp", "grower", "a grower", "thumb up", "the best band ever", "god like",
+        "godlike drumming", "this is god tier", "god-tier guitar", "mind blowing", "masterwork", "master work", "epoch making",
+        "essential stuff", "excellent work", "it has its moments", "needs to be played more", "play it loud", "listen loud",
+        "good drums", "good guitar solo", "awesome bass", "sick drumming", "rifftastic", "kicking asses", "new release", "known albums",
+        "not on spotify yet", "comfort album", "comfort listening", "workout songs", "summer jams", "new 2 me", "escuchados", "meghallgatni",
     }
 )
 
@@ -74,6 +82,8 @@ _NOISE_RE = re.compile(
     r"|^\d{1,2}$"
     r"|\b(records|recordings|studios?)$|\b(album )?cover( art)?$|\bnude\b|\bnaked\b|\bboobs\b|recommend|\bfaves?\b|\bfavs?\b"
     r"|\balbums? ever\b|^(just|really|pretty|fucking|so) (love|great|good|amazing)"
+    r"|\b\d+ (out )?of (10|5)\b|\b\d+ stars?\b|^rating\b|\blisten(ed|ing)?\b|\bwish ?list\b|\bpurchased\b|\bownage\b"
+    r"|\b(i|my|me|we|our|your)\b|^(\S+\s+){6,}\S+$"
 )
 
 # Last.fm housekeeping tags. Nationalities and places are kept: where a band is from is useful context.

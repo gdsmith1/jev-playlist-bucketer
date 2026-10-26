@@ -55,6 +55,12 @@ if __name__ == "__main__":
 
 
 class NoiseFilterTest(unittest.TestCase):
+    def test_drops_instrument_era_and_praise_tags_but_keeps_genres(self):
+        self.assertEqual(self.names("guitar", "guitar hero", "classic", "oldies", "headbangers ball", "fucking brilliant", "10 out of 10",
+                                    "need to listen", "music i love", "taught me to grow", "when we were younger and our hair was shorter",
+                                    "new wave of british heavy metal", "guitar virtuoso", "stoner rock"),
+                         ["guitar virtuoso", "new wave of british heavy metal", "stoner rock"])
+
     def names(self, *names):
         return [t["name"] for t in clean_tags([tag(n, 50) for n in names], max_n=20)]
 
