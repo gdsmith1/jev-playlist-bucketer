@@ -4,7 +4,8 @@ import html
 import os
 import re
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import requests
 from requests.adapters import HTTPAdapter

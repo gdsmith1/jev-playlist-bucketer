@@ -4,6 +4,7 @@ import re
 
 from ..models import Enrichment, Group
 from .decades import decade_stats
+from .jevresults import jev_record, summarize
 from .noise import noise_audit
 from .quality import quality_stats
 from .similar import similar_to_outliers
@@ -106,7 +107,7 @@ def coverage_of(records: list[dict], clusters: list[dict]) -> dict:
     groups = {"none": [], "one": [], "several": []}
     for r in records:
         groups["none" if not r["buckets"] else "one" if len(r["buckets"]) == 1 else "several"].append(r)
-    size = lambda rs: {"albums": len(rs), "songs": sum(r["songs"] for r in rs)}  # noqa: E731
+    size = lambda rs: {"albums": len(rs), "songs": sum(r["songs"] for r in rs)}
     buckets = [{"seed": c["seed"], "albums": sum(c["seed"] in r["buckets"] for r in records),
                 "songs": sum(r["songs"] for r in records if c["seed"] in r["buckets"])} for c in clusters]
     for b in buckets:
@@ -115,7 +116,14 @@ def coverage_of(records: list[dict], clusters: list[dict]) -> dict:
             "bucket_song_sum": sum(b["songs"] for b in buckets), "borderline": size([r for r in records if r["borderline"]])}
 
 
-def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
+def song_rows_of(songs: list[dict] | None, albums: list[dict]) -> tuple[list[dict], bool]:
+    """Compact per-song rows (index, title, song artist, album index); without `songs`, one row per album and a flag saying so."""
+    if songs is None:
+        return [{"i": i, "t": a["album"], "ar": a["artist"], "g": i} for i, a in enumerate(albums)], True
+    return [{"i": s["index"], "t": s["title"], "ar": s["artist"], "g": s["group"]} for s in songs], False
+
+
+def analyze(pairs: list[tuple[Group, Enrichment]], jev_result: dict | None = None, songs: list[dict] | None = None) -> dict:
     albums = []
     for group, enrichment in pairs:
         weighted = _weighted_tags(enrichment)
@@ -128,7 +136,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
     for i, a in enumerate(albums):
         for tag in a["tags"]:
             members.setdefault(tag, set()).add(i)
-    songs_of = lambda idx: sum(albums[i]["songs"] for i in idx)  # noqa: E731
+    songs_of = lambda idx: sum(albums[i]["songs"] for i in idx)
     ranked = sorted(members, key=lambda t: (-songs_of(members[t]), -len(members[t]), t))
     top = [t for t in ranked if t not in UMBRELLA_TAGS and len(members[t]) >= MIN_TAG_ALBUMS][:TOP_TAGS]  # bucket candidates
     keep = set(top[:SHOWN_TAGS]) | set(ranked[:SHOWN_TAGS])
@@ -185,12 +193,17 @@ def analyze(pairs: list[tuple[Group, Enrichment]]) -> dict:
             outliers.append({"artist": a["artist"], "album": a["album"], "albums": [a["album"]], "songs": a["songs"], "reason": outlier_reason(a["tags"], total, fits),
                              "cover": a["cover"], "fit": round(fit, 2), "nearest": nearest if fit > 0 else None,
                              "tags": sorted(specific or a["tags"], key=lambda t: -a["tags"][t])[:6], "similar": a["similar"]})
+    if jev_result is not None:
+        for record, entry in zip(records, jev_result["albums"], strict=True):
+            record["jev"] = jev_record(entry)
     outliers = merge_by_artist(outliers)
     outliers.sort(key=lambda o: (o["fit"], -o["songs"]))
 
     total_songs = sum(a["songs"] for a in albums)
     coverage = coverage_of(records, clusters)
-    return {"albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
+    extra = {"jev": summarize(records, jev_result, [c["seed"] for c in clusters])} if jev_result is not None else {}
+    song_rows, per_album = song_rows_of(songs, albums)
+    return {**extra, "song_rows": song_rows, "song_rows_per_album": per_album, "albums": len(albums), "songs": total_songs, "tags": tag_stats, "heat_tags": heat_tags, "heat": heat, "clusters": clusters, "outliers": outliers,
             "outlier_fit": OUTLIER_FIT, "outlier_songs": sum(o["songs"] for o in outliers), "album_records": records, "coverage": coverage,
             "similar_network": similar_to_outliers(albums, records, outliers), "quality": quality_stats(records), "noise": noise_audit(records),
             "decades": decade_stats(records, [c["seed"] for c in clusters])}

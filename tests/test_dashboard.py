@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from unittest import mock
 
-from bucketer.dashboard import analysis as analysis_module
 from bucketer.dashboard import UMBRELLA_TAGS, album_tags, analyze, render, write_dashboard
+from bucketer.dashboard import analysis as analysis_module
 from bucketer.dashboard.analysis import cohesion, merge_by_artist, outlier_reason, release_year, similar_artists
 from bucketer.models import Enrichment, Group
 
@@ -89,7 +89,7 @@ class DashboardTest(unittest.TestCase):
         self.assertNotIn("Kyuss", reasons)
 
     def test_outlier_reasons(self):
-        fits = lambda *shares: [(s, f"b{i}") for i, s in enumerate(shares)]  # noqa: E731
+        fits = lambda *shares: [(s, f"b{i}") for i, s in enumerate(shares)]
         self.assertEqual(outlier_reason({}, 0, fits(0.0)), "untagged")
         self.assertEqual(outlier_reason({"rock": 1.0}, 0, fits(0.0)), "only umbrella tags")
         self.assertEqual(outlier_reason({"x": 1.0}, 1.0, fits(0.0, 0.0)), "no tag in a suggested bucket")
@@ -158,7 +158,7 @@ class DashboardTest(unittest.TestCase):
     def test_render_embeds_json_and_escapes_script_close(self):
         html = render(analyze([pair("</script><b>", "x", [("t", 100)])]), {"t": {"summary": "</script>", "reach": 1}})
         self.assertEqual(html.count("</script>"), 1)  # only the page's own closing tag
-        embedded = re.search(r"const D=(.*?);const COLORS", html, re.S).group(1)
+        embedded = re.search(r"const D=(.*?);const COLORS", html, re.DOTALL).group(1)
         self.assertEqual(json.loads(embedded)["info"]["t"]["summary"], "</script>")
 
     def test_render_includes_drilldown_section(self):

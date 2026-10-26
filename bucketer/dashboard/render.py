@@ -2,14 +2,14 @@
 
 import json
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from ..models import Enrichment, Group
 from .analysis import analyze
 
 STATIC = Path(__file__).parent / "static"
-SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar"]  # page order; each file draws one section
+SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar", "selected", "playlist", "tabs"]  # page order; each file draws one section
 
 
 def _read(relative: str) -> str:
@@ -23,8 +23,8 @@ def render(analysis: dict, tag_info: dict[str, dict]) -> str:
     return page.replace("/*DATA*/null", data)
 
 
-def write_dashboard(run_dir: str, pairs: list[tuple[Group, Enrichment]], tag_info: Callable[[str], dict | None]) -> str:
-    analysis = analyze(pairs)
+def write_dashboard(run_dir: str, pairs: list[tuple[Group, Enrichment]], tag_info: Callable[[str], dict | None], jev_result: dict | None = None, songs: list[dict] | None = None) -> str:
+    analysis = analyze(pairs, jev_result, songs)
     info = {}
     for row in analysis["tags"]:
         found = tag_info(row["tag"])

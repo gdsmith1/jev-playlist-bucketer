@@ -6,7 +6,10 @@ function albumDetail(r){
  const fits=Object.entries(r.cluster_fits).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
  const fit=el("div",{className:"dcol"},el("h4",{textContent:"Fit to buckets"}),...(fits.length?fits.map(([k,v])=>el("div",{className:"drow"},el("span",{textContent:k}),meter(v,"var(--blue)"),el("span",{className:"sub",textContent:pct(v)}))):[el("div",{className:"sub",textContent:"fits no bucket"})]));
  const sim=el("div",{className:"dcol"},el("h4",{textContent:"Similar artists"}),el("div",{className:r.similar.length?"":"sub",textContent:r.similar.length?r.similar.join(", "):"none on Last.fm"}));
- return el("div",{className:"detailgrid"},tags,fit,sim)}
+ const cols=[tags,fit,sim];
+ if(r.jev){const sc=Object.entries(r.jev.scores).sort((a,b)=>b[1]-a[1]);
+  cols.splice(2,0,el("div",{className:"dcol"},el("h4",{textContent:"jev scores"}),...sc.map(([k,v])=>el("div",{className:"drow"},el("span",{textContent:k}),meter(Math.max(0,Math.min(1,v)),r.jev.matched.includes(k)?"var(--green)":"var(--muted)"),el("span",{className:"sub",textContent:v.toFixed(2)+(r.jev.matched.includes(k)?" · matched":"")})))))}
+ return el("div",{className:"detailgrid"},...cols)}
 function albumTable(records,host,seed){
  let shown=PAGE;
  function draw(){

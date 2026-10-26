@@ -53,5 +53,29 @@ td input[type=checkbox]{width:auto;margin:0}
 /* coverage */
 .stack{display:flex;height:18px;border-radius:4px;overflow:hidden;margin:8px 0 4px;border:1px solid var(--line)}.stack div{height:100%}
 .bar .fill.small{background:var(--pink)}#bordwrap{display:none;margin-top:8px;max-height:420px}label.sub input{width:auto;margin:0 6px 0 0}
+/* your buckets */
+#yourbuckets .chip{cursor:default}
 /* similar artists */
 .simrec{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0}.simrec b{color:var(--yellow)}
+/* tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-top:8px}
+.tabs [role=tab]{background:none;border:1px solid transparent;border-bottom:0;color:var(--muted);padding:8px 14px;font:inherit;cursor:pointer;border-radius:6px 6px 0 0;margin-bottom:-1px}
+.tabs [role=tab]:hover{color:var(--fg)}.tabs [role=tab][aria-selected=true]{color:var(--green);background:var(--panel);border-color:var(--line)}
+.tabs [role=tab]:focus-visible,[role=tabpanel]:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+[role=tabpanel]{padding-top:4px}
+/* selected buckets and playlist */
+.badge{display:inline-block;padding:0 8px;border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--yellow)}.badge.custom{color:var(--orange)}.badge.fallback{color:var(--muted)}
+.hbar{display:grid;grid-template-columns:minmax(90px,170px) 1fr 140px;gap:8px;align-items:center;margin:3px 0}.hbar .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .track{height:14px;background:var(--line);border-radius:2px}.hbar .track i{display:block;height:100%;border-radius:2px}.hbar .n{color:var(--muted);text-align:right;white-space:nowrap}
+.hist{position:relative;display:flex;align-items:flex-end;gap:2px;height:140px;padding:16px 4px 0;border-bottom:1px solid var(--line)}
+.hist .col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--muted)}.hist .col i{display:block;width:100%;border-radius:2px 2px 0 0}
+.hist .thr{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--pink)}.hist .thr span{position:absolute;top:-2px;left:4px;color:var(--pink);font-size:11px;white-space:nowrap}
+.haxis{display:flex;gap:2px;padding:0 4px;color:var(--muted);font-size:10px}.haxis span{flex:1;text-align:left}
+.whatif{display:flex;flex-wrap:wrap;gap:8px}.whatif .stat.cur{border-color:var(--pink)}.whatif .stat b{color:var(--yellow)}.whatif .stat.cur b{color:var(--pink)}
+table.ov td,table.ov th{text-align:center;padding:4px 8px}table.ov th.rh{text-align:right}table.ov td.d{color:var(--muted)}table.ov th{position:static;cursor:default}
+select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:6px 10px;border-radius:6px;font:inherit}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.filters input{margin:0}
+.pager{display:flex;gap:8px;align-items:center;margin:8px 0}.pager .more{margin:0}.pager .more:disabled{opacity:.4;cursor:default}
+.tag{color:var(--muted)}.sorth{cursor:pointer}.sorth:focus-visible{outline:1px solid var(--blue)}
+.note{padding:16px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);margin-top:16px}
+.chips .chip{cursor:default;margin:1px 4px 1px 0}.chip.other{color:var(--muted)}

@@ -1,6 +1,6 @@
 """Builds the album text jev receives (also its cache key) and the run summary."""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from .models import Enrichment
 from .names import clean_album, is_unknown_album, primary_artist

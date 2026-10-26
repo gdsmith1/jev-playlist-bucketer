@@ -16,3 +16,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 140
 target-version = "py310"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.17.2,<0.18.0)"
+]

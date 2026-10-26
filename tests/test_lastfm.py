@@ -118,9 +118,8 @@ class CoverTest(Base):
 
 class LastfmTest(Base):
     def test_missing_key(self):
-        with mock.patch.dict(os.environ, {}, clear=True):
-            with self.assertRaises(SystemExit):
-                LastfmClient(cache_dir=self.tmp.name)
+        with mock.patch.dict(os.environ, {}, clear=True), self.assertRaises(SystemExit):
+            LastfmClient(cache_dir=self.tmp.name)
 
     def test_full_fetch_and_tag_cleanup(self):
         def fn(p):

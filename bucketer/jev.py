@@ -72,7 +72,7 @@ class JevClient:
         return legacy is not None and self._adoptable(legacy)
 
     def _cache_key(self, text: str) -> str:
-        return hashlib.sha256(f"{self.fingerprint}\n{text}".encode("utf-8")).hexdigest()
+        return hashlib.sha256(f"{self.fingerprint}\n{text}".encode()).hexdigest()
 
     def _sdk(self) -> Any:
         if self._client is None:

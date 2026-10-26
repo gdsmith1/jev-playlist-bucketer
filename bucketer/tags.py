@@ -1,7 +1,7 @@
 """Last.fm tag cleaning."""
 
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 MAX_TAGS_PER_LEVEL = 8
 
@@ -54,8 +54,7 @@ NOISE_TAGS = frozenset(
         "fucking great", "fucking amazing", "fucking masterpiece", "the best", "just great", "insane", "badass", "bad ass rock",
         "ok", "win", "original", "new", "the", "x", "d", "w", "f", "go", "with", "mia", "fs", "dm", "dos sux", "single", "singles",
         "split", "split album", "releases", "new releases", "most wanted", "wanted", "wish list", "check it out", "to explore",
-        "musthave", "can't live without", "seen in concert", "bands seen live", "saw them live", "good live", "love it",
-        "names of people", "rickroll", "international", "title is imperative", "good shit", "good times", "good riffs",
+        "musthave", "can't live without", "seen in concert", "bands seen live", "saw them live", "good live", "names of people", "rickroll", "international", "title is imperative", "good shit", "good times", "good riffs",
         "eponymous", "misc", "tgif", "records and tapes", "lossless", "discover", "reminisce", "remember", "unclassifiable",
         "tribute album", "cover version", "naked covers", "extended play", "sophomore album", "3rd album", "5th album",
         # labels

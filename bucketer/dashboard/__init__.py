@@ -2,5 +2,6 @@
 
 from .analysis import UMBRELLA_TAGS, album_tags, analyze
 from .render import render, write_dashboard
+from .songs import song_dicts
 
-__all__ = ["UMBRELLA_TAGS", "album_tags", "analyze", "render", "write_dashboard"]
+__all__ = ["UMBRELLA_TAGS", "album_tags", "analyze", "render", "song_dicts", "write_dashboard"]
