@@ -97,7 +97,7 @@ class EndToEndTest(unittest.TestCase):
     def test_select_none_with_custom_buckets_file_and_jev_result(self):
         scores = {"kyuss|wretch": {"mine": 2}, "sleep|dopesmoker": {"mine": 0}}
         with mock.patch.object(cli, "write_dashboard", return_value="d.html") as wd:
-            jev, run_dir = self.run_main("--buckets", "custom.json", scores=scores, select="none", prep=write_custom)
+            _jev, run_dir = self.run_main("--buckets", "custom.json", scores=scores, select="none", prep=write_custom)
         with open(os.path.join(run_dir, "selected_buckets.json")) as f:
             self.assertEqual(json.load(f), {"mine": {"description": "Mine", "source": "custom"}})
         self.assertEqual(self.jev_cls.call_args.args[0], {"mine": {"description": "Mine", "source": "custom"}})

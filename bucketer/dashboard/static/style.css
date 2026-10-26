@@ -76,6 +76,6 @@ table.ov td,table.ov th{text-align:center;padding:4px 8px}table.ov th.rh{text-al
 select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:6px 10px;border-radius:6px;font:inherit}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.filters input{margin:0}
 .pager{display:flex;gap:8px;align-items:center;margin:8px 0}.pager .more{margin:0}.pager .more:disabled{opacity:.4;cursor:default}
-.tag{color:var(--muted)}.sorth{cursor:pointer}.sorth:focus-visible{outline:1px solid var(--blue)}
+.tag{color:var(--muted)}
 .note{padding:16px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);margin-top:16px}
 .chips .chip{cursor:default;margin:1px 4px 1px 0}.chip.other{color:var(--muted)}

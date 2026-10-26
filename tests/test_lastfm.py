@@ -178,7 +178,7 @@ class LastfmTest(Base):
                 return 200, {"error": 29, "message": "rate"}
             return 200, tags_resp(("rock", 100))
         self.script(fn)
-        status, tags = self.p._top_tags("artist.getTopTags", [("artist", "x")])
+        status, _tags = self.p._top_tags("artist.getTopTags", [("artist", "x")])
         self.assertEqual(status, lastfm.OK)
         self.assertEqual(self.sleeps, [2.0, 4.0])
 

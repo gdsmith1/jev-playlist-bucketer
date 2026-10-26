@@ -1,4 +1,5 @@
 import unittest
+from typing import ClassVar
 from unittest import mock
 
 from bucketer.dashboard import analysis as analysis_module
@@ -16,7 +17,7 @@ def pair(artist, album, album_tags=None, artist_tags=None, songs=1, cover="", da
 
 
 class QualityTest(unittest.TestCase):
-    PAIRS = [
+    PAIRS: ClassVar[list] = [
         pair("A", "1", album_tags=[("x", 100)], songs=4, cover="u"),
         pair("B", "2", artist_tags=[("x", 100)], songs=2),
         pair("C", "3", artist_tags=[("y", 100)], songs=5, cover="u"),

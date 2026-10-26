@@ -41,9 +41,9 @@ class ChooseTest(unittest.TestCase):
             checkpoint.choose_buckets(self.suggested, "nope")
 
     def test_no_terminal_and_no_select_exits(self):
-        with mock.patch.object(checkpoint, "interactive", return_value=False), mock.patch.object(checkpoint, "ask_checkbox") as ask:
-            with self.assertRaisesRegex(SystemExit, "--select"):
-                checkpoint.choose_buckets(self.suggested, None)
+        with mock.patch.object(checkpoint, "interactive", return_value=False), mock.patch.object(checkpoint, "ask_checkbox") as ask, \
+                self.assertRaisesRegex(SystemExit, "--select"):
+            checkpoint.choose_buckets(self.suggested, None)
         ask.assert_not_called()
 
     def test_prompt_choice_is_used(self):
@@ -55,9 +55,8 @@ class ChooseTest(unittest.TestCase):
     def test_ctrl_c_and_empty_selection_exit(self):
         for answer in (None, []):
             with mock.patch.object(checkpoint, "interactive", return_value=True), mock.patch.object(checkpoint, "ask_checkbox", return_value=answer), \
-                    mock.patch.object(checkpoint, "ask_text", return_value=""):
-                with self.assertRaisesRegex(SystemExit, "Nothing was sent to jev"):
-                    checkpoint.choose_buckets(self.suggested, None)
+                    mock.patch.object(checkpoint, "ask_text", return_value=""), self.assertRaisesRegex(SystemExit, "Nothing was sent to jev"):
+                checkpoint.choose_buckets(self.suggested, None)
 
     def test_no_suggestions_exits(self):
         with self.assertRaisesRegex(SystemExit, "No buckets selected"):
@@ -157,9 +156,9 @@ class ConfirmSpendTest(unittest.TestCase):
 
     def test_declined_or_cancelled_exits(self):
         for answer in (False, None):
-            with mock.patch.object(checkpoint, "interactive", return_value=True), mock.patch.object(checkpoint, "ask_confirm", return_value=answer):
-                with self.assertRaisesRegex(SystemExit, "Nothing was sent to jev"):
-                    self.run_confirm(self.jev(), ["a"])
+            with mock.patch.object(checkpoint, "interactive", return_value=True), mock.patch.object(checkpoint, "ask_confirm", return_value=answer), \
+                    self.assertRaisesRegex(SystemExit, "Nothing was sent to jev"):
+                self.run_confirm(self.jev(), ["a"])
 
     def test_no_terminal_needs_yes(self):
         with mock.patch.object(checkpoint, "interactive", return_value=False), mock.patch.object(checkpoint, "ask_confirm") as ask:
