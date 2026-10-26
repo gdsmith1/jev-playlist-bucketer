@@ -2,6 +2,7 @@ import unittest
 
 from bucketer.names import artist_candidates, clean_album, is_unknown_album, primary_artist
 
+
 class NameCleaningTest(unittest.TestCase):
     def test_primary_artist(self):
         self.assertEqual(primary_artist("Filter; The Crystal Method"), "Filter")

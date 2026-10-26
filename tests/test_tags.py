@@ -52,3 +52,27 @@ class CleanTagsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoiseFilterTest(unittest.TestCase):
+    def test_drops_instrument_era_and_praise_tags_but_keeps_genres(self):
+        self.assertEqual(self.names("guitar", "guitar hero", "classic", "oldies", "headbangers ball", "fucking brilliant", "10 out of 10",
+                                    "need to listen", "music i love", "taught me to grow", "when we were younger and our hair was shorter",
+                                    "new wave of british heavy metal", "guitar virtuoso", "stoner rock"),
+                         ["guitar virtuoso", "new wave of british heavy metal", "stoner rock"])
+
+    def names(self, *names):
+        return [t["name"] for t in clean_tags([tag(n, 50) for n in names], max_n=20)]
+
+    def test_drops_personal_listening_state_tags(self):
+        self.assertEqual(self.names("favourite albums", "Seen Live", "owned", "my collection", "vinyl", "albums i own",
+                                    "own on vinyl", "spotify", "wishlist", "doom"), ["doom"])
+
+    def test_drops_ratings_recommendations_junk_and_labels(self):
+        self.assertEqual(self.names("masterpiece", "k1r7m", "kaufekaufenkaufen", "pwnage", "9.00/10.00", "5 stars",
+                                    "recommended", "jb recommendation", "4ad", "relapse records", "1982 albums",
+                                    "best albums 2022", "nude on cover", "my gang 11", "grunge"), ["grunge"])
+
+    def test_keeps_genres_moods_and_places(self):
+        keep = ["british", "american", "usa", "swedish", "seattle", "energetic", "sad", "new wave", "sludge metal"]
+        self.assertEqual(sorted(self.names(*keep)), sorted(keep))

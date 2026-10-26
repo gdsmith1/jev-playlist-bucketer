@@ -75,5 +75,4 @@ def write_buckets(run_dir: str, header: str, bucket_lines: dict[str, list[str]])
             continue
         with open(os.path.join(run_dir, f"{key}.csv"), "w") as f:
             f.write(header + "\n")
-            for line in matched_lines:
-                f.write(line + "\n")
+            f.writelines(line + "\n" for line in matched_lines)

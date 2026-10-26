@@ -4,6 +4,7 @@ import unittest
 
 from bucketer.cache import JsonCache
 
+
 class JsonCacheTest(unittest.TestCase):
     def test_roundtrip_and_missing_file(self):
         with tempfile.TemporaryDirectory() as d:

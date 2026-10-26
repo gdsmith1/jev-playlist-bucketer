@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genre Dashboard</title>
+<style>
+/*CSS*/
+</style></head><body><main>
+<h1>Genre Dashboard</h1><div class="sub">Built from Last.fm tags; the recommendations involve no jev. Click any tag for its Last.fm description (when it has one).</div>
+<div class="stats" id="stats"></div>
+<div role="tablist" aria-label="Dashboard sections" class="tabs" id="tabs">
+<button role="tab" type="button" id="tab-recommended" aria-controls="panel-recommended" data-tab="recommended">Recommended buckets</button>
+<button role="tab" type="button" id="tab-selected" aria-controls="panel-selected" data-tab="selected">Selected buckets</button>
+<button role="tab" type="button" id="tab-playlist" aria-controls="panel-playlist" data-tab="playlist">Full playlist</button></div>
+<section role="tabpanel" id="panel-recommended" aria-labelledby="tab-recommended" tabindex="0">
+<h2>Suggested buckets</h2><div class="sub">Tags that tend to appear on the same albums, biggest first. A starting point, not a final answer.</div><div class="cards" id="clusters"></div>
+<h2>Bucket sizes and coverage</h2><div class="sub" id="covsub"></div><div class="stack" id="covstack"></div><div class="legend" id="covlegend"></div><div id="covbars"></div>
+<label class="sub"><input type="checkbox" id="bord"> show borderline albums only (top two fits within 10 points)</label><div class="scroll" id="bordwrap"><table><tbody id="bordbody"></tbody></table></div>
+<div class="drill" id="bucketdrill" hidden></div>
+<h2>Top tags</h2><div id="tags"></div>
+<h2>Tag overlap</h2><div class="sub">Share of albums two tags have in common (Jaccard, shown as a percentage in each cell; brighter = more overlap, on the fixed scale below). Umbrella tags are left out.</div>
+<div class="scroll" style="padding:8px"><table class="hm" id="heat"></table></div><div class="legend" id="heatlegend"></div>
+<h2>Outliers</h2><div class="sub" id="outsub"></div>
+<input id="q" placeholder="filter artist, album or tag" aria-label="filter outliers">
+<div class="scroll"><table><thead><tr id="oh"></tr></thead><tbody id="ob"></tbody></table></div>
+<button class="more" id="zerotoggle" aria-expanded="false"></button>
+<div class="scroll" id="zerobox" hidden><table><tbody id="oz"></tbody></table></div>
+<h2>All albums</h2><div class="sub">Every album in the run. Click a row (or press Enter) for its tags, fit to each bucket and similar artists.</div>
+<input id="aq" placeholder="search artist, album or tag" aria-label="search all albums"><div class="scroll" id="allalbums"></div>
+<div id="detail"></div>
+</section>
+<section role="tabpanel" id="panel-selected" aria-labelledby="tab-selected" tabindex="0" hidden></section>
+<section role="tabpanel" id="panel-playlist" aria-labelledby="tab-playlist" tabindex="0" hidden></section>
+<script>
+/*JS*/
+</script></main></body></html>

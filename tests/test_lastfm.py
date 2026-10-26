@@ -118,9 +118,8 @@ class CoverTest(Base):
 
 class LastfmTest(Base):
     def test_missing_key(self):
-        with mock.patch.dict(os.environ, {}, clear=True):
-            with self.assertRaises(SystemExit):
-                LastfmClient(cache_dir=self.tmp.name)
+        with mock.patch.dict(os.environ, {}, clear=True), self.assertRaises(SystemExit):
+            LastfmClient(cache_dir=self.tmp.name)
 
     def test_full_fetch_and_tag_cleanup(self):
         def fn(p):
@@ -179,7 +178,7 @@ class LastfmTest(Base):
                 return 200, {"error": 29, "message": "rate"}
             return 200, tags_resp(("rock", 100))
         self.script(fn)
-        status, tags = self.p._top_tags("artist.getTopTags", [("artist", "x")])
+        status, _tags = self.p._top_tags("artist.getTopTags", [("artist", "x")])
         self.assertEqual(status, lastfm.OK)
         self.assertEqual(self.sleeps, [2.0, 4.0])
 
@@ -264,3 +263,59 @@ class GetJsonTest(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SimilarFullTest(Base):
+    def seed(self):
+        self.p.cache.section("artist")["kyuss"] = {"tags": [], "extras": {"similar_artists": ["a"]}}
+
+    def similar_resp(self):
+        return {"similarartists": {"artist": [{"name": "Fu Manchu", "match": "0.9"}, {"name": "Unida", "match": "0.5"}]}}
+
+    def test_old_entry_upgraded_once(self):
+        self.seed()
+        self.script(lambda p: (200, self.similar_resp()))
+        expected = [{"name": "Fu Manchu", "match": 0.9}, {"name": "Unida", "match": 0.5}]
+        self.assertEqual(self.p.similar_artists("Kyuss"), expected)
+        self.assertEqual(self.p.similar_artists("Kyuss"), expected)
+        self.assertEqual(self.methods(), ["artist.getSimilar"])
+        self.assertEqual(self.p.cache.section("artist")["kyuss"]["extras"]["similar_artists"], ["a"])
+
+    def test_error_not_cached(self):
+        self.seed()
+        self.script(lambda p: (500, None))
+        self.assertEqual(self.p.similar_artists("Kyuss"), [])
+        self.assertNotIn("similar_full", self.p.cache.section("artist")["kyuss"]["extras"])
+
+    def test_not_found_remembered_as_empty(self):
+        self.seed()
+        self.script(lambda p: (200, {"error": 6, "message": "no"}))
+        self.assertEqual(self.p.similar_artists("Kyuss"), [])
+        self.assertEqual(self.p.cache.section("artist")["kyuss"]["extras"]["similar_full"], [])
+
+    def test_unknown_artist_makes_no_call(self):
+        self.script(lambda p: (200, self.similar_resp()))
+        self.assertEqual(self.p.similar_artists("Nobody"), [])
+        self.assertEqual(self.calls, [])
+
+
+class FetchSimilarTest(Base):
+    def script_all(self):
+        def answer(p):
+            if p["method"] == "artist.getSimilar":
+                return 200, {"similarartists": {"artist": [{"name": "Unida", "match": "0.5"}]}}
+            if p["method"].endswith("getTopTags"):
+                return 200, tags_resp(("stoner rock", 100))
+            return 200, info_resp()
+        self.script(answer)
+
+    def test_fetch_without_flag_makes_no_similar_call(self):
+        self.script_all()
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").similar_full, [])
+        self.assertNotIn("artist.getSimilar", self.methods())
+
+    def test_fetch_with_flag_returns_and_caches_similar(self):
+        self.script_all()
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch", similar=True).similar_full, [{"name": "Unida", "match": 0.5}])
+        self.assertEqual(self.p.fetch("Kyuss", "Wretch").similar_full, [{"name": "Unida", "match": 0.5}])
+        self.assertEqual(self.methods().count("artist.getSimilar"), 1)
