@@ -71,7 +71,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
  {const m=keys.map(a=>keys.map(b=>recs.filter(r=>r.jev.matched.includes(a)&&r.jev.matched.includes(b)).length));
   const tbl=el("table",{className:"ov"},el("thead",{},el("tr",{},el("th"),...keys.map(k=>el("th",{textContent:k,scope:"col"})))),
    el("tbody",{},...keys.map((a,i)=>el("tr",{},el("th",{className:"rh",textContent:a,scope:"row"}),...keys.map((b,j)=>{const td=el("td",{textContent:m[i][j],className:i==j?"d":"",title:a+" and "+b+": "+m[i][j]+" albums"});
-    if(i!=j){const a=m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j]));td.style.background=ramp(a);if(a>.55)td.classList.add("hot")}return td})))));
+    if(i!=j){const a=m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j]));td.style.background=ramp(a);if(a>.72)td.classList.add("hot")}return td})))));
   sec.append(el("div",{className:"scroll",style:"padding:8px"},tbl))}
 
  h2("What fell into other","Biggest albums and artists that reached no bucket, with their best-scoring bucket: a score just under "+T+" means a near-miss.");

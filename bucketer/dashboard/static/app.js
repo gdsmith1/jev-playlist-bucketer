@@ -7,3 +7,10 @@ function show(tag){const i=D.info[tag];const d=$("detail");d.style.display="bloc
 function art(url,title,cls){if(!url)return el("span",{className:"ph",textContent:"♪",title:title||"no cover on Last.fm"});
  const i=el("img",{src:url,alt:title||"",title:title||"",loading:"lazy",referrerPolicy:"no-referrer"});i.onerror=()=>i.replaceWith(el("span",{className:"ph",textContent:"♪",title:"cover failed to load"}));return i}
 function chip(t){return el("button",{className:"chip",textContent:t,onclick:()=>show(t),title:D.info[t]?D.info[t].summary:""})}
+
+{const root=document.documentElement,btn=$("decortoggle");
+ const get=()=>{try{return localStorage.getItem("decor")}catch(e){return null}},set=v=>{try{localStorage.setItem("decor",v)}catch(e){}};
+ const apply=off=>{if(off)root.setAttribute("data-decor","off");else root.removeAttribute("data-decor");btn.textContent="Scenery: "+(off?"off":"on");btn.setAttribute("aria-pressed",!off)};
+ apply(get()=="off");btn.onclick=()=>{const off=root.getAttribute("data-decor")!="off";apply(off);set(off?"off":"on")};
+ const pause=()=>{if(document.hidden||scrollY>innerHeight*2)root.setAttribute("data-paused","");else root.removeAttribute("data-paused")};
+ document.addEventListener("visibilitychange",pause);addEventListener("scroll",pause,{passive:true})}

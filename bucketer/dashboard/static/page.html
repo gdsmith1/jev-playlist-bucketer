@@ -1,15 +1,18 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Genre Dashboard</title>
+<link rel="icon" href="data:,">
 <style>
 /*CSS*/
 </style></head><body>
 <!-- SCENE: Frutiger Aero background. Hooks for later motifs (dolphin, water, dandelion, leaf): add elements inside .scene (behind content) or .scene-front (over content). Styled in the "scene" block of style.css. -->
-<div class="scene" aria-hidden="true"><i class="rays"></i><i class="sun"></i><i class="horizon"></i><i class="hills"></i><i class="bub" style="--s:220px;--x:8%;--y:12%;--d:7s"></i><i class="bub" style="--s:120px;--x:88%;--y:30%;--d:8s"></i><i class="bub" style="--s:60px;--x:6%;--y:58%;--d:9s"></i><i class="bub" style="--s:34px;--x:22%;--y:24%;--d:10s"></i><i class="bub" style="--s:90px;--x:93%;--y:72%;--d:11s"></i><i class="bub" style="--s:18px;--x:70%;--y:10%;--d:12s"></i><i class="bub" style="--s:150px;--x:40%;--y:80%;--d:13s"></i><i class="bub" style="--s:44px;--x:60%;--y:88%;--d:14s"></i></div>
+<div class="scene" aria-hidden="true"><i class="rays"></i><i class="sun"></i><i class="horizon"></i><i class="streak"></i><i class="flare" style="--fx:22%;--fy:24%;--fs:40px;--fc:rgba(160,255,200,.9)"></i><i class="flare" style="--fx:30%;--fy:31%;--fs:70px;--fc:rgba(255,240,150,.8)"></i><i class="flare" style="--fx:41%;--fy:40%;--fs:28px;--fc:rgba(150,220,255,.9)"></i><i class="flare" style="--fx:52%;--fy:49%;--fs:90px;--fc:rgba(255,200,230,.6)"></i><i class="hills"></i><i class="bub" style="--s:220px;--x:8%;--y:12%;--d:7s"></i><i class="bub" style="--s:120px;--x:88%;--y:30%;--d:8s"></i><i class="bub" style="--s:60px;--x:6%;--y:58%;--d:9s"></i><i class="bub" style="--s:34px;--x:22%;--y:24%;--d:10s"></i><i class="bub" style="--s:90px;--x:93%;--y:72%;--d:11s"></i><i class="bub" style="--s:18px;--x:70%;--y:10%;--d:12s"></i><i class="bub" style="--s:150px;--x:40%;--y:80%;--d:13s"></i><i class="bub" style="--s:44px;--x:60%;--y:88%;--d:14s"></i></div>
 <!-- DECOR: see "decor" block in style.css -->
-<div class="decor" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="dand d1"></i><i class="dand d2"></i><i class="dand d3"></i><i class="dand d4"></i><i class="dand d5"></i><i class="wave w1"></i><i class="wave w2"></i><i class="wave w3"></i><i class="fish f1"></i><i class="fish f2"></i><i class="fish f3"></i><i class="leaf lf1"></i><i class="leaf lf2"></i><i class="dolphin"></i></div>
-<div class="scene-front" aria-hidden="true"><i class="bub keep" style="--s:24px;--x:52%;--y:46%;--d:16s"></i><i class="bub keep" style="--s:70px;--x:16%;--y:86%;--d:17s"></i><i class="bub" style="--s:14px;--x:82%;--y:52%;--d:18s"></i><i class="bub" style="--s:40px;--x:96%;--y:14%;--d:19s"></i></div>
+<div class="decor" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="dand d1"></i><i class="dand d2"></i><i class="dand d3"></i><i class="dand d4"></i><i class="dand d5"></i><i class="seed s1"></i><i class="seed s2"></i><i class="seed s3"></i><i class="seed s4"></i><i class="seed s5"></i><i class="seed s6"></i><i class="deep"></i><i class="wave w1"></i><i class="fish f1"></i><i class="fish f2"></i><i class="wave w2"></i><i class="fish f3"></i><i class="caustic"></i><i class="wave w3"></i><i class="leaf lf3"></i><i class="leaf lf1"></i><i class="leaf lf2"></i></div>
+<div class="dwrap" aria-hidden="true"><i class="splash sp1"></i><i class="splash sp2"></i><i class="dolphin"></i><i class="bub" style="--s:14px;--x:36%;--y:78%;--d:99s"></i><i class="bub" style="--s:10px;--x:58%;--y:76%;--d:99s"></i><i class="bub" style="--s:18px;--x:44%;--y:84%;--d:99s"></i><i class="bub" style="--s:12px;--x:70%;--y:80%;--d:99s"></i><i class="bub" style="--s:9px;--x:40%;--y:70%;--d:99s"></i><i class="bub" style="--s:16px;--x:62%;--y:86%;--d:99s"></i></div>
+<div class="scene-front" aria-hidden="true"><i class="bub keep" style="--s:24px;--x:2%;--y:46%;--d:16s"></i><i class="bub keep" style="--s:40px;--x:3%;--y:86%;--d:17s"></i><i class="bub keep" style="--s:14px;--x:98%;--y:52%;--d:18s"></i><i class="bub keep" style="--s:34px;--x:96%;--y:14%;--d:19s"></i></div>
 <main>
+<button class="btn" type="button" id="decortoggle" aria-pressed="true">Scenery: on</button>
 <h1>Genre Dashboard</h1><div class="sub">Built from Last.fm tags; the recommendations involve no jev. Click any tag for its Last.fm description (when it has one).</div>
 <div class="stats" id="stats"></div>
 <div role="tablist" aria-label="Dashboard sections" class="tabs" id="tabs">
@@ -17,7 +20,7 @@
 <button role="tab" type="button" id="tab-selected" aria-controls="panel-selected" data-tab="selected">Selected buckets</button>
 <button role="tab" type="button" id="tab-playlist" aria-controls="panel-playlist" data-tab="playlist">Full playlist</button></div>
 <section role="tabpanel" id="panel-recommended" aria-labelledby="tab-recommended" tabindex="0">
-<h2>Suggested buckets</h2><div class="sub">Tags that tend to appear on the same albums, biggest first. A starting point, not a final answer.</div><div class="cards" id="clusters"></div>
+<h2>Suggested buckets</h2><div class="sub">Tags that tend to appear on the same albums, biggest first. A starting point, not a final answer. Each card's orb colour is the bucket's colour in the charts below.</div><div class="cards" id="clusters"></div>
 <h2>Bucket sizes and coverage</h2><div class="sub" id="covsub"></div><div class="stack" id="covstack"></div><div class="legend" id="covlegend"></div><div id="covbars"></div>
 <label class="sub"><input type="checkbox" id="bord"> show borderline albums only (top two fits within 10 points)</label><div class="scroll" id="bordwrap"><table><tbody id="bordbody"></tbody></table></div>
 <div class="drill" id="bucketdrill" hidden></div>
