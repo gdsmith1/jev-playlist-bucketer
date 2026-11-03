@@ -1,4 +1,4 @@
-const D=/*DATA*/null;const COLORS=["#a6e22e","#66d9ef","#f92672","#fd971f","#ae81ff","#e6db74"];
+const D=/*DATA*/null;const COLORS=["#4cc62f","#1fb5e0","#ff5c8a","#ffa31a","#8a7bf5","#d9a000"];
 const $=id=>document.getElementById(id);
 function el(tag,props,...kids){const e=document.createElement(tag);Object.assign(e,props||{});kids.forEach(k=>e.append(k));return e}
 function show(tag){const i=D.info[tag];const d=$("detail");d.style.display="block";d.replaceChildren(el("b",{},tag),i?el("span",{}," ("+i.reach.toLocaleString()+" listeners) "+i.summary):el("span",{className:"sub"}," no description on Last.fm"))}

@@ -22,12 +22,12 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
 
  h2("Songs per bucket","A song counts in every bucket its album reached, so bars can add up to more than the "+D.songs+" songs; other holds albums that reached none. Percent is of all songs.");
  const rows=J.buckets.map(b=>({label:b.key,value:b.songs,text:b.songs+" songs · "+sp(b.songs),color:colorOf(b.key)}));
- rows.push({label:"other",value:J.other.songs,text:J.other.songs+" songs · "+sp(J.other.songs),color:"#75715e"});
+ rows.push({label:"other",value:J.other.songs,text:J.other.songs+" songs · "+sp(J.other.songs),color:"#9db8c8"});
  sec.append(hbars(rows,"Songs per selected bucket and other"));
 
  h2("Albums by number of buckets matched");
  const mc=[0,0,0,0],ms=[0,0,0,0];recs.forEach(r=>{const n=Math.min(3,r.jev.matched.length);mc[n]++;ms[n]+=r.songs});
- sec.append(hbars(["0 (other)","1","2","3 or more"].map((l,i)=>({label:l,value:mc[i],text:mc[i]+" albums · "+ms[i]+" songs",color:i?["","#a6e22e","#66d9ef","#ae81ff"][i]:"#75715e"})),"Albums by number of buckets matched"));
+ sec.append(hbars(["0 (other)","1","2","3 or more"].map((l,i)=>({label:l,value:mc[i],text:mc[i]+" albums · "+ms[i]+" songs",color:i?["","#4cc62f","#1fb5e0","#8a7bf5"][i]:"#9db8c8"})),"Albums by number of buckets matched"));
 
  h2("Bucket cards");
  const cards=el("div",{className:"cards"});
@@ -44,7 +44,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
   mk(b.key,b.source,b.albums+" albums · "+b.songs+" songs",colorOf(b.key),body,b.source=="custom"?"custom":"")});
  {const body=el("div",{className:"more"},el("div",{className:"ex",textContent:"Albums that reached the threshold in no bucket."}),
    el("button",{className:"more",textContent:"Browse "+J.other.albums+" albums",onclick:()=>browse("other",recs.filter(isOther))}));
-  mk("other","fallback",unit(J.other),"#75715e",body)}
+  mk("other","fallback",unit(J.other),"#9db8c8",body)}
  sec.append(cards,drill);
 
  h2("Score distribution","Every album-bucket score from jev. The dashed line is the threshold; the orange bars sit within "+J.borderline_below+" below it, the near-misses.");
@@ -57,7 +57,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
   vals.forEach(v=>{bins[Math.min(n-1,Math.floor((v-lo)/STEP))]++});const top=Math.max(...bins);
   const hist=el("div",{className:"hist",role:"img","aria-label":"Histogram of "+vals.length+" scores, threshold "+T+", "+vals.filter(v=>v>=T-J.borderline_below&&v<T).length+" within "+J.borderline_below+" below it"});
   bins.forEach((c,i)=>{const a=lo+i*STEP,col=el("div",{className:"col",title:a.toFixed(2)+" to "+(a+STEP).toFixed(2)+": "+c+" scores"},el("span",{textContent:c||""}));
-   const bar=el("i");bar.style.height=(100*c/top*.85)+"%";bar.style.background=a>=T-1e-9?"#a6e22e":a>=T-J.borderline_below-1e-9?"#fd971f":"#75715e";col.append(bar);hist.append(col)});
+   const bar=el("i");bar.style.height=(100*c/top*.85)+"%";bar.style.background=a>=T-1e-9?"#4cc62f":a>=T-J.borderline_below-1e-9?"#ffa31a":"#9db8c8";col.append(bar);hist.append(col)});
   const line=el("div",{className:"thr"},el("span",{textContent:"threshold "+T}));line.style.left="calc(4px + (100% - 8px) * "+((T-lo)/(n*STEP))+")";hist.append(line);
   histBox.replaceChildren(hist,el("div",{className:"haxis"},...bins.map((c,i)=>el("span",{textContent:(lo+i*STEP).toFixed(2)}))))}
  sel.onchange=drawHist;drawHist();
