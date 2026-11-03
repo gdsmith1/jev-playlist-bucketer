@@ -1,4 +1,6 @@
-const D=/*DATA*/null;const COLORS=["#4cc62f","#1fb5e0","#ff5c8a","#ffa31a","#8a7bf5","#d9a000"];
+const D=/*DATA*/null;const COLORS=["#4cc62f","#1fb5e0","#ffb21a","#2f7fd8","#14b8a6","#a6d62f"];
+const RAMP=[[216,246,255],[52,180,236],[10,95,148]];
+function ramp(a){a=Math.max(0,Math.min(1,a));const s=a<.5?0:1,t=a<.5?a*2:(a-.5)*2;return "rgb("+RAMP[s].map((c,i)=>Math.round(c+(RAMP[s+1][i]-c)*t)).join(",")+")"}
 const $=id=>document.getElementById(id);
 function el(tag,props,...kids){const e=document.createElement(tag);Object.assign(e,props||{});kids.forEach(k=>e.append(k));return e}
 function show(tag){const i=D.info[tag];const d=$("detail");d.style.display="block";d.replaceChildren(el("b",{},tag),i?el("span",{}," ("+i.reach.toLocaleString()+" listeners) "+i.summary):el("span",{className:"sub"}," no description on Last.fm"))}

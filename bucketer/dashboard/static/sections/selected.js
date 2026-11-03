@@ -27,7 +27,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
 
  h2("Albums by number of buckets matched");
  const mc=[0,0,0,0],ms=[0,0,0,0];recs.forEach(r=>{const n=Math.min(3,r.jev.matched.length);mc[n]++;ms[n]+=r.songs});
- sec.append(hbars(["0 (other)","1","2","3 or more"].map((l,i)=>({label:l,value:mc[i],text:mc[i]+" albums · "+ms[i]+" songs",color:i?["","#4cc62f","#1fb5e0","#8a7bf5"][i]:"#9db8c8"})),"Albums by number of buckets matched"));
+ sec.append(hbars(["0 (other)","1","2","3 or more"].map((l,i)=>({label:l,value:mc[i],text:mc[i]+" albums · "+ms[i]+" songs",color:i?["","#4cc62f","#1fb5e0","#2f7fd8"][i]:"#9db8c8"})),"Albums by number of buckets matched"));
 
  h2("Bucket cards");
  const cards=el("div",{className:"cards"});
@@ -57,7 +57,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
   vals.forEach(v=>{bins[Math.min(n-1,Math.floor((v-lo)/STEP))]++});const top=Math.max(...bins);
   const hist=el("div",{className:"hist",role:"img","aria-label":"Histogram of "+vals.length+" scores, threshold "+T+", "+vals.filter(v=>v>=T-J.borderline_below&&v<T).length+" within "+J.borderline_below+" below it"});
   bins.forEach((c,i)=>{const a=lo+i*STEP,col=el("div",{className:"col",title:a.toFixed(2)+" to "+(a+STEP).toFixed(2)+": "+c+" scores"},el("span",{textContent:c||""}));
-   const bar=el("i");bar.style.height=(100*c/top*.85)+"%";bar.style.background=a>=T-1e-9?"#4cc62f":a>=T-J.borderline_below-1e-9?"#ffa31a":"#9db8c8";col.append(bar);hist.append(col)});
+   const bar=el("i");bar.style.height=(100*c/top*.85)+"%";bar.style.background=a>=T-1e-9?"#4cc62f":a>=T-J.borderline_below-1e-9?"#ffb21a":"#9db8c8";col.append(bar);hist.append(col)});
   const line=el("div",{className:"thr"},el("span",{textContent:"threshold "+T}));line.style.left="calc(4px + (100% - 8px) * "+((T-lo)/(n*STEP))+")";hist.append(line);
   histBox.replaceChildren(hist,el("div",{className:"haxis"},...bins.map((c,i)=>el("span",{textContent:(lo+i*STEP).toFixed(2)}))))}
  sel.onchange=drawHist;drawHist();
@@ -71,7 +71,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
  {const m=keys.map(a=>keys.map(b=>recs.filter(r=>r.jev.matched.includes(a)&&r.jev.matched.includes(b)).length));
   const tbl=el("table",{className:"ov"},el("thead",{},el("tr",{},el("th"),...keys.map(k=>el("th",{textContent:k,scope:"col"})))),
    el("tbody",{},...keys.map((a,i)=>el("tr",{},el("th",{className:"rh",textContent:a,scope:"row"}),...keys.map((b,j)=>{const td=el("td",{textContent:m[i][j],className:i==j?"d":"",title:a+" and "+b+": "+m[i][j]+" albums"});
-    if(i!=j){td.style.background="rgba(174,129,255,"+(.08+.8*m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j])))+")"}return td})))));
+    if(i!=j){const a=m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j]));td.style.background=ramp(a);if(a>.55)td.classList.add("hot")}return td})))));
   sec.append(el("div",{className:"scroll",style:"padding:8px"},tbl))}
 
  h2("What fell into other","Biggest albums and artists that reached no bucket, with their best-scoring bucket: a score just under "+T+" means a near-miss.");
