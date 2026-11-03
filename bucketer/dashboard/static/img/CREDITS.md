@@ -1,0 +1,17 @@
+# Image credits
+
+Photographic scenery in the dashboard. Everything here is public domain or CC0 (no attribution required, credited anyway), or generated from code. Sources are Wikimedia Commons file pages. Originals were cropped, background-removed (rembg `birefnet-general-lite`, plus manual mask repair for the clownfish) or colour-keyed, colour-graded and recompressed to WebP. The files in this folder are the processed results.
+
+| File here | Source file | Author | Licence |
+|---|---|---|---|
+| `dolphin.webp` | [Common bottlenose dolphin jumping.jpg](https://commons.wikimedia.org/wiki/File:Common_bottlenose_dolphin_jumping.jpg) | NOAA Fisheries | Public domain |
+| `clownfish.webp` | [Common clownfish.jpg](https://commons.wikimedia.org/wiki/File:Common_clownfish.jpg) | Janderk | Public domain |
+| `butterflyfish.webp` | [Chaetodon paucifasciatus 150452375.jpg](https://commons.wikimedia.org/wiki/File:Chaetodon_paucifasciatus_150452375.jpg) | Jean-Paul Boerekamps | CC0 |
+| `cloud1.webp`, `cloud2.webp`, `cloud3.webp` | [Bright blue sky with scenic white cloud patterns.jpg](https://commons.wikimedia.org/wiki/File:Bright_blue_sky_with_scenic_white_cloud_patterns.jpg) (colour-keyed off the blue sky) | Trixia Lao | CC0 |
+| `meadow.webp` | [Meadow full of daisies, Idstein.jpg](https://commons.wikimedia.org/wiki/File:Meadow_full_of_daisies,_Idstein.jpg) | Gerda Arendt | CC0 |
+| `water.webp` | [Bottlenose Dolphin Leap (43530653511).png](https://commons.wikimedia.org/wiki/File:Bottlenose_Dolphin_Leap_(43530653511).png) (turquoise sea, lower part only) | drytortugasnps (US National Park Service) | Public domain |
+| `dandelion.webp` | [Dandelion seeds close-up.jpg](https://commons.wikimedia.org/wiki/File:Dandelion_seeds_close-up.jpg) (luminance-keyed off the dark background) | Oleksandr K | CC0 |
+| `leaf.webp` | [Droplets on a maple leaf (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Droplets_on_a_maple_leaf_(Unsplash).jpg) | Sander Smeekes | CC0 |
+| `bubble_clear.webp`, `bubble_rainbow.webp` | Rendered procedurally (thin-film colour, specular highlights); no source photo | this repo | n/a |
+
+Licence status was read from each file's Commons page metadata when downloaded. Re-check the file page if you need to rely on it.

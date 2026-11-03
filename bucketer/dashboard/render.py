@@ -1,7 +1,9 @@
 """Assembles dashboard.html from the static page, stylesheet and section scripts, with the analysis embedded as JSON."""
 
+import base64
 import json
 import os
+import re
 from collections.abc import Callable
 from pathlib import Path
 
@@ -16,10 +18,23 @@ def _read(relative: str) -> str:
     return (STATIC / relative).read_text(encoding="utf-8")
 
 
+IMG_URL = re.compile(r"url\(img/([A-Za-z0-9_.-]+)\)")
+IMG_TYPES = {".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+
+
+def inline_images(css: str) -> str:
+    """Replace each `url(img/<file>)` with a base64 data URI so the dashboard stays a single self-contained file."""
+    def embed(match: re.Match) -> str:
+        path = STATIC / "img" / match.group(1)
+        mime = IMG_TYPES[path.suffix.lower()]
+        return f"url(data:{mime};base64,{base64.b64encode(path.read_bytes()).decode('ascii')})"
+    return IMG_URL.sub(embed, css)
+
+
 def render(analysis: dict, tag_info: dict[str, dict]) -> str:
     data = json.dumps({**analysis, "info": tag_info}, ensure_ascii=False).replace("</", "<\\/")
     script = "\n".join([_read("app.js")] + [_read(f"sections/{name}.js") for name in SECTIONS])
-    page = _read("page.html").replace("/*CSS*/", _read("style.css")).replace("/*JS*/", script)
+    page = _read("page.html").replace("/*CSS*/", inline_images(_read("style.css"))).replace("/*JS*/", script)
     return page.replace("/*DATA*/null", data)
 
 
