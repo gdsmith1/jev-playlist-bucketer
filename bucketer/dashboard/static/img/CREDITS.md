@@ -17,7 +17,7 @@ The dashboard scenery is photographic cutouts from Wikimedia Commons (public dom
 | `aero_earth.webp` | Blue Marble Western Hemisphere.jpg | NASA / Reto Stöckli (Terra MODIS) | Public domain | circular mask, shadow lift, saturation boost |
 | `aero_butterfly.webp` | Monarch Butterfly.(Danaus plexippus) (14256022010).jpg | Bernard Spragg | CC0 | rembg, saturation boost |
 | `aero_bird.webp` | Black Tern flying (7402338502).jpg (a tern, not a gull) | U.S. Fish and Wildlife Service, Northeast Region | Public domain | rembg |
-| `aero_turtle.webp` | HIHWNMS green sea turtle (49040305018).jpg | NOAA National Marine Sanctuaries | Public domain | rembg, brightened |
-| `aero_jellyfish.webp` | Purple striped jellyfish, Pelagia panopyra, MBNMS.jpg | Kip Evans (NOAA) | Public domain | rembg |
-
-| `aero_grass_tuft.webp`, `aero_leaf_fronds.webp` | none (generated) | n/a | n/a | generated procedurally (numpy/scipy/Pillow), no third-party imagery |
+| `aero_grass_tuft.webp` | none (generated) | n/a | n/a | generated procedurally (numpy/scipy/Pillow), no third-party imagery |
+| `aero_splash.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
+| `aero_splash_lip.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
+| `aero_splash_drops.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
