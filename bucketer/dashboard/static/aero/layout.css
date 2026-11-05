@@ -47,7 +47,8 @@ th,td{padding:3px 8px}
 
 /* "Scenery: on" glossy switch: same button, id and aria-pressed; the track is drawn with
    pseudo-elements because app.js rewrites the button text */
-#decortoggle{position:absolute;right:0;top:10px;z-index:30;display:inline-flex;align-items:center;padding:5px 14px 5px 58px;border-radius:999px;color:var(--navy,#0b3a5a);font-size:13px;min-height:32px}
+:root{--muted:#27526b}
+button#decortoggle{position:absolute;right:0;top:10px;z-index:30;display:inline-flex;align-items:center;padding:5px 14px 5px 62px;text-shadow:none;border-radius:999px;color:var(--navy,#0b3a5a);font-size:13px;min-height:32px}
 #decortoggle::before{content:"";position:absolute;left:8px;top:50%;margin-top:-11px;width:42px;height:22px;border-radius:999px;background:linear-gradient(#7d8d9b,#b6c3ce);box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
 #decortoggle::after{content:"";position:absolute;left:10px;top:50%;margin-top:-9px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff,#dbe6ee 60%,#9fb0bd);box-shadow:0 2px 3px rgba(0,0,0,.4);transition:transform .25s}
 #decortoggle[aria-pressed=true]::before{background:linear-gradient(#27b34a,var(--aero-neon-green,#7dff3a));box-shadow:inset 0 2px 4px rgba(0,60,0,.4),inset 0 7px 0 rgba(255,255,255,.28)}
@@ -60,7 +61,7 @@ th,td{padding:3px 8px}
  .cards{grid-template-columns:1fr}
  [role=tabpanel]{margin-top:clamp(28px,10vh,110px)}
  .scene .bub:nth-child(n+16),.decor .d2,.decor .clown2{display:block}
- #decortoggle{position:relative;right:auto;top:auto}
+ button#decortoggle{position:relative;right:auto;top:auto}
 }
 @media (prefers-contrast:more){
  .card,.drill,.simrec,.decs,.scroll,.note,#detail{box-shadow:none}
