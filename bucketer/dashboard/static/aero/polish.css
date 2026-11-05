@@ -28,3 +28,28 @@ main::after{right:auto;left:466px;top:40px}
 
 /* phones: tab bar wraps instead of forcing sideways scroll */
 @media (max-width:640px){.tabs{display:flex;flex-wrap:wrap;gap:6px;border-radius:22px}.tabs [role=tab]{flex:1 1 auto;min-width:0;padding-left:12px;padding-right:12px}.stats{max-width:100%}.decs{max-width:100%;overflow-x:auto}}
+
+/* orb: reflected-light crescent along the lower-right edge */
+.card::before{box-shadow:0 2px 5px rgba(8,70,120,.5),inset 0 -4px 6px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.35),inset -3px -4px 4px -2px rgba(255,255,255,.65)}
+
+/* bezels: rivets on the chrome bars */
+.stats#stats,.tabs{background-image:radial-gradient(circle at 50% 50%,#fff 0 1px,#8493a6 2px 3px,transparent 4px),radial-gradient(circle at 50% 50%,#fff 0 1px,#8493a6 2px 3px,transparent 4px),var(--ui-chrome);background-repeat:no-repeat,no-repeat,no-repeat;background-size:9px 9px,9px 9px,auto;background-position:left 3px center,right 3px center,0 0}
+.stats#stats,.tabs{position:relative}
+
+/* stickers in the empty right-hand end of the two chrome bars: glass lens + CD on the tab bar, recycle bin + music note on the stats bar */
+.tabs::before,.tabs::after,.stats#stats::before,.stats#stats::after{content:"";position:absolute;pointer-events:none;top:50%}
+.tabs::after{right:22px;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:radial-gradient(circle at 34% 26%,#fff 0 7%,rgba(255,255,255,0) 22%),radial-gradient(circle at 50% 50%,#bfe6ff 0 18%,#2a8ee8 45%,#0a4fb0 78%,#06306e 100%);box-shadow:0 0 0 3px #d9e2ec,0 0 0 4px #6b7c90,0 3px 6px rgba(0,40,100,.45)}
+.tabs::before{right:76px;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:radial-gradient(circle,#e8eef4 0 9%,#6b7c90 10% 13%,transparent 14%),conic-gradient(from 20deg,#ff9ad5,#9ad8ff,#fff6a0,#a8ffb8,#ff9ad5);box-shadow:0 0 0 1px #8493a6,0 3px 6px rgba(0,40,100,.4),inset 0 0 6px rgba(255,255,255,.8)}
+.stats#stats::after{right:28px;width:34px;height:40px;margin-top:-20px;background:linear-gradient(90deg,#6fe03a,#c8ff8a 40%,#3aa51a);clip-path:polygon(0 18%,100% 18%,88% 100%,12% 100%);filter:drop-shadow(0 3px 3px rgba(0,60,20,.45))}
+.stats#stats::before{right:92px;margin-top:-22px;width:30px;height:44px;content:"\266B";font:700 38px/44px "Segoe UI Symbol","Apple Symbols",serif;text-align:center;color:transparent;background:linear-gradient(180deg,#5cb8ff 0%,#1a6fd8 50%,#0a3f94 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 2px rgba(0,40,110,.5))}
+@media (max-width:900px){.tabs::before,.tabs::after,.stats#stats::before,.stats#stats::after{display:none}}
+@media (forced-colors:active),(prefers-contrast:more){.tabs::before,.tabs::after,.stats#stats::before,.stats#stats::after{display:none}}
+
+/* phone title sits on the dome: dark halo so the white-blue letters read */
+@media (max-width:640px){h1{text-shadow:0 0 6px rgba(0,40,120,.9),0 2px 3px rgba(0,30,90,.8)}}
+
+/* legend lines under charts sit on scenery: same readable backing as intro text */
+main>.legend,section>.legend{display:block;width:fit-content;max-width:100%;padding:5px 12px;border-radius:12px;color:#0b2a5c;background:rgba(238,249,255,.85);box-shadow:0 2px 6px rgba(0,60,130,.18)}
+
+/* high contrast: stat tiles solid dark with plain white numbers and labels; no title stickers */
+@media (prefers-contrast:more){.stats .stat{background:#001233!important;color:#fff!important;border-color:#fff}.stats .stat b,.stats .stat span{-webkit-text-fill-color:#fff;background:none;color:#fff!important;text-shadow:none;filter:none}main::before,main::after{display:none}}
