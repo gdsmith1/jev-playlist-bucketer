@@ -1,1 +1,19 @@
-/* aero lane: hero (owned by one agent; see z-index map at top of style.css) */
+/* lane: hero. Fixed top-right scene: glass dome with skyline + meadow, neon Earth, palm frond with droplets,
+   horizon skyline, animated airliner. z-index band 1. */
+.hero-scene{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;filter:var(--aero-grade,saturate(1.15))}
+.hero-skyline{position:absolute;left:0;right:0;bottom:0;width:100%;height:clamp(90px,16vh,190px);opacity:.9}
+.hero-frond{position:absolute;top:calc(-1 * clamp(10px,2vw,30px));right:calc(-1 * clamp(10px,2vw,30px));width:clamp(170px,30vw,460px);height:auto;transform-origin:100% 0;animation:hero-sway 7s ease-in-out infinite alternate;filter:drop-shadow(0 4px 6px rgba(0,80,40,.35))}
+.hero-earth{position:absolute;top:clamp(150px,23vw,370px);right:clamp(120px,22vw,360px);width:clamp(90px,13vw,210px);aspect-ratio:1;background:url(img/hero-earth.webp) center/contain no-repeat;filter:drop-shadow(0 6px 14px rgba(10,60,140,.45));animation:hero-float 9s ease-in-out infinite alternate}
+.hero-earth::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.55),rgba(255,255,255,0) 38%),radial-gradient(circle at 70% 78%,rgba(0,40,120,.35),rgba(0,0,0,0) 55%)}
+.hero-bubble{position:absolute;top:clamp(28px,5vw,80px);right:clamp(36px,8vw,150px);width:clamp(150px,22vw,340px);aspect-ratio:1;border-radius:50%;animation:hero-float 8s ease-in-out infinite alternate-reverse}
+.hero-dome{position:absolute;inset:3%;border-radius:50%;overflow:hidden;background:#9fdcff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.hero-dome-art{position:absolute;inset:0;width:100%;height:100%}
+.hero-refl{position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse 80% 60% at 50% 115%,rgba(120,255,60,.35),rgba(120,255,60,0) 65%),linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 45%)}
+.hero-rim{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 60%,rgba(190,240,255,.35) 80%,rgba(255,255,255,.9) 96%,rgba(255,255,255,.4) 100%);box-shadow:0 10px 30px rgba(20,90,180,.35),inset 0 -8px 18px rgba(80,200,255,.55),inset 0 0 0 1px rgba(255,255,255,.85)}
+.hero-spec{position:absolute;left:16%;top:7%;width:46%;height:28%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.05));transform:rotate(-24deg)}
+.hero-plane{position:absolute;top:clamp(70px,14vh,140px);left:-140px;width:clamp(70px,9vw,130px);height:auto;filter:drop-shadow(0 3px 4px rgba(0,60,120,.3));animation:hero-fly 48s linear infinite}
+@keyframes hero-fly{0%{transform:translate(0,12px) rotate(-3deg)}100%{transform:translate(calc(100vw + 300px),-50px) rotate(-3deg)}}
+@keyframes hero-float{from{transform:translateY(0)}to{transform:translateY(8px)}}
+@keyframes hero-sway{from{transform:rotate(-1.5deg)}to{transform:rotate(1.8deg)}}
+@media (prefers-reduced-motion:reduce){.hero-scene *{animation:none!important}.hero-plane{left:12%}}
+@media (prefers-contrast:more),(forced-colors:active){.hero-scene{display:none}}
