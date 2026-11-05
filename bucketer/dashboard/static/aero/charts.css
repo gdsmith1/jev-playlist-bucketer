@@ -24,26 +24,23 @@ div:has(>.hist) .hist{border:0;border-bottom:1px solid var(--ch-rim);padding:16p
 #covbars .fill.small{background-color:var(--ch-orange);box-shadow:0 0 10px rgba(255,154,31,.7)}
 #tags .bar.umb{opacity:1}#tags .bar.umb .fill{background-color:var(--ch-yellow);box-shadow:0 0 10px rgba(255,233,46,.7)}
 .meter i,.fitbar i{background-color:var(--ch-lime);box-shadow:0 0 8px rgba(157,255,46,.7)}
-/* top-edge highlight on every fill */
-.bar .fill::after,.hbar .track i::after{content:"";position:absolute;left:6px;right:6px;top:2px;height:28%;border-radius:999px;background:rgba(255,255,255,.7);pointer-events:none}
 /* hbar fills keep their inline legend colour */
 .hbar .track i{box-shadow:0 0 9px 1px rgba(255,255,255,.35)}
 
 /* ---- decades and score histograms ---- */
 .dbar i,.hist .col i{position:relative;border-radius:6px 6px 0 0;background-image:linear-gradient(90deg,rgba(255,255,255,.45) 0,rgba(255,255,255,0) 40%,rgba(0,0,0,.18) 100%);box-shadow:0 0 8px rgba(255,255,255,.3)}
 .dbar i{background-color:var(--ch-orange);box-shadow:0 0 9px rgba(255,154,31,.75)}
-.dbar i::after,.hist .col i::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:6px 6px 0 0;background:rgba(255,255,255,.85)}
 .daxis{border-top-color:var(--ch-rim)}
 .decrow+.decrow{border-top:1px solid rgba(130,225,255,.18);padding-top:6px}
 
 /* ---- heatmap on dark glass: aqua ramp ---- */
 .scroll:has(>table.hm){padding:8px}
-table.hm td{background:rgba(25,230,255,var(--a));color:#fff;text-shadow:0 1px 2px rgba(0,20,50,.8);border-radius:3px}
-table.hm td.hot{color:#00162e;text-shadow:none}
-table.hm td.self{background:rgba(255,255,255,.14)}
+table.hm td{color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 2px rgba(0,20,50,.8);border-radius:3px}
+table.hm td.hot{color:#000;text-shadow:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+table.hm td.self{background:rgba(255,255,255,.14);box-shadow:none}
 table.hm th,table.hm th.rh{color:var(--ch-cyan);background:#07224a}
 table.hm th[tabindex]:hover,table.hm th[tabindex]:focus-visible{color:#fff;outline-color:var(--ch-lime)}
-.hmscale i{background:linear-gradient(90deg,rgba(25,230,255,.08),var(--ch-cyan));box-shadow:0 0 0 1px var(--ch-rim)}
+.hmscale i{background:linear-gradient(90deg,#0a2854,#1eb9eb,#96faff);box-shadow:0 0 0 1px var(--ch-rim)}
 
 /* ---- glossy coverage pill (grey, green, cyan) ---- */
 .stack{position:relative;height:30px;padding:3px;border-radius:999px;background:var(--ch-track);border:1px solid var(--ch-rim);box-shadow:inset 0 2px 5px rgba(0,0,0,.6),0 2px 8px rgba(0,40,100,.3);overflow:hidden}
@@ -58,29 +55,29 @@ table.hm th[tabindex]:hover,table.hm th[tabindex]:focus-visible{color:#fff;outli
 .bar:hover .fill,.hbar:hover .track i,.meter:hover i,.fitbar:hover i{filter:brightness(1.18) saturate(1.2);box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 16px 3px rgba(25,230,255,.85)}
 #covbars .bar:hover .fill{box-shadow:0 0 0 1px #fff,0 0 16px 3px rgba(157,255,46,.9)}
 .dbar:hover i,.hist .col:hover i{filter:brightness(1.2);box-shadow:0 0 0 1px #fff,0 0 14px 3px rgba(255,255,255,.7)}
-.bar .fill::before,.hbar .track i::before,.dbar i::before,.hist .col i::before{content:"";position:absolute;right:2px;top:50%;width:5px;height:5px;margin-top:-3px;border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(circle at 35% 30%,#fff,rgba(255,255,255,.35) 60%,rgba(255,255,255,0) 70%);box-shadow:-9px -7px 0 -1px rgba(255,255,255,.7),-17px 6px 0 -2px rgba(255,255,255,.6),6px -9px 0 -1px rgba(255,255,255,.7),12px 5px 0 -2px rgba(255,255,255,.6)}
-.dbar i::before,.hist .col i::before{right:auto;left:50%;top:0;margin-left:-3px}
+.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{content:"";position:absolute;right:2px;top:50%;width:5px;height:5px;margin-top:-3px;border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(circle at 35% 30%,#fff,rgba(255,255,255,.35) 60%,rgba(255,255,255,0) 70%);box-shadow:-9px -7px 0 -1px rgba(255,255,255,.7),-17px 6px 0 -2px rgba(255,255,255,.6),6px -9px 0 -1px rgba(255,255,255,.7),12px 5px 0 -2px rgba(255,255,255,.6)}
+.dbar i::after,.hist .col i::after{right:auto;left:50%;top:0;margin-left:-3px}
 @keyframes ch-burst{0%{opacity:0;transform:translateY(4px) scale(.5)}25%{opacity:1}100%{opacity:0;transform:translateY(-14px) scale(1.3)}}
-.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::before,.hist .col:hover i::before{animation:ch-burst .9s ease-out 1}
+.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::after,.hist .col:hover i::after{animation:ch-burst .9s ease-out 1}
 
 /* ---- accessibility modes ---- */
-@media (prefers-reduced-motion:reduce){.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::before,.hist .col:hover i::before{animation:none}.bar .fill,.hbar .track i{transition:none}}
+@media (prefers-reduced-motion:reduce){.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::after,.hist .col:hover i::after{animation:none}.bar .fill,.hbar .track i{transition:none}}
 @media (prefers-reduced-transparency:reduce){#covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar){background:#06214a}}
 @media (prefers-contrast:more){
  #covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar),.scroll:has(>table.hm){background:#001233;border:2px solid #fff;box-shadow:none}
  .bar>div:nth-child(2),.hbar .track,.meter,.fitbar{background:#000;box-shadow:0 0 0 2px #fff}
- .bar>div:nth-child(2)::after,.hbar .track::after,.bar .fill::after,.hbar .track i::after,.dbar i::after,.hist .col i::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::before,.hist .col i::before{display:none}
+ .bar>div:nth-child(2)::after,.hbar .track::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{display:none}
  .bar .fill,.hbar .track i,.meter i,.fitbar i,.dbar i,.hist .col i,.stack div{background-image:none;box-shadow:none;filter:none}
  #tags .fill{background-color:#00e5ff}#tags .bar.umb .fill{background-color:#ffe600}#covbars .fill{background-color:#7dff00}#covbars .fill.small{background-color:#ff8c00}.dbar i{background-color:#ffb000}
  .stack{background:#000;border:2px solid #fff;box-shadow:none}
  .stack div:nth-child(1){background:#bbb!important}.stack div:nth-child(2){background:#7dff00!important}.stack div:nth-child(3){background:#00e5ff!important}
  .bar:hover .fill,.hbar:hover .track i{box-shadow:0 0 0 2px #fff}
- table.hm td{background:rgba(0,229,255,var(--a));color:#fff;text-shadow:none}table.hm td.hot{color:#000}
+ table.hm td{text-shadow:none;box-shadow:none}
 }
 @media (forced-colors:active){
  #covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar),.scroll:has(>table.hm){background:Canvas;border:1px solid CanvasText;box-shadow:none}
  .bar>div:nth-child(2),.hbar .track,.meter,.fitbar{background:Canvas;border:1px solid CanvasText;box-shadow:none}
- .bar>div:nth-child(2)::after,.hbar .track::after,.bar .fill::after,.hbar .track i::after,.dbar i::after,.hist .col i::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::before,.hist .col i::before{display:none}
+ .bar>div:nth-child(2)::after,.hbar .track::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{display:none}
  .bar .fill,.hbar .track i,.meter i,.fitbar i,.dbar i,.hist .col i{background:Highlight;forced-color-adjust:none;box-shadow:none;filter:none}
  .stack{border:1px solid CanvasText;background:Canvas;box-shadow:none}.stack div{box-shadow:none;border-right:1px solid CanvasText}
  .stack div:nth-child(1){background:GrayText!important}.stack div:nth-child(2){background:Highlight!important}.stack div:nth-child(3){background:LinkText!important}

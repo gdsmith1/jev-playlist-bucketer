@@ -1,5 +1,5 @@
 const D=/*DATA*/null;const COLORS=["#4cc62f","#1fb5e0","#ffb21a","#2f7fd8","#14b8a6","#a6d62f"];
-const RAMP=[[216,246,255],[52,180,236],[10,95,148]];
+const RAMP=[[10,40,84],[30,185,235],[150,250,255]];
 function ramp(a){a=Math.max(0,Math.min(1,a));const s=a<.5?0:1,t=a<.5?a*2:(a-.5)*2;return "rgb("+RAMP[s].map((c,i)=>Math.round(c+(RAMP[s+1][i]-c)*t)).join(",")+")"}
 const $=id=>document.getElementById(id);
 function el(tag,props,...kids){const e=document.createElement(tag);Object.assign(e,props||{});kids.forEach(k=>e.append(k));return e}
