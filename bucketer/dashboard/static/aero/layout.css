@@ -1,1 +1,69 @@
-/* aero lane: layout (owned by one agent; see z-index map at top of style.css) */
+/* ===== aero/layout: spacing, open header, depth, parallax, toggle (lane 6) ===== */
+:root{--aero-gap:30px}
+main{padding-top:clamp(16px,6vh,70px);padding-bottom:26vh}
+
+/* top ~40%: title, stats and tabs sit directly on the sky, no slab */
+h1{margin-top:0;position:relative}
+main>.sub{max-width:62ch}
+.stats{gap:10px 24px;margin:12px 0 6px}
+.stat{background:none;border:0;outline:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tabs{margin-top:10px}
+/* open sky before the first card */
+[role=tabpanel]{margin-top:clamp(40px,17vh,190px);padding-top:0}
+
+/* smaller cards, wider gaps so the scene reads between them */
+.cards{gap:var(--aero-gap);grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.card{padding:10px 12px 9px 48px}
+.drill,.simrec,.decs{padding:8px 11px}
+h2{margin:46px 0 8px}
+.scroll,.stack{margin-bottom:var(--aero-gap)}
+th,td{padding:3px 8px}
+.card,.drill,.simrec,.decs,.scroll,.note,#detail{box-shadow:0 12px 24px rgba(8,60,110,.26),0 2px 5px rgba(8,60,110,.2)}
+
+/* depth: floating objects get soft shadows */
+.scene .cloud,.scene .bub,.decor .fish,.decor .leaf,.decor .dand,.dwrap .dolphin,.scene-front .bub{filter:drop-shadow(0 10px 12px rgba(8,60,110,.28))}
+
+/* foreground layer: above cards, never blocks clicks. Other lanes may add .aero-fg-obj children
+   or use .scene-front; .corner nudges an object onto a card corner */
+.scene-front,.aero-fg{z-index:20;pointer-events:none}
+.aero-fg-obj{position:absolute;pointer-events:none;z-index:20;filter:drop-shadow(0 12px 14px rgba(8,60,110,.32))}
+.aero-fg-obj.corner{top:-18px;right:-18px}
+.card.open,.card:hover{z-index:2}
+
+/* parallax: three depths, CSS only, progressive enhancement */
+@supports (animation-timeline:scroll()){
+ @media (prefers-reduced-motion:no-preference){
+  @keyframes aero-par-sky{to{transform:translateY(-4vh)}}
+  @keyframes aero-par-mid{to{transform:translateY(-12vh)}}
+  @keyframes aero-par-fg{to{transform:translateY(-30vh)}}
+  .scene{animation:aero-par-sky linear both;animation-timeline:scroll(root)}
+  .decor,.dwrap{animation:aero-par-mid linear both;animation-timeline:scroll(root)}
+  .scene-front,.aero-fg{animation:aero-par-fg linear both;animation-timeline:scroll(root)}
+ }
+}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+/* "Scenery: on" glossy switch: same button, id and aria-pressed; the track is drawn with
+   pseudo-elements because app.js rewrites the button text */
+#decortoggle{position:absolute;right:0;top:10px;z-index:30;display:inline-flex;align-items:center;padding:5px 14px 5px 58px;border-radius:999px;color:var(--navy,#0b3a5a);font-size:13px;min-height:32px}
+#decortoggle::before{content:"";position:absolute;left:8px;top:50%;margin-top:-11px;width:42px;height:22px;border-radius:999px;background:linear-gradient(#7d8d9b,#b6c3ce);box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
+#decortoggle::after{content:"";position:absolute;left:10px;top:50%;margin-top:-9px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff,#dbe6ee 60%,#9fb0bd);box-shadow:0 2px 3px rgba(0,0,0,.4);transition:transform .25s}
+#decortoggle[aria-pressed=true]::before{background:linear-gradient(#27b34a,var(--aero-neon-green,#7dff3a));box-shadow:inset 0 2px 4px rgba(0,60,0,.4),inset 0 7px 0 rgba(255,255,255,.28)}
+#decortoggle[aria-pressed=true]::after{transform:translateX(20px)}
+
+/* mobile: scenery scales down, it is not removed (overrides style.css rules that hide it) */
+@media (max-width:900px){.scene .rays,.scene .flare,.scene .streak{display:block}}
+@media (max-width:640px){
+ :root{--aero-gap:18px}
+ .cards{grid-template-columns:1fr}
+ [role=tabpanel]{margin-top:clamp(28px,10vh,110px)}
+ .scene .bub:nth-child(n+16),.decor .d2,.decor .clown2{display:block}
+ #decortoggle{position:relative;right:auto;top:auto}
+}
+@media (prefers-contrast:more){
+ .card,.drill,.simrec,.decs,.scroll,.note,#detail{box-shadow:none}
+ .scene-front,.aero-fg{display:none}
+}
+@media (forced-colors:active){.aero-fg,.aero-fg-obj{display:none}}
