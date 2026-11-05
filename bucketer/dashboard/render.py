@@ -11,6 +11,8 @@ from ..models import Enrichment, Group
 from .analysis import analyze
 
 STATIC = Path(__file__).parent / "static"
+LANES = ["sky", "hero", "bubbles", "water", "animals", "layout", "ui", "charts"]  # stylesheet order after style.css; later lanes win ties
+SCENE_LANES = ["sky", "hero", "water", "animals", "bubbles"]  # each has aero/<lane>.html injected at <!--SCENE:<lane>-->
 SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar", "selected", "playlist", "tabs"]  # page order; each file draws one section
 
 
@@ -34,7 +36,10 @@ def inline_images(css: str) -> str:
 def render(analysis: dict, tag_info: dict[str, dict]) -> str:
     data = json.dumps({**analysis, "info": tag_info}, ensure_ascii=False).replace("</", "<\\/")
     script = "\n".join([_read("app.js")] + [_read(f"sections/{name}.js") for name in SECTIONS])
-    page = _read("page.html").replace("/*CSS*/", inline_images(_read("style.css"))).replace("/*JS*/", script)
+    css = "\n".join([_read("style.css")] + [_read(f"aero/{name}.css") for name in LANES])
+    page = _read("page.html").replace("/*CSS*/", inline_images(css)).replace("/*JS*/", script)
+    for name in SCENE_LANES:
+        page = page.replace(f"<!--SCENE:{name}-->", _read(f"aero/{name}.html"))
     return page.replace("/*DATA*/null", data)
 
 

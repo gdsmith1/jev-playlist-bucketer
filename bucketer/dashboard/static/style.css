@@ -1,3 +1,4 @@
+/* z-index map for scene layers (fixed, pointer-events:none): sky 0, hero 1, water 2, animals 3, bubbles 4; page content (main) 10; foreground decor above content 20. Per-lane styles live in aero/<lane>.css, appended after this file by render.py. */
 :root{--bg:#bfe8fb;--panel:rgba(255,255,255,.55);--line:rgba(255,255,255,.85);--edge:rgba(60,140,190,.35);--fg:#12384f;--muted:#4f7891;--pink:#d6336c;--green:#2e9e1f;--blue:#0c78bd;--orange:#d9780a;--purple:#6a55d8;--yellow:#9a6d00;--shadow:0 6px 18px rgba(20,100,160,.22)}
 *{box-sizing:border-box}body{margin:0;padding:0 16px 48px;background:var(--bg);color:var(--fg);font:14px/1.5 ui-monospace,Menlo,Consolas,monospace}
 main{max-width:1100px;margin:0 auto}h1{color:var(--green);font-size:20px;margin:24px 0 4px}h2{color:var(--pink);font-size:16px;margin:32px 0 8px}
@@ -84,7 +85,7 @@ select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padd
 html,body{margin:0}
 html{min-height:100%;background:linear-gradient(180deg,#3fb0ee 0%,#8fdcf8 42%,#d6f5ff 74%,#aee9b8 100%) fixed}
 body{padding:0 16px 56px;background:none;font-family:"Frutiger LT","Segoe UI","Myriad Pro","Lucida Grande","Helvetica Neue","Trebuchet MS",sans-serif;font-size:14px;color:var(--fg);min-height:100vh;position:relative}
-main{position:relative;z-index:1}
+main{position:relative;z-index:10}
 
 /* ===== scene: fixed background layers (rays, sun, horizon, hills, bubbles). Add dolphin/water/dandelion/leaf motifs here. ===== */
 .scene,.scene-front{position:fixed;inset:0;pointer-events:none;overflow:hidden}

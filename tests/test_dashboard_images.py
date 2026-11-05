@@ -19,7 +19,7 @@ class InlineImagesTest(unittest.TestCase):
             inline_images("a{background:url(img/nope.webp)}")
 
     def test_every_referenced_image_exists_and_is_used_once(self):
-        css = (STATIC / "style.css").read_text(encoding="utf-8")
+        css = "".join(path.read_text(encoding="utf-8") for path in [STATIC / "style.css", *sorted((STATIC / "aero").glob("*.css"))])
         names = re.findall(r"url\(img/([\w.-]+)\)", css)
         self.assertEqual(len(names), len(set(names)))  # each image inlined once, not per selector
         for name in names:
@@ -39,3 +39,10 @@ class InlineImagesTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LaneAssemblyTest(unittest.TestCase):
+    def test_render_leaves_no_placeholders(self):
+        html = render(analyze([]), {})
+        self.assertNotIn("<!--SCENE:", html)
+        self.assertNotIn("url(img/", html)
