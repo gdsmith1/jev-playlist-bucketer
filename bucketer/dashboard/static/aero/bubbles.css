@@ -1,31 +1,24 @@
-/* lane: bubbles (back z4, front z20). Glass bubble recipe: 5-15% white fill, 1.5px white rim, crisp top-left specular crescent (::after), soft lower-right refraction glow (background), iridescent fringe (::before). Big ones show an inverted grass/sky reflection. Wisps are ring-only glitter bubbles. Layers are masked to the side margins so nothing crosses card edges or table rows. */
-.aero-bub-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;-webkit-mask-image:var(--aero-mask);mask-image:var(--aero-mask)}
+/* lane: bubbles (back z4, front z20). Refractive spheres: thin dark inner rim + white outer rim, hot specular dot top-left, warm inner bottom glow, faint inverted green/blue reflection. Thin-film rainbow only on .irid; giants (.xl) hold a mini hill-and-sky scene. They rise with a horizontal wobble and pop (scale up + fade) near the top. */
+.aero-bub-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 .aero-bub-back{z-index:4}
 .aero-bub-front{z-index:20}
-.aero-bub{position:absolute;left:var(--x);bottom:calc(var(--s) * -1.2);width:var(--s);height:var(--s);border-radius:50%;display:block;
-  background:radial-gradient(circle at 74% 80%,rgba(150,232,255,.5) 0,rgba(150,232,255,0) 36%),radial-gradient(circle,rgba(255,255,255,.04) 50%,rgba(255,255,255,.14) 100%);
-  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.9),inset 0 0 calc(var(--s) * .06) rgba(255,255,255,.5),0 0 calc(var(--s) * .08) rgba(120,220,255,.35);
-  animation:aero-rise var(--d,40s) linear var(--dl,0s) infinite,aero-wobble 5.5s ease-in-out var(--dl,0s) infinite alternate;will-change:transform}
-.aero-bub::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,#ff6ad5,#ffd36a,#7dff8f,#5fe6ff,#6a8bff,#c76aff,#ff6ad5);-webkit-mask:radial-gradient(farthest-side,transparent 84%,#000 92%,transparent 100%);mask:radial-gradient(farthest-side,transparent 84%,#000 92%,transparent 100%);opacity:.6;mix-blend-mode:screen}
-.aero-bub::after{content:"";position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle at 57% 57%,transparent 0 66%,#fff 68%);-webkit-mask-image:linear-gradient(135deg,#000 0,#000 30%,transparent 52%);mask-image:linear-gradient(135deg,#000 0,#000 30%,transparent 52%)}
-.aero-bub-md{opacity:.92}
-/* big bubbles: inverted reflection (grass hills up top, sky beneath) */
-.aero-refl{position:absolute;inset:7%;border-radius:50%;overflow:hidden;opacity:.5;display:block;transform:scaleY(-1);
-  background:radial-gradient(ellipse 70% 26% at 28% 100%,#3dae2b 0 96%,transparent),radial-gradient(ellipse 80% 20% at 84% 100%,#7cd233 0 96%,transparent),linear-gradient(to top,#bfe6f5,#3a9be8 70%,#1a73d9)}
-.aero-refl::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,0) 55%,rgba(255,255,255,.5) 100%)}
-.aero-bub-blur{filter:blur(2.5px)}
-/* wisps: ring only, glittery rim, no fill */
-.aero-bub-wisp{background:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.8),0 0 5px rgba(255,255,255,.75);opacity:.85}
-.aero-bub-wisp::after{display:none}.aero-bub-wisp::before{opacity:.35}
-/* four-point sparkle on a bubble edge */
-.aero-st{position:absolute;left:var(--l);top:var(--t);width:var(--sz);height:var(--sz);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);z-index:1}
-/* underwater clusters rise a short way and fade */
-.aero-bub-water{bottom:-2%;animation:aero-water var(--d,10s) ease-out var(--dl,0s) infinite,aero-wobble 2.2s ease-in-out var(--dl,0s) infinite alternate}
-@keyframes aero-rise{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--dx,0),calc(-100vh - var(--s) * 2.4),0)}}
-@keyframes aero-water{0%{transform:translate3d(0,0,0);opacity:0}10%{opacity:.9}100%{transform:translate3d(var(--dx,0),-30vh,0);opacity:0}}
-@keyframes aero-wobble{from{translate:-8px 0}to{translate:8px 0}}
+.aero-bub{position:absolute;left:var(--x);bottom:calc(var(--s) * -1.3);width:var(--s);height:var(--s);border-radius:50%;display:block;font-style:normal;
+ background:radial-gradient(circle at 50% 104%,rgba(255,240,180,.6) 0,rgba(255,240,180,0) 40%),linear-gradient(0deg,rgba(61,220,30,.2),rgba(0,180,230,.12) 36%,transparent 56%),radial-gradient(circle,rgba(255,255,255,0) 54%,rgba(255,255,255,.16) 82%,rgba(255,255,255,.5) 97%);
+ box-shadow:0 0 0 1px rgba(255,255,255,.75),inset 0 0 0 1px rgba(8,50,110,.4),inset 0 0 calc(var(--s) * .07) rgba(255,255,255,.55),0 0 calc(var(--s) * .1) rgba(120,220,255,.3);
+ animation:aero-rise var(--d,40s) linear var(--dl,0s) infinite,aero-pop var(--d,40s) linear var(--dl,0s) infinite,aero-wobble 5.5s ease-in-out var(--dl,0s) infinite alternate;will-change:transform}
+/* hot specular dot + soft streak, top-left */
+.aero-bub::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 29% 25%,#fff 0,#fff 3.2%,rgba(255,255,255,0) 7.5%),radial-gradient(ellipse 24% 9% at 34% 17%,rgba(255,255,255,.75),rgba(255,255,255,0) 100%),radial-gradient(ellipse 8% 22% at 80% 66%,rgba(255,255,255,.4),rgba(255,255,255,0) 100%)}
+.aero-bub.sm::after{background:radial-gradient(circle at 30% 28%,#fff 0,#fff 16%,rgba(255,255,255,0) 40%)}
+/* thin-film rainbow rim, only on a few */
+.aero-bub.irid::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,#ff6ad5,#ffd36a,#7dff8f,#5fe6ff,#6a8bff,#c76aff,#ff6ad5);-webkit-mask:radial-gradient(farthest-side,transparent 86%,#000 94%,transparent 100%);mask:radial-gradient(farthest-side,transparent 86%,#000 94%,transparent 100%);opacity:.65;mix-blend-mode:screen}
+/* giant bubbles: mini scene (sun, hills, sky) seen through the sphere */
+.aero-mini{position:absolute;inset:5%;border-radius:50%;overflow:hidden;opacity:.8;
+ background:radial-gradient(ellipse 80% 38% at 28% 96%,#3ddc1e 0 62%,transparent 64%),radial-gradient(ellipse 90% 44% at 82% 104%,#27a812 0 62%,transparent 64%),radial-gradient(circle at 72% 26%,#fff6c0 0 4%,rgba(255,240,170,.4) 8%,transparent 12%),linear-gradient(180deg,#1d7fe0,#7fd0f5 66%,#d6f3ff)}
+.aero-mini::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0) 52%,rgba(255,255,255,.55) 100%)}
+@keyframes aero-rise{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--dx,0),calc(-100vh + 6vh - var(--s) * .2),0)}}
+@keyframes aero-pop{0%,94%{scale:1;opacity:1}98%{scale:1.22;opacity:.7}100%{scale:1.4;opacity:0}}
+@keyframes aero-wobble{from{translate:-9px 0}to{translate:9px 0}}
 html[data-decor=off] .aero-bub-layer{display:none}
 html[data-paused] .aero-bub-layer *{animation-play-state:paused!important}
-@media (max-width:900px){.aero-bub-front,.aero-bub-xl,.aero-bub-md{display:none}}
-@media (prefers-reduced-motion:reduce){.aero-bub{animation:none;bottom:auto;top:calc(8% + var(--x) * 3)}.aero-bub-water{display:none}}
+@media (prefers-reduced-motion:reduce){.aero-bub{animation:none;bottom:auto;top:calc(8% + var(--x) * 3)}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-bub-layer{display:none}}

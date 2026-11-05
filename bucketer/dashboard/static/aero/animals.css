@@ -1,54 +1,73 @@
-/* aero lane: animals. One layer (z20) masked to the side margins so animals never cover cards or table rows; they pass "behind" the column.
-   Facing: dolphin + clownfish photos face LEFT (travel left), moorish idol + goldfish face RIGHT. Never reverse a travel direction against facing. */
-.aero-animals-front{position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden;-webkit-mask-image:var(--aero-mask);mask-image:var(--aero-mask);--dw:clamp(110px,calc((100vw - 1100px) / 2 - 30px),260px)}
-.aero-animals-front i{display:block;font-style:normal}
+/* lane: animals (z20, so they pass "behind" the card column). Facing: dolphin, clownfish, turtle photos face LEFT; moorish idol, goldfish, butterfly face RIGHT; jellyfish bell right. Underwater swimmers live between the dock (62px) and the waterline (--aw-h). Dolphins break the surface at the crest line, with a splash crown (ring + droplet fan) timed to the leap; the second dolphin is the same markup mirrored, offset by half a cycle. */
+.aero-animals-front{position:fixed;inset:0;z-index:8;pointer-events:none;overflow:hidden;--dw:clamp(190px,calc((100vw - 1100px) / 2 + 70px),400px);
+ --ai-dol:url(img/aero_dolphin_leap.webp);--ai-clown:url(img/aero_clownfish_big.webp);--ai-idol:url(img/aero_moorish_idol.webp);--ai-gold:url(img/aero_goldfish.webp);--ai-turtle:url(img/aero_turtle.webp);--ai-jelly:url(img/aero_jellyfish.webp);--ai-bf:url(img/aero_butterfly.webp)}
+.aero-animals-front i,.aero-animals-front b{display:block;font-style:normal}
 .aero-img{display:block;width:100%;height:100%;background-repeat:no-repeat;background-position:center;background-size:contain}
-/* photos (high-res sources, downsized by CSS so they stay crisp on retina) */
-.aero-animals-front{--ai-dol:url(img/aero_dolphin_leap.webp);--ai-clown:url(img/aero_clownfish_big.webp);--ai-idol:url(img/aero_moorish_idol.webp);--ai-gold:url(img/aero_goldfish.webp)}
-.aero-dol{background-image:var(--ai-dol)}
-.aero-clown{background-image:var(--ai-clown)}
-.aero-idol{background-image:var(--ai-idol)}
-.aero-gold{background-image:var(--ai-gold)}
+.aero-dol{background-image:var(--ai-dol)}.aero-clown{background-image:var(--ai-clown)}.aero-idol{background-image:var(--ai-idol)}.aero-gold{background-image:var(--ai-gold)}.aero-turtle{background-image:var(--ai-turtle)}
 .aero-big .aero-img,.aero-dolphin .aero-img,.aero-gold{filter:saturate(1.35) contrast(1.06) drop-shadow(0 0 1.5px #fff) drop-shadow(0 7px 6px rgba(4,60,120,.4))}
+/* underwater swimmers get a cyan caustic cast and a soft contact shadow on the seabed */
+.aero-big .aero-img{filter:saturate(1.35) contrast(1.05) drop-shadow(0 0 7px rgba(0,230,255,.55)) drop-shadow(0 5px 5px rgba(0,50,110,.35))}
 
-/* ---- fish: swim under the waterline (bottom band), one clownfish and one moorish idol, never repeated at other sizes ---- */
 .aero-big{position:absolute;left:0}
+.aero-big::after{content:"";position:absolute;left:12%;right:12%;bottom:-12%;height:12%;border-radius:50%;background:rgba(0,30,90,.35);filter:blur(5px)}
 .aero-big .aero-bob{width:100%;height:100%;animation:aero-bob 6s ease-in-out infinite alternate}
-.aero-idol-a{bottom:13vh;width:clamp(90px,10vw,150px);aspect-ratio:473/404;translate:-260px 0;animation:aero-swim-r 95s linear -30s infinite}
-.aero-clown-a{bottom:5vh;width:clamp(84px,9vw,136px);aspect-ratio:900/523;translate:calc(100vw + 40px) 0;animation:aero-swim-l 80s linear -22s infinite}
+/* tail wag: skew pivoting at the head (fish facing left pivot left, facing right pivot right) */
+.aero-big .aero-img{animation:aero-wag .55s ease-in-out infinite alternate;transform-origin:var(--ph,20%) 50%}
+.aero-idol-a{--ph:80%;bottom:calc(var(--dock) + 30px);width:clamp(130px,12vw,210px);aspect-ratio:700/538;translate:-260px 0;animation:aero-swim-r 95s linear -30s infinite}
+.aero-clown-a{--ph:20%;bottom:calc(var(--dock) + 8px);width:clamp(120px,13vw,200px);aspect-ratio:700/413;translate:calc(100vw + 40px) 0;animation:aero-swim-l 80s linear -22s infinite}
 .aero-clown-a .aero-bob{animation-duration:7s;animation-delay:-2s}
+.aero-turtle-a{--ph:30%;bottom:calc(var(--dock) + 12px);width:clamp(120px,9.5vw,170px);aspect-ratio:700/757;translate:calc(100vw + 40px) 0;animation:aero-swim-l 130s linear -75s infinite}
+.aero-turtle-a .aero-img{animation-duration:2.4s}
+.aero-turtle-a .aero-bob{animation-duration:9s}
 
-/* ---- goldfish in a glass bubble ---- */
-.aero-bubblefish{position:absolute;right:clamp(8px,calc((100vw - 1100px) / 2 - 150px),40px);top:34vh;width:clamp(96px,calc((100vw - 1100px) / 2 - 20px),176px);aspect-ratio:1}
+/* jellyfish: bell up, pulsing + bobbing, right margin underwater */
+.aero-jelly{position:absolute;right:calc(var(--dw) * .55);bottom:calc(var(--dock) + 52px);width:64px;height:112px}
+.aero-jbob{width:100%;height:100%;animation:aero-jb 7s ease-in-out infinite alternate}
+.aero-jimg{position:absolute;left:50%;top:50%;width:112px;height:60px;margin:-30px 0 0 -56px;rotate:-82deg;background:var(--ai-jelly) no-repeat center/contain;filter:saturate(1.3) drop-shadow(0 0 8px rgba(190,120,255,.6));opacity:.92;animation:aero-jp 2.6s ease-in-out infinite}
+@keyframes aero-jb{from{transform:translateY(8px)}to{transform:translateY(-26px)}}
+@keyframes aero-jp{0%,100%{scale:1 1}50%{scale:1.1 .86}}
+
+/* butterfly: wandering flutter path in the left margin, wing flap via scaleX */
+.aero-bf{position:absolute;left:clamp(60px,10vw,200px);top:34vh;width:84px;aspect-ratio:700/502;animation:aero-bfpath 22s ease-in-out infinite alternate}
+.aero-bfp{width:100%;height:100%;animation:aero-bfbob 1.1s ease-in-out infinite alternate}
+.aero-bfw{width:100%;height:100%;background:var(--ai-bf) no-repeat center/contain;filter:saturate(1.3) drop-shadow(0 5px 4px rgba(0,50,100,.3));animation:aero-flap .2s ease-in-out infinite alternate}
+@keyframes aero-bfpath{0%{translate:0 0;rotate:-6deg}25%{translate:90px -90px;rotate:10deg}50%{translate:20px -170px;rotate:-12deg}75%{translate:110px -60px;rotate:8deg}100%{translate:30px 90px;rotate:-4deg}}
+@keyframes aero-bfbob{to{transform:translateY(-10px)}}
+@keyframes aero-flap{from{transform:scaleX(1)}to{transform:scaleX(.5)}}
+
+/* goldfish in a glass bubble */
+.aero-bubblefish{position:absolute;left:clamp(8px,2vw,40px);top:44vh;width:clamp(120px,11vw,200px);aspect-ratio:1}
 .aero-gbub{position:relative;width:100%;height:100%;border-radius:50%;animation:aero-bubfloat 7s ease-in-out infinite alternate;
  background:radial-gradient(circle at 74% 80%,rgba(150,232,255,.5) 0,rgba(150,232,255,0) 38%),rgba(255,255,255,.1);
- box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.9),inset 0 0 18px rgba(255,255,255,.4),0 10px 18px rgba(10,80,150,.25)}
-.aero-gbub::before{content:"";position:absolute;inset:5%;border-radius:50%;background:radial-gradient(circle at 57% 57%,transparent 0 66%,#fff 68%);-webkit-mask-image:linear-gradient(135deg,#000 0,#000 30%,transparent 52%);mask-image:linear-gradient(135deg,#000 0,#000 30%,transparent 52%)}
-.aero-gbub .aero-gold{position:absolute;left:23%;top:28%;width:54%;height:44%;animation:aero-gswim 5.5s ease-in-out infinite alternate}
+ box-shadow:0 0 0 1px rgba(255,255,255,.75),inset 0 0 0 1px rgba(8,50,110,.35),inset 0 0 18px rgba(255,255,255,.4),0 10px 18px rgba(10,80,150,.25)}
+.aero-gbub::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 29% 25%,#fff 0,#fff 3%,rgba(255,255,255,0) 7%),radial-gradient(ellipse 24% 9% at 34% 17%,rgba(255,255,255,.75),rgba(255,255,255,0) 100%)}
+.aero-gbub .aero-gold{position:absolute;left:21%;top:28%;width:58%;height:44%;animation:aero-gswim 5.5s ease-in-out infinite alternate}
 
-/* ---- leaping dolphin (right-middle), splash at exit and entry, arc of droplets ---- */
-.aero-leap{position:absolute;right:clamp(4px,calc((100vw - 1100px) / 2 - 150px),30px);bottom:clamp(40px,9vh,100px);width:calc(var(--dw)*1.5);height:0}
+/* leaping dolphins at the crest line, splash crown at exit and entry */
+.aero-leap{position:absolute;right:-10px;bottom:calc(var(--aw-h) - 34px);width:calc(var(--dw)*1.5);height:0}
+.aero-leap.d2{right:auto;left:-10px;scale:-1 1}
 .aero-leapclip{pointer-events:none;position:absolute;left:0;right:0;bottom:0;height:calc(var(--dw)*2);overflow:hidden}
-.aero-dolphin{position:absolute;right:0;bottom:0;width:var(--dw);aspect-ratio:860/548;translate:0 0;animation:aero-leap-x 12s linear infinite}
-.aero-dolphin .aero-img{animation:aero-leap-y 12s infinite;transform:translateY(130%)}
+.aero-dolphin{position:absolute;right:0;bottom:0;width:var(--dw);aspect-ratio:700/450;translate:0 0;animation:aero-leap-x 12s linear var(--off,0s) infinite}
+.aero-dolphin .aero-img{animation:aero-leap-y 12s var(--off,0s) infinite;transform:translateY(130%)}
 .aero-foam{position:absolute;bottom:calc(var(--dw)*-.07);width:calc(var(--dw)*.9);height:calc(var(--dw)*.24);margin-left:calc(var(--dw)*-.45);border-radius:50%;opacity:0;
  background:radial-gradient(ellipse 50% 55% at 50% 55%,rgba(255,255,255,.98) 0,rgba(255,255,255,.85) 38%,rgba(210,242,255,.5) 66%,rgba(255,255,255,0) 100%);
  filter:drop-shadow(0 0 5px rgba(255,255,255,.9));transform-origin:50% 80%}
-.aero-foam-a{left:72%;animation:aero-foam 12s ease-out infinite;animation-delay:.6s}
-.aero-foam-b{left:38%;animation:aero-foam 12s ease-out infinite;animation-delay:5.6s}
+/* crown: expanding ring + fan of droplets */
+.aero-foam::before{content:"";position:absolute;inset:-18% -14% auto;height:90%;border-radius:50%;border:2.5px solid rgba(255,255,255,.95);box-shadow:0 0 6px rgba(255,255,255,.8)}
+.aero-foam::after{content:"";position:absolute;left:8%;right:8%;bottom:55%;height:150%;background:radial-gradient(circle at 10% 70%,#fff 0 5%,transparent 6%),radial-gradient(circle at 26% 38%,#fff 0 6%,transparent 7%),radial-gradient(circle at 42% 18%,#fff 0 5%,transparent 6%),radial-gradient(circle at 58% 12%,#fff 0 6%,transparent 7%),radial-gradient(circle at 74% 34%,#fff 0 5%,transparent 6%),radial-gradient(circle at 90% 66%,#fff 0 6%,transparent 7%);filter:drop-shadow(0 0 3px rgba(150,230,255,.9))}
+.aero-foam-a{left:72%;animation:aero-foam 12s ease-out calc(.6s + var(--off,0s)) infinite}
+.aero-foam-b{left:38%;animation:aero-foam 12s ease-out calc(5.6s + var(--off,0s)) infinite}
 .aero-dr,.aero-tr{position:absolute;bottom:0;border-radius:50%;opacity:0;
  background:radial-gradient(circle at 35% 30%,#fff 0,rgba(255,255,255,.95) 30%,rgba(190,235,255,.75) 70%,rgba(120,200,250,.5) 100%);
  box-shadow:0 0 4px rgba(255,255,255,.9),0 1px 2px rgba(10,90,170,.35)}
-.aero-dr{width:calc(var(--r)*3);height:calc(var(--r)*3);margin-left:calc(var(--r)*-1.5);animation:aero-dx 12s linear infinite,aero-dy 12s infinite;animation-delay:var(--dl)}
+.aero-dr{width:calc(var(--r)*3);height:calc(var(--r)*3);margin-left:calc(var(--r)*-1.5);animation:aero-dx 12s linear infinite,aero-dy 12s infinite;animation-delay:calc(var(--dl) + var(--off,0s))}
 .aero-dr-a{left:72%}.aero-dr-b{left:38%}
-.aero-tr{left:var(--lx);bottom:calc(var(--dw)*var(--by));width:7px;height:9px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:aero-fall 12s cubic-bezier(.5,0,1,.6) infinite;animation-delay:var(--dl)}
+.aero-tr{left:var(--lx);bottom:calc(var(--dw)*var(--by));width:8px;height:11px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:aero-fall 12s cubic-bezier(.5,0,1,.6) infinite;animation-delay:calc(var(--dl) + var(--off,0s))}
 
-/* ---- motion ---- */
 @keyframes aero-swim-r{from{translate:-260px 0}to{translate:calc(100vw + 60px) 0}}
 @keyframes aero-swim-l{from{translate:calc(100vw + 40px) 0}to{translate:-300px 0}}
 @keyframes aero-bob{from{transform:translateY(-10px) rotate(-3deg)}to{transform:translateY(12px) rotate(3deg)}}
-@keyframes aero-bob2{from{transform:translate(0,-8px) rotate(-4deg)}to{transform:translate(10px,8px) rotate(3deg)}}
-@keyframes aero-sine{from{transform:translateY(-9px) rotate(-3deg)}to{transform:translateY(9px) rotate(3deg)}}
+@keyframes aero-wag{from{transform:skewY(-5deg) rotate(-1.5deg)}to{transform:skewY(5deg) rotate(1.5deg)}}
 @keyframes aero-bubfloat{from{transform:translateY(-8px) rotate(-1deg)}to{transform:translateY(10px) rotate(1deg)}}
 @keyframes aero-gswim{from{transform:translate(-3%,-4%) rotate(-3deg)}to{transform:translate(3%,4%) rotate(3deg)}}
 @keyframes aero-leap-x{0%,5%{translate:0 0}49%,100%{translate:-45% 0}}
@@ -64,11 +83,9 @@
 
 html[data-decor=off] .aero-animals-front{display:none}
 html[data-paused] .aero-animals-front *{animation-play-state:paused!important}
-
-@media (max-width:900px){.aero-animals-front{display:none}}
 @media (prefers-reduced-motion:reduce){
  .aero-animals-front *,.aero-animals-front{animation:none!important}
- .aero-idol-a{translate:12vw 0}.aero-clown-a{translate:calc(100vw - 100% - 14vw) 0}
+ .aero-idol-a{translate:12vw 0}.aero-clown-a{translate:calc(100vw - 100% - 14vw) 0}.aero-turtle-a{translate:calc(100vw - 100% - 30vw) 0}
  .aero-dolphin{translate:-30% 0}.aero-dolphin .aero-img{transform:translateY(-62%) rotate(14deg)}
  .aero-foam,.aero-dr,.aero-tr{display:none}
 }

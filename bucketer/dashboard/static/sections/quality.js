@@ -2,7 +2,7 @@
  const h=el("h2",{textContent:"Data quality"}),sub=el("div",{className:"sub",textContent:"How well Last.fm covered the playlist. Albums with only artist-level tags carry the weakest signal."});
  const tiles=el("div",{className:"stats"});
  [["album-level tags",Q.album_level],["artist tags only",Q.artist_only],["no tags at all",Q.untagged],["no cover",Q.no_cover]].forEach(([k,v])=>
-  tiles.append(el("div",{className:"stat"},el("b",{textContent:v.albums+" ("+pct(v.albums,Q.total.albums)+")"}),k,el("div",{className:"sub",textContent:v.songs+" songs, "+pct(v.songs,Q.total.songs)}))));
+  tiles.append(el("div",{className:"stat"},el("b",{className:k=="album-level tags"||!v.albums?"":"warn",textContent:v.albums+" ("+pct(v.albums,Q.total.albums)+")"}),k,el("div",{className:"sub",textContent:v.songs+" songs, "+pct(v.songs,Q.total.songs)}))));
  const rows=Q.artist_only_list,body=el("tbody");
  rows.forEach(r=>body.append(el("tr",{},el("td",{className:"cv"},art(r.cover,r.artist+" - "+r.album)),el("td",{textContent:r.artist}),el("td",{textContent:r.album}),el("td",{textContent:r.songs}),el("td",{},...r.tags.map(chip)))));
  const more=Q.artist_only.albums-rows.length;

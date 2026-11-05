@@ -1,14 +1,12 @@
 /* ===== ui lane: the whole page chrome (everything except the scene lanes and the scene/decor blocks in style.css) =====
    Frutiger Aero: light, saturated, glossy. One glass recipe (--glass*), one gel-button recipe, one capsule-bar recipe. */
 :root{
---ink:#0a2a52;--fg:#0a2a52;--muted:#2a4d7c;--sea:#0a5f94;--navy:#073a6e;--blue:#0c78bd;--green:#3fb52a;--aqua:#1fb5e0;--lime:#a6e02f;--amber:#e69a00;--pink:#b8325f;
+--ink:#0b3a6e;--fg:#0b3a6e;--muted:#2a4d7c;--sea:#0a5f94;--navy:#0b3a6e;--blue:#0c78bd;--green:#3fb52a;--aqua:#00b4e6;--lime:#3ddc1e;--amber:#f5b400;--pink:#b8325f;
 --glass-fill:rgba(255,255,255,.4);--glass-solid:rgba(240,250,255,.82);--glass-rim:rgba(255,255,255,.75);
 --glass-shadow:0 10px 20px rgba(0,0,0,.1);--glass-blur:blur(10px);
 --strip:#C9D4F5;--r-card:18px;--r-panel:16px;
---font:'Segoe UI',Tahoma,'Frutiger LT','Myriad Pro','Trebuchet MS',sans-serif;
 --lcd:Consolas,'Lucida Console','Courier New',monospace;
 --gel:linear-gradient(to bottom,#73c8f8 0%,#1583d7 50%,#0361A3 50%,#299eef 100%);
---gel-green:linear-gradient(to bottom,#b9f27c 0%,#4cc22e 50%,#23871a 50%,#5fd142 100%);
 }
 *{box-sizing:border-box}
 html{min-height:100%;background:linear-gradient(180deg,#3fb0ee 0%,#8fdcf8 42%,#d6f5ff 74%,#aee9b8 100%) fixed}

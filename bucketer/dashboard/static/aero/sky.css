@@ -1,29 +1,76 @@
-/* lane: sky (z 0). Cobalt-to-cyan sky, horizon glow, sun with sun-ray beams and bokeh, puffy SVG clouds, star glints, shared grade and accent tokens (blue ~60 / white ~25 / green ~15, orange + lime only as small pops). */
-:root{--aero-grade:saturate(1.2) contrast(1.05);--aero-mask:linear-gradient(90deg,#000 calc(50% - 574px),transparent calc(50% - 550px),transparent calc(50% + 550px),#000 calc(50% + 574px));--aero-orange:#f28a1e;--aero-lime:#b6e02a}
-html{background:linear-gradient(180deg,#0a5fc4 0,#1a73d9 16%,#3a9be8 46%,#8fd3f2 74%,#bfe6f5 100%) fixed}
-.aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.aero-sky i,.aero-sky b,.aero-sky svg{position:absolute;display:block}
-.as-horizon{left:0;right:0;bottom:0;height:46vh;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(214,243,255,.55) 55%,rgba(255,255,255,.92) 100%)}
-.as-sun{left:-16vmax;top:-16vmax;width:56vmax;height:56vmax;border-radius:50%;mix-blend-mode:screen;background:radial-gradient(circle,#fff 0,#fff 5%,#e4f8ff 14%,#7fd0f5 35%,rgba(127,208,245,.25) 52%,transparent 70%)}
-.as-beam{left:-4vmax;top:-4vmax;width:150vmax;height:150vmax;mix-blend-mode:screen;background:conic-gradient(from 0deg at 0 0,transparent 0 var(--a),rgba(255,255,255,.5) calc(var(--a) + var(--w)/2),transparent calc(var(--a) + var(--w)),transparent 360deg);-webkit-mask-image:linear-gradient(135deg,#000 0,transparent 60%);mask-image:linear-gradient(135deg,#000 0,transparent 60%)}
-.as-beam.b1{--a:6deg;--w:9deg}.as-beam.b2{--a:20deg;--w:5deg;opacity:.8}.as-beam.b3{--a:32deg;--w:14deg;opacity:.7}.as-beam.b4{--a:50deg;--w:7deg}.as-beam.b5{--a:66deg;--w:11deg;opacity:.6}
-/* bokeh: translucent discs trailing away from the sun */
-.as-bokeh{left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.1),rgba(255,255,255,.3) 80%,rgba(255,255,255,.5));box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);mix-blend-mode:screen}
-/* clouds: puffy white tops, soft grey-blue underbellies, three depth layers */
-.as-cloud{aspect-ratio:2/1;filter:drop-shadow(0 10px 14px rgba(10,80,190,.18))}
-.as-cloud.far{width:clamp(110px,14vw,240px);opacity:.75;filter:blur(1px)}
-.as-cloud.mid{width:clamp(200px,26vw,440px);opacity:.95}
-.as-cloud.near{width:clamp(300px,40vw,700px)}
-.as-cloud.k1{left:34vw;top:5vh}.as-cloud.k2{right:8vw;top:30vh}.as-cloud.k3{left:52vw;top:14vh}
-.as-cloud.k4{left:-6vw;top:38vh}.as-cloud.k5{right:-10vw;top:10vh}
-/* four-point star glints (white, soft glow); a few more sit on bubble edges in the bubbles lane */
-.as-star{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);opacity:.85}
+/* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two parallax layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, balloon, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
+:root{--aero-grade:saturate(1.28) contrast(1.05);--dock:62px;--aw-h:clamp(220px,31vh,340px);--hh:max(38vh,20.5vw)}
+html{background:linear-gradient(160deg,#0b4fb8 0,#1f78d8 26%,#3b9de8 50%,#8fd3f4 76%,#cdeefc 100%) fixed}
+.aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+ --c1:url(img/aero_cloud_1.webp);--c2:url(img/aero_cloud_2.webp);--c3:url(img/aero_cloud_3.webp);--c4:url(img/aero_cloud_4.webp);--bird:url(img/aero_bird.webp);--plane:url(img/aero_plane.webp)}
+.aero-sky i,.aero-sky svg,.aero-sky div{position:absolute;display:block}
+.aero-sky i{font-style:normal}
+
+/* sun, warm sunshine accent, rays, flare ghosts */
+.as-sun{left:calc(6vw - 32vmax);top:calc(4vh - 32vmax);width:64vmax;height:64vmax;border-radius:50%;mix-blend-mode:screen;background:radial-gradient(circle,#fff 0,#fffbe0 4%,#fff0a8 10%,rgba(255,226,120,.5) 22%,rgba(150,215,250,.35) 42%,transparent 68%)}
+.as-warm{left:-8vw;top:-10vh;width:70vw;height:60vh;mix-blend-mode:screen;background:radial-gradient(ellipse at 18% 18%,rgba(255,204,64,.5),rgba(255,170,40,.18) 40%,transparent 70%)}
+.as-ray{left:6vw;top:4vh;width:150vmax;height:var(--h);transform-origin:0 50%;rotate:var(--r);mix-blend-mode:screen;clip-path:polygon(0 47%,100% 0,100% 100%,0 53%);background:linear-gradient(90deg,rgba(255,246,190,.6),rgba(255,246,190,.18) 40%,transparent 75%)}
+.as-ray.r1{--r:34deg;--h:120px}.as-ray.r2{--r:47deg;--h:70px;opacity:.8}.as-ray.r3{--r:22deg;--h:54px;opacity:.7}
+.as-fl{left:calc(6vw + var(--t) * 78vw);top:calc(4vh + var(--t) * 78vh);width:var(--s);height:var(--s);translate:-50% -50%;border-radius:50%;mix-blend-mode:screen;opacity:.55;background:radial-gradient(circle,rgba(255,255,255,.05) 40%,rgba(190,240,255,.35) 82%,rgba(255,255,255,.55) 100%)}
+.as-fl:nth-of-type(odd){background:radial-gradient(circle,rgba(255,240,170,.1) 40%,rgba(255,220,120,.32) 82%,rgba(255,255,255,.5) 100%)}
+.as-fl.hex{border-radius:0;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);opacity:.4}
+
+/* aurora: two blurred ribbons near the sky top that cross-fade (hue shift without animating a filter); clearly visible but soft */
+.as-aurora{left:-10vw;top:1vh;width:120vw;height:26vh;rotate:-7deg;mix-blend-mode:screen;filter:blur(26px);opacity:.6}
+.as-aurora.a1{background:linear-gradient(90deg,transparent,rgba(70,255,150,.95) 22%,rgba(40,240,210,.9) 55%,rgba(110,200,255,.5) 80%,transparent)}
+.as-aurora.a2{top:4vh;background:linear-gradient(90deg,transparent 5%,rgba(0,235,235,.9) 28%,rgba(130,255,130,.85) 62%,rgba(190,140,255,.5) 85%,transparent);opacity:.1}
+
+/* photographic clouds. Straight crop edges: tower sits partly off the left edge and behind the hills, cloud 4 hangs off the right edge, banks get a feathered mask */
+.as-par{inset:0}
+.as-cl{background:no-repeat center/100% 100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(0deg,transparent,#000 22%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(0deg,transparent,#000 22%);mask-composite:intersect}
+.as-cl.cl1{left:-9vw;top:36vh;width:34vw;aspect-ratio:800/665;background-image:var(--c1);-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%);-webkit-mask-composite:source-over;mask-composite:add;animation:as-drift 70s ease-in-out infinite alternate}
+.as-cl.cl4{right:-6vw;top:10vh;width:42vw;aspect-ratio:900/514;background-image:var(--c4);-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%),linear-gradient(0deg,transparent,#000 20%);mask-image:linear-gradient(90deg,transparent,#000 16%),linear-gradient(0deg,transparent,#000 20%);animation:as-drift2 85s ease-in-out infinite alternate}
+.as-cl.cl2a{left:40vw;top:14vh;width:20vw;aspect-ratio:800/420;background-image:var(--c2);opacity:.85;animation:as-drift 120s ease-in-out -30s infinite alternate}
+.as-cl.cl2b{left:63vw;top:27vh;width:27vw;aspect-ratio:800/420;background-image:var(--c2);animation:as-drift2 95s ease-in-out -10s infinite alternate}
+.as-cl.cl3{left:-4vw;top:41vh;width:64vw;aspect-ratio:900/245;background-image:var(--c3);opacity:.9;animation:as-drift 110s ease-in-out infinite alternate}
+.as-cirrus{left:-5vw;top:-4vh;width:110vw;height:44vh;rotate:-7deg;opacity:.7;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 55% 40%,#000 25%,transparent 80%);mask-image:radial-gradient(ellipse 70% 60% at 55% 40%,#000 25%,transparent 80%)}
+@keyframes as-drift{from{translate:-3vw 0}to{translate:6vw 0}}
+@keyframes as-drift2{from{translate:3vw 0}to{translate:-5vw 0}}
+
+/* gulls: flock glides left with a wing-bob */
+.as-flock{left:0;top:0;width:1px;height:1px;animation:as-glide 75s linear -20s infinite}
+.as-bird{left:var(--bx);top:var(--by);width:var(--bs);aspect-ratio:560/540;animation:as-glide-y 9s ease-in-out infinite alternate}
+.as-bird b{position:absolute;inset:0;background:var(--bird) no-repeat center/contain;animation:as-wing var(--bd) ease-in-out infinite alternate;transform-origin:50% 60%;filter:drop-shadow(0 2px 2px rgba(0,50,110,.25))}
+@keyframes as-glide{from{translate:calc(100vw + 120px) 8px}to{translate:-200px 0}}
+@keyframes as-glide-y{from{translate:0 -4px}to{translate:0 5px}}
+@keyframes as-wing{from{transform:scaleY(.82) rotate(-6deg)}to{transform:scaleY(1.04) rotate(4deg)}}
+
+/* rare plane event: crosses once per 52s, climbing to the left, trailing a contrail; flies in the top strip above the heading so neither the plane nor its trail crosses the title text */
+.as-plane-a{left:0;top:2vh;width:220px;aspect-ratio:640/169;animation:as-plane-x 52s linear -2s infinite}
+.as-plane-b{inset:0;animation:as-plane-y 52s ease-out -2s infinite}
+.as-plane{inset:0;background:var(--plane) no-repeat center/contain;filter:drop-shadow(0 4px 5px rgba(0,50,120,.3))}
+.as-trail{left:90%;top:52%;width:min(50vw,700px);height:6px;border-radius:6px;transform-origin:0 50%;rotate:1.5deg;background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,.5) 35%,rgba(255,255,255,0));filter:blur(1.2px);opacity:.9}
+.as-trail::after{content:"";position:absolute;left:0;right:0;top:-3px;height:12px;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.35),rgba(255,255,255,0) 70%);filter:blur(4px)}
+@keyframes as-plane-x{0%{translate:calc(100vw + 60px) 0}42%,100%{translate:-320px 0}}
+@keyframes as-plane-y{0%{translate:0 26px}42%,100%{translate:0 -30px}}
+
+/* balloon drifting behind the right edge of the glass column */
+.as-balloon{left:calc(50% + 470px);top:44vh;width:clamp(44px,4.4vw,70px);filter:drop-shadow(0 6px 6px rgba(0,50,120,.3));animation:as-balloon 11s ease-in-out infinite alternate}
+@keyframes as-balloon{from{translate:-6px 10px;rotate:-2deg}to{translate:8px -16px;rotate:3deg}}
+
+/* four-point star glints */
+.as-star{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);opacity:.95;filter:drop-shadow(0 0 4px #fff)}
+@keyframes as-twinkle{0%,100%{transform:scale(.35) rotate(0);opacity:.2}50%{transform:scale(1) rotate(12deg);opacity:1}}
+.as-vig{inset:0;background:radial-gradient(circle at 6% 4%,rgba(255,244,190,.28),transparent 38%),radial-gradient(ellipse at 45% 42%,transparent 52%,rgba(4,36,110,.3) 100%)}
+
 @media (prefers-reduced-motion:no-preference){
-.as-star{animation:as-twinkle 4.2s ease-in-out infinite;animation-delay:var(--d)}
-}
-@keyframes as-twinkle{0%,100%{transform:scale(.4);opacity:.25}50%{transform:scale(1);opacity:1}}
-html[data-decor=off] .as-beam,html[data-decor=off] .as-cloud,html[data-decor=off] .as-bokeh,html[data-decor=off] .as-star{display:none}
+.as-star{animation:as-twinkle 4.2s ease-in-out var(--d) infinite}
+.as-aurora.a1{animation:as-aur 14s ease-in-out infinite alternate}
+.as-aurora.a2{animation:as-aur2 14s ease-in-out infinite alternate}
+@keyframes as-aur{from{opacity:.7;translate:-4vw 0}to{opacity:.18;translate:4vw 2vh}}
+@keyframes as-aur2{from{opacity:.12}to{opacity:.62}}
+@supports (animation-timeline:scroll()){
+.as-parfar{animation:as-pfar linear both;animation-timeline:scroll(root)}
+.as-parnear{animation:as-pnear linear both;animation-timeline:scroll(root)}
+@keyframes as-pfar{to{translate:0 -70px}}
+@keyframes as-pnear{to{translate:0 -170px}}
+}}
+html[data-decor=off] .aero-sky>*{display:none}
 html[data-paused] .aero-sky *{animation-play-state:paused!important}
-@media (max-width:900px){.as-beam.b4,.as-beam.b5,.as-cloud.far,.as-bokeh:nth-of-type(n+4){display:none}}
-@media (prefers-reduced-motion:reduce){.aero-sky *{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.aero-sky *{animation:none!important}.as-plane-a{translate:44vw 0}.as-flock{translate:60vw 0}.as-aurora.a2{opacity:.35}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-sky{display:none}}

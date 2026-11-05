@@ -1,39 +1,59 @@
-/* aero lane: water (z2) + water-fg (z20). New classes prefixed aw-/aero-water. */
+/* lane: water (z2) + foreground foliage (z20). Cyan tiled surface with sliding caustics, diagonal wave crest with foam strip, meniscus line, underwater light shafts + bubble swarm, splash ribbon, ice cubes, starfish, pebbles; fronds and daisies in front. Band height is --aw-h; the dock covers its last 62px. */
 .aero-water,.aero-water-fg{position:fixed;inset:0;pointer-events:none;overflow:hidden}
-.aero-water{z-index:2;-webkit-mask-image:var(--aero-mask);mask-image:var(--aero-mask)}.aero-water-fg{z-index:20;-webkit-mask-image:var(--aero-mask);mask-image:var(--aero-mask)}
-.aero-water i,.aero-water b,.aero-water-fg i,.aero-water-fg b{display:block;position:absolute}
-.aw-water{position:absolute;left:0;right:0;bottom:0;height:clamp(150px,27vh,300px)}
-.aw-deep{position:absolute;inset:34px 0 0;background:linear-gradient(180deg,#e6faff 0,#19dff0 10%,#10b9e6 34%,#0a7fd0 68%,#0a3f97 100%)}
-.aw-crest{position:absolute;left:0;top:0;width:100%;height:60px;filter:drop-shadow(0 -2px 3px rgba(255,255,255,.7));animation:aw-sway 9s ease-in-out infinite alternate}
-.aw-caus{position:absolute;inset:34px 0 0;mix-blend-mode:overlay;opacity:.8}.aw-caus svg{width:100%;height:100%}
-.aw-b{left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff 0 12%,rgba(255,255,255,.35) 24%,rgba(160,240,255,.12) 62%,rgba(255,255,255,.55) 100%);box-shadow:inset 0 0 3px rgba(255,255,255,.8);animation:aw-rise var(--d) linear var(--l) infinite}
-.aw-sp{left:var(--x);top:var(--y);width:var(--s);height:var(--s);background:radial-gradient(circle,#fff 0 18%,rgba(255,255,255,0) 62%),conic-gradient(from 45deg,transparent 0 40%,#fff 45% 55%,transparent 60% 90%,#fff 95%);border-radius:50%;animation:aw-tw var(--d) ease-in-out var(--l) infinite}
-.aw-ice{position:absolute;width:clamp(36px,5vw,76px);aspect-ratio:1;border-radius:18%;background:linear-gradient(135deg,rgba(255,255,255,.75),rgba(190,245,255,.3) 45%,rgba(255,255,255,.55));border:1.5px solid rgba(255,255,255,.85);box-shadow:inset 0 0 12px rgba(255,255,255,.8),0 4px 10px rgba(0,70,140,.3)}
-.aw-ice::after{content:"";position:absolute;left:14%;top:12%;width:40%;height:18%;border-radius:50%;background:rgba(255,255,255,.9);transform:rotate(-30deg)}
-.aw-ice.i1{left:56%;top:6px;rotate:14deg;animation:aw-bob 5s ease-in-out infinite alternate}
-.aw-ice.i2{left:70%;top:30px;width:clamp(28px,3.6vw,54px);rotate:-20deg;animation:aw-bob 6.5s ease-in-out -2s infinite alternate}
-.aw-ice.i3{left:84%;top:4px;rotate:35deg;animation:aw-bob 5.5s ease-in-out -1s infinite alternate}
-.aw-mint{position:absolute;width:clamp(44px,5vw,80px);aspect-ratio:1.5;filter:drop-shadow(0 3px 4px rgba(0,60,40,.4))}
-.aw-mint.m1{left:62%;top:14px;rotate:-25deg}.aw-mint.m2{left:78%;top:20px;rotate:40deg}.aw-mint.m3{left:48%;top:30px;rotate:100deg;scale:.8}
-.aw-drop{left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 30% 28%,#fff 0 10%,rgba(255,255,255,.25) 30%,rgba(120,230,255,.1) 70%,rgba(255,255,255,.6) 100%);box-shadow:0 3px 6px rgba(0,80,140,.35),inset 0 -3px 5px rgba(0,150,200,.3)}
-.aw-splash{position:absolute;bottom:clamp(120px,24vh,260px);width:clamp(180px,24vw,380px);filter:drop-shadow(0 4px 8px rgba(0,100,170,.35));opacity:.95;transform-origin:50% 100%;animation:aw-sw 7s ease-in-out infinite alternate}
-.aw-splash.s1{right:10%}.aw-splash.s2{right:26%;width:clamp(120px,15vw,240px);animation-delay:-3s}
-.aw-hill{position:absolute;left:-4%;bottom:0;width:68%;height:clamp(170px,26vh,300px);display:block}
-.aw-dz{position:absolute;filter:drop-shadow(0 4px 5px rgba(0,60,30,.45))}
-.aw-dz.z1{right:2%;bottom:3vh;width:clamp(110px,13vw,210px);rotate:12deg}
-.aw-dz.z2{right:13%;bottom:-1vh;width:clamp(80px,9vw,150px);rotate:-18deg;filter:blur(2.5px) drop-shadow(0 4px 5px rgba(0,60,30,.45))}
-.aw-dz.z3{right:-2%;bottom:20vh;width:clamp(60px,6vw,100px);rotate:30deg;filter:blur(4px)}
-.aw-leaf{position:absolute;display:block;width:clamp(90px,10vw,170px);aspect-ratio:1.5;filter:drop-shadow(0 4px 5px rgba(0,60,30,.4))}.aw-leaf svg{display:block;width:100%;height:100%}
-.aw-leaf.l1{left:1%;bottom:1vh;rotate:-15deg}.aw-leaf.l2{left:12%;bottom:-2vh;rotate:20deg;filter:blur(2px)}
-.aw-gl{left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 30% 28%,#fff 0 14%,rgba(255,255,255,.3) 38%,rgba(255,255,255,.08) 70%);box-shadow:0 2px 3px rgba(0,50,20,.45),inset 0 -2px 3px rgba(255,255,255,.4)}
-.aw-monitor{position:absolute;left:1.5%;bottom:calc(clamp(150px,27vh,300px) - 14px);width:clamp(70px,8vw,116px);filter:drop-shadow(0 6px 8px rgba(0,60,120,.35))}
-.aw-compass{position:absolute;left:3%;bottom:4vh;width:clamp(44px,4.6vw,64px);filter:drop-shadow(0 4px 6px rgba(0,60,120,.4));animation:aw-bob 6s ease-in-out infinite alternate}
-@keyframes aw-sway{to{transform:translateX(-18px)}}
-@keyframes aw-rise{from{transform:translateY(20px)}to{transform:translateY(-60px)}}
-@keyframes aw-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
-@keyframes aw-bob{to{transform:translateY(6px) rotate(4deg)}}
-@keyframes aw-sw{to{transform:rotate(2.5deg) scaleY(1.04)}}
-@media (max-width:640px){.aw-hill{position:absolute;left:-4%;bottom:0;width:68%;height:clamp(170px,26vh,300px);display:block}}
+.aero-water{z-index:2;--aw-tile:url(img/aero_water.webp)}
+.aero-water-fg{z-index:9;--aw-fr:url(img/aero_fronds.webp);--aw-dz:url(img/aero_daisies.webp)}
+.aero-water i,.aero-water div,.aero-water-fg i,.aero-water-fg b{position:absolute;display:block;font-style:normal}
+.aw-band{left:0;right:0;bottom:0;height:var(--aw-h)}
+.aw-body{left:0;right:0;top:34px;bottom:0;overflow:hidden;background:linear-gradient(180deg,#2fd2f4 0,#00b4e6 22%,#0a84cc 55%,#073f93 100%)}
+.aw-tile{inset:0;overflow:hidden}
+.aw-tile i{left:0;top:0;width:calc(100% + 512px);height:calc(100% + 512px);background:var(--aw-tile) 0 0/var(--ts) repeat}
+.aw-tile.t1{--ts:300px;-webkit-mask-image:linear-gradient(180deg,#000 0,#000 25%,rgba(0,0,0,.25) 70%,transparent);mask-image:linear-gradient(180deg,#000 0,#000 25%,rgba(0,0,0,.25) 70%,transparent)}
+.aw-tile.t2{--ts:480px;mix-blend-mode:screen;opacity:.3;-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.4),#000 60%);mask-image:linear-gradient(180deg,rgba(0,0,0,.4),#000 60%)}
+.aw-tile.t1 i{animation:aw-sl1 28s linear infinite}
+.aw-tile.t2 i{animation:aw-sl2 40s linear infinite}
+@keyframes aw-sl1{to{translate:-300px -300px}}
+@keyframes aw-sl2{from{translate:-480px 0}to{translate:0 -480px}}
+.aw-shaft{left:var(--x);top:0;width:var(--w);height:100%;transform:skewX(-18deg);mix-blend-mode:screen;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(190,250,255,.16) 55%,transparent 92%);opacity:.5;animation:aw-shaft var(--d) ease-in-out var(--l) infinite alternate}
+@keyframes aw-shaft{from{opacity:.15;translate:-14px 0}to{opacity:.6;translate:14px 0}}
+.aw-ub{left:var(--x);bottom:0;width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff 0 18%,rgba(255,255,255,.25) 40%,rgba(255,255,255,.08) 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);opacity:0;animation:aw-ub var(--d) ease-out var(--l) infinite}
+@keyframes aw-ub{0%{opacity:0;translate:0 0}12%{opacity:.9}100%{opacity:0;translate:6px calc(var(--aw-h) * -.6)}}
+/* crest: diagonal wave, light surface gradient, meniscus line, foam strip */
+.aw-crest{left:-100px;top:0;width:calc(100% + 200px);height:70px;overflow:visible;animation:aw-sway 12s ease-in-out infinite alternate;filter:drop-shadow(0 -2px 3px rgba(255,255,255,.55))}
+.aw-f1{animation:aw-foam 6s linear infinite}
+@keyframes aw-foam{to{stroke-dashoffset:-108}}
+@keyframes aw-sway{to{translate:90px 0}}
+/* CSS splash: nested arcing ribbons (crown) + ring ripples + a fan of droplets, pulsing at the waterline */
+.aw-splash{left:var(--sx);bottom:calc(var(--aw-h) - 30px);width:clamp(120px,11vw,190px);aspect-ratio:1.5;translate:-50% 0;pointer-events:none;animation:aw-spl 6s ease-in-out var(--sd,0s) infinite alternate;transform-origin:50% 100%}
+.aw-splash i{display:block;position:absolute;left:50%;bottom:6%;translate:-50% 0;border-radius:50% 50% 0 0/100% 100% 0 0;border:5px solid transparent;border-bottom:0;border-top-color:rgba(255,255,255,.92);filter:drop-shadow(0 0 5px rgba(255,255,255,.9)) drop-shadow(0 2px 3px rgba(0,90,170,.35));-webkit-mask-image:linear-gradient(0deg,transparent,#000 40%);mask-image:linear-gradient(0deg,transparent,#000 40%)}
+.aw-splash .c1{width:92%;height:84%}.aw-splash .c2{width:62%;height:100%;border-top-width:7px;border-top-color:rgba(230,250,255,.95)}.aw-splash .c3{width:34%;height:92%;border-top-width:4px}
+.aw-splash .rg{left:50%;bottom:0;width:112%;height:26%;border:2.5px solid rgba(255,255,255,.85);border-radius:50%;translate:-50% 40%;-webkit-mask-image:none;mask-image:none;filter:drop-shadow(0 0 4px rgba(255,255,255,.8))}
+.aw-splash .dr{inset:0;border:0;border-radius:0;translate:none;filter:drop-shadow(0 0 3px rgba(255,255,255,.9));-webkit-mask-image:none;mask-image:none;background:radial-gradient(circle at 8% 52%,#fff 0 3.5%,transparent 4.5%),radial-gradient(circle at 16% 26%,#fff 0 4.5%,transparent 5.5%),radial-gradient(circle at 30% 9%,#fff 0 3.5%,transparent 4.5%),radial-gradient(circle at 50% 3%,#fff 0 4%,transparent 5%),radial-gradient(circle at 70% 11%,#fff 0 3.5%,transparent 4.5%),radial-gradient(circle at 84% 27%,#fff 0 4.5%,transparent 5.5%),radial-gradient(circle at 93% 54%,#fff 0 3.5%,transparent 4.5%),radial-gradient(circle at 39% 20%,rgba(255,255,255,.85) 0 2.2%,transparent 3%),radial-gradient(circle at 62% 22%,rgba(255,255,255,.85) 0 2.2%,transparent 3%)}
+@keyframes aw-spl{from{transform:scale(.9,.82);opacity:.7}to{transform:scale(1.06,1.05);opacity:1}}
+/* small things: ice cubes on the surface, starfish + pebbles on the floor with contact shadows */
+.aw-ice{width:clamp(34px,3.6vw,54px);aspect-ratio:1;border-radius:16%;background:linear-gradient(135deg,rgba(255,255,255,.8),rgba(190,245,255,.3) 45%,rgba(255,255,255,.6));border:1.5px solid rgba(255,255,255,.9);box-shadow:inset 0 0 12px rgba(255,255,255,.85),0 5px 8px rgba(0,70,140,.3);animation:aw-bob 5s ease-in-out infinite alternate}
+.aw-ice::after{content:"";position:absolute;left:14%;top:12%;width:40%;height:16%;border-radius:50%;background:rgba(255,255,255,.95);rotate:-30deg}
+.aw-ice.i1{left:4%;bottom:calc(var(--aw-h) - 56px);rotate:14deg}
+.aw-ice.i2{left:9%;bottom:calc(var(--aw-h) - 40px);width:clamp(24px,2.6vw,38px);rotate:-20deg;animation-delay:-2s}
+.aw-ice.i3{right:5%;bottom:calc(var(--aw-h) - 36px);rotate:28deg;animation-delay:-1s}
+.aw-ice.i4{right:10%;bottom:calc(var(--aw-h) - 28px);width:clamp(24px,2.6vw,38px);rotate:-12deg;animation-delay:-3s}
+@keyframes aw-bob{to{translate:0 5px;rotate:6deg}}
+.aw-starfish{right:6%;bottom:calc(var(--dock) + 8px);width:clamp(36px,3.6vw,54px);aspect-ratio:1;rotate:18deg;filter:drop-shadow(0 4px 3px rgba(0,30,80,.55))}
+.aw-starfish svg{display:block;width:100%;height:100%}
+.aw-peb{border-radius:50% 46% 52% 48%;background:radial-gradient(circle at 32% 28%,#f4ead2,#b49a74 55%,#6c5a40);box-shadow:0 3px 3px rgba(0,30,80,.5),inset 0 -2px 3px rgba(0,0,0,.25)}
+.aw-peb.p1{left:4%;bottom:calc(var(--dock) + 6px);width:22px;height:15px}.aw-peb.p2{left:6.4%;bottom:calc(var(--dock) + 4px);width:14px;height:10px}.aw-peb.p3{left:2%;bottom:calc(var(--dock) + 3px);width:12px;height:9px}.aw-peb.p4{right:11%;bottom:calc(var(--dock) + 5px);width:18px;height:12px}.aw-peb.p5{right:13%;bottom:calc(var(--dock) + 3px);width:11px;height:8px}
+.aw-gl{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);filter:drop-shadow(0 0 4px #fff);animation:as-twinkle 3.4s ease-in-out var(--d) infinite}
+/* foreground foliage with soft depth of field (behind the glass column) */
+.aw-fr{background:var(--aw-fr) no-repeat center/contain;aspect-ratio:700/504}
+.aw-fr.fr1{left:-80px;bottom:-26px;width:clamp(280px,27vw,440px);filter:blur(2px) saturate(1.3) drop-shadow(0 6px 8px rgba(0,60,30,.4));transform-origin:0 100%;animation:aw-frs 8s ease-in-out infinite alternate}
+.aw-fr.fr2{right:-90px;top:-70px;width:clamp(240px,22vw,360px);rotate:180deg;filter:blur(3px) saturate(1.3);transform-origin:50% 50%}
+.aw-fr.fr3{right:-80px;bottom:-34px;width:clamp(220px,20vw,330px);scale:-1 1;filter:blur(3.5px) saturate(1.3);transform-origin:50% 100%;animation:aw-frs 9.5s ease-in-out -3s infinite alternate}
+.aw-dz{bottom:-6px;aspect-ratio:700/416;transform-origin:50% 100%;animation:aw-dz 5.5s ease-in-out infinite alternate}
+.aw-dz b{position:absolute;inset:0;display:block;background:var(--aw-dz) no-repeat center bottom/contain;filter:saturate(1.2) drop-shadow(0 -2px 4px rgba(0,60,20,.25))}
+.aw-dz.dz1{left:-18px;width:clamp(240px,22vw,340px)}
+.aw-dz.dz2{right:-30px;width:clamp(170px,15vw,240px);scale:-1 1;animation-delay:-2.5s}
+@keyframes aw-dz{from{transform:skewX(-2.5deg)}to{transform:skewX(2.5deg)}}
+@keyframes aw-frs{from{transform:rotate(-1.4deg)}to{transform:rotate(1.6deg)}}
 html[data-decor=off] .aero-water,html[data-decor=off] .aero-water-fg{display:none}
-@media (prefers-reduced-motion:reduce){.aero-water *,.aero-water-fg *{animation:none!important}.aw-sp{opacity:.8}}
+html[data-paused] .aero-water *,html[data-paused] .aero-water-fg *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.aero-water *,.aero-water-fg *{animation:none!important}.aw-gl{opacity:.9}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-water,.aero-water-fg{display:none}}

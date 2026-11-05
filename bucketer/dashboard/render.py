@@ -11,7 +11,7 @@ from ..models import Enrichment, Group
 from .analysis import analyze
 
 STATIC = Path(__file__).parent / "static"
-LANES = ["sky", "hero", "bubbles", "water", "animals", "ui"]  # stylesheet order after style.css; ui holds all page chrome
+LANES = ["sky", "hero", "bubbles", "water", "animals", "ui", "polish"]  # stylesheet order after style.css; ui holds all page chrome
 SCENE_LANES = ["sky", "hero", "water", "animals", "bubbles"]  # each has aero/<lane>.html injected at <!--SCENE:<lane>-->
 SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar", "selected", "playlist", "tabs"]  # page order; each file draws one section
 
@@ -33,11 +33,22 @@ def inline_images(css: str) -> str:
     return IMG_URL.sub(embed, css)
 
 
+FONT_URL = re.compile(r"url\(fonts/([A-Za-z0-9_.-]+\.woff2)\)")
+
+
+def inline_fonts(css: str) -> str:
+    """Replace each `url(fonts/<file>.woff2)` with a base64 data URI (bundled Open Sans), keeping the report one file."""
+    def embed(match: re.Match) -> str:
+        data = base64.b64encode((STATIC / "fonts" / match.group(1)).read_bytes()).decode("ascii")
+        return f"url(data:font/woff2;base64,{data})"
+    return FONT_URL.sub(embed, css)
+
+
 def render(analysis: dict, tag_info: dict[str, dict]) -> str:
     data = json.dumps({**analysis, "info": tag_info}, ensure_ascii=False).replace("</", "<\\/")
     script = "\n".join([_read("app.js")] + [_read(f"sections/{name}.js") for name in SECTIONS])
     css = "\n".join([_read("style.css")] + [_read(f"aero/{name}.css") for name in LANES])
-    page = _read("page.html").replace("/*CSS*/", inline_images(css)).replace("/*JS*/", script)
+    page = _read("page.html").replace("/*CSS*/", inline_fonts(inline_images(css))).replace("/*JS*/", script)
     for name in SCENE_LANES:
         page = page.replace(f"<!--SCENE:{name}-->", _read(f"aero/{name}.html"))
     return page.replace("/*DATA*/null", data)

@@ -8,4 +8,5 @@
    if(k)n=(i+k+tabs.length)%tabs.length;else if(e.key=="Home")n=0;else if(e.key=="End")n=tabs.length-1;
    if(n>=0){e.preventDefault();select(names[n],true)}}});
  window.addEventListener("hashchange",()=>select(location.hash.slice(1)));
+ $("homebtn").onclick=()=>{select(names[0],false);scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})};
  select(location.hash.slice(1))}

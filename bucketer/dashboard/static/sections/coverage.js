@@ -1,6 +1,6 @@
 {const C=D.coverage,pct=n=>Math.round(100*n/Math.max(1,D.songs))+"%",pctA=Math.round(C.threshold*100);
  $("covsub").textContent="An album is in a bucket when at least "+pctA+"% of its tag weight lands there, so buckets overlap: the bucket sizes below add up to "+C.bucket_song_sum+" songs for "+D.songs+" real songs. Every album is counted once in the bar: in no bucket (it would go to other), in one, or in several.";
- const parts=[["none","in no bucket","#9db8c8"],["one","in one bucket","#4cc62f"],["several","in several buckets","#1fb5e0"]];
+ const parts=[["none","in no bucket","#9db8c8"],["one","in one bucket","#3ddc1e"],["several","in several buckets","#00b4e6"]];
  $("covstack").replaceChildren(...parts.map(([k,l,c])=>{const d=el("div",{title:l+": "+C[k].albums+" albums, "+C[k].songs+" songs"});d.style.width=(100*C[k].songs/Math.max(1,D.songs))+"%";d.style.background=c;return d}));
  $("covlegend").textContent=parts.map(([k,l])=>l+": "+C[k].albums+" albums, "+C[k].songs+" songs ("+pct(C[k].songs)+")").join("  |  ");
  const top=Math.max(1,...C.buckets.map(b=>b.songs));
