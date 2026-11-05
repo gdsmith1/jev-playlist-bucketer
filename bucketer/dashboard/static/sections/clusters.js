@@ -7,5 +7,5 @@ const cards=D.clusters.map((c,i)=>{const more=el("div",{className:"more"},...c.t
   el("h3",{textContent:c.label_tags.join(" · "),title:"seed tag: "+c.seed}),el("span",{className:"sub",textContent:c.albums+" albums · "+c.songs+" songs"}),
   el("span",{className:"sub",title:"Mean overlap between the albums carrying each pair of this bucket's tags: higher means the tags describe the same albums.",textContent:c.cohesion==null?"cohesion: n/a (single tag)":"cohesion "+Math.round(c.cohesion*100)+"%"}));
  const card=el("div",{className:"card"+(D.clusters.length<=12?" open":"")},head,more);card.style.setProperty("--c",COLORS[i%COLORS.length]);$("clusters").append(card);return card});
-if(cards.length>12)$("clusters").before(el("div",{className:"tools"},el("button",{className:"btn",textContent:"Expand all",onclick:()=>cards.forEach(c=>c.classList.add("open"))}),
+if(cards.length>1)$("clusters").before(el("div",{className:"tools"},el("button",{className:"btn",textContent:"Expand all",onclick:()=>cards.forEach(c=>c.classList.add("open"))}),
  el("button",{className:"btn",textContent:"Collapse all",onclick:()=>cards.forEach(c=>c.classList.remove("open"))}),el("span",{className:"sub",textContent:" click a bucket to open it"})));

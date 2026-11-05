@@ -10,12 +10,10 @@ The dashboard scenery is photographic cutouts from Wikimedia Commons (public dom
 | `aero_goldfish.webp` | Aquarium tropical de Pierrefitte-Nestalas 03082018 Carassius auratus Lionhead goldfish 2.jpg | Vassil | CC0 1.0 | rembg, mild grade |
 | `aero_cloud_1.webp`, `aero_cloud_4.webp` | Cumulus congestus clouds (27075262952).jpg | HO JJ (Taipei) | CC0 | saturation keying, whitened, blue-grey underside; all four cloud files unsharp-masked + contrast boost (ImageMagick) |
 | `aero_cloud_2.webp`, `aero_cloud_3.webp` | Sea sky and clouds, Ibiza, Spain.jpg | Joselodos | CC0 | saturation keying, soft underside |
-| `aero_hill_near.webp`, `aero_hill_far.webp` | Mowed fresh green seamless healthy lawn grass turf texture.jpg | Sisters.seamless | CC0 | tiled, procedural ridge mask, lime grade (far one hazed, smaller scale) |
+| `aero_hill_far.webp`, `aero_hill_mid.webp`, `aero_hill_near.webp` | none (generated) | n/a | n/a | rendered procedurally with numpy/scipy/Pillow: smooth ridge curves, top-left lighting, colour ramps, haze on the far layer, fine grass noise on the near layer only. No third-party imagery |
 | `aero_plane.webp` | A6-EDK Emirates Airbus A380-861 - cn 030 takeoff from Schiphol runway 36C pic3.JPG | Alf van Beem | Public domain | rembg, slight contrast/saturation boost; livery painted out with ImageMagick (fuselage lettering, engine logos replaced by a fuselage-tone gradient, tail stripes and red cheatline desaturated) so it reads as an unmarked jet |
-| `aero_skyline.webp` | Skyscrapers by railway station (Unsplash).jpg | Tony Yeung (tkwyoung) | CC0 | sky keyed, cyan tint |
+| `aero_skyline.webp` | Skyscrapers by railway station (Unsplash).jpg | Tony Yeung (tkwyoung) | CC0 | sky keyed, cyan tint, alpha made solid (opaque towers) |
 | `aero_water.webp` | Dalyan water 2019 G1.jpg | George Chernilevsky | Public domain | cropped, offset-blended to tile, graded to #0090d0..#00b8e6 |
-| `aero_fronds.webp` | The morning dew gently rests on the fern leaf providing life giving moisture.jpg | Steve Hillebrand, U.S. Fish and Wildlife Service | Public domain | green keying, lime hue push |
-| `aero_daisies.webp` | Meadow full of daisies, Idstein.jpg | Gerda Arendt | CC0 | cropped patch with ragged alpha top, saturation boost |
 | `aero_earth.webp` | Blue Marble Western Hemisphere.jpg | NASA / Reto Stöckli (Terra MODIS) | Public domain | circular mask, shadow lift, saturation boost |
 | `aero_butterfly.webp` | Monarch Butterfly.(Danaus plexippus) (14256022010).jpg | Bernard Spragg | CC0 | rembg, saturation boost |
 | `aero_bird.webp` | Black Tern flying (7402338502).jpg (a tern, not a gull) | U.S. Fish and Wildlife Service, Northeast Region | Public domain | rembg |

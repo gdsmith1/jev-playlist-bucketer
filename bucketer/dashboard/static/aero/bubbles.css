@@ -18,7 +18,5 @@
 @keyframes aero-rise{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--dx,0),calc(-100vh + 6vh - var(--s) * .2),0)}}
 @keyframes aero-pop{0%,94%{scale:1;opacity:1}98%{scale:1.22;opacity:.7}100%{scale:1.4;opacity:0}}
 @keyframes aero-wobble{from{translate:-9px 0}to{translate:9px 0}}
-html[data-decor=off] .aero-bub-layer{display:none}
-html[data-paused] .aero-bub-layer *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){.aero-bub{animation:none;bottom:auto;top:calc(8% + var(--x) * 3)}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-bub-layer{display:none}}

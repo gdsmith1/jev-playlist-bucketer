@@ -1,4 +1,4 @@
-/* lane: animals (z20, so they pass "behind" the card column). Facing: dolphin, clownfish, turtle photos face LEFT; moorish idol, goldfish, butterfly face RIGHT; jellyfish bell right. Underwater swimmers live between the dock (62px) and the waterline (--aw-h). Dolphins break the surface at the crest line, with a splash crown (ring + droplet fan) timed to the leap; the second dolphin is the same markup mirrored, offset by half a cycle. */
+/* lane: animals (z20, so they pass "behind" the card column). Facing: dolphin, clownfish, turtle photos face LEFT; moorish idol, goldfish, butterfly face RIGHT; jellyfish bell right. Underwater swimmers live between the dock (62px) and the waterline (--aw-h). Dolphins break the surface at the crest line, with a splash crown (ring + droplet fan) timed to the leap; a single dolphin now leaps in the left-centre water (mirrored markup, so it travels right toward the column) so it never competes with the globe (high right) for space. */
 .aero-animals-front{position:fixed;inset:0;z-index:8;pointer-events:none;overflow:hidden;--dw:clamp(190px,calc((100vw - 1100px) / 2 + 70px),400px);
  --ai-dol:url(img/aero_dolphin_leap.webp);--ai-clown:url(img/aero_clownfish_big.webp);--ai-idol:url(img/aero_moorish_idol.webp);--ai-gold:url(img/aero_goldfish.webp);--ai-turtle:url(img/aero_turtle.webp);--ai-jelly:url(img/aero_jellyfish.webp);--ai-bf:url(img/aero_butterfly.webp)}
 .aero-animals-front i,.aero-animals-front b{display:block;font-style:normal}
@@ -45,7 +45,8 @@
 
 /* leaping dolphins at the crest line, splash crown at exit and entry */
 .aero-leap{position:absolute;right:-10px;bottom:calc(var(--aw-h) - 34px);width:calc(var(--dw)*1.5);height:0}
-.aero-leap.d2{right:auto;left:-10px;scale:-1 1}
+.aero-leap{--dw:clamp(190px,calc((100vw - 1100px) / 2 + 70px),320px)}
+.aero-leap.d2{right:auto;left:max(-10px,calc((100vw - 1100px) / 4 - 90px));scale:-1 1}
 .aero-leapclip{pointer-events:none;position:absolute;left:0;right:0;bottom:0;height:calc(var(--dw)*2);overflow:hidden}
 .aero-dolphin{position:absolute;right:0;bottom:0;width:var(--dw);aspect-ratio:700/450;translate:0 0;animation:aero-leap-x 12s linear var(--off,0s) infinite}
 .aero-dolphin .aero-img{animation:aero-leap-y 12s var(--off,0s) infinite;transform:translateY(130%)}
@@ -53,7 +54,6 @@
  background:radial-gradient(ellipse 50% 55% at 50% 55%,rgba(255,255,255,.98) 0,rgba(255,255,255,.85) 38%,rgba(210,242,255,.5) 66%,rgba(255,255,255,0) 100%);
  filter:drop-shadow(0 0 5px rgba(255,255,255,.9));transform-origin:50% 80%}
 /* crown: expanding ring + fan of droplets */
-.aero-foam::before{content:"";position:absolute;inset:-18% -14% auto;height:90%;border-radius:50%;border:2.5px solid rgba(255,255,255,.95);box-shadow:0 0 6px rgba(255,255,255,.8)}
 .aero-foam::after{content:"";position:absolute;left:8%;right:8%;bottom:55%;height:150%;background:radial-gradient(circle at 10% 70%,#fff 0 5%,transparent 6%),radial-gradient(circle at 26% 38%,#fff 0 6%,transparent 7%),radial-gradient(circle at 42% 18%,#fff 0 5%,transparent 6%),radial-gradient(circle at 58% 12%,#fff 0 6%,transparent 7%),radial-gradient(circle at 74% 34%,#fff 0 5%,transparent 6%),radial-gradient(circle at 90% 66%,#fff 0 6%,transparent 7%);filter:drop-shadow(0 0 3px rgba(150,230,255,.9))}
 .aero-foam-a{left:72%;animation:aero-foam 12s ease-out calc(.6s + var(--off,0s)) infinite}
 .aero-foam-b{left:38%;animation:aero-foam 12s ease-out calc(5.6s + var(--off,0s)) infinite}
@@ -81,12 +81,10 @@
 @keyframes aero-dy{0%{transform:translateY(0);animation-timing-function:ease-out}6%{transform:translateY(calc(var(--dy)*-1));animation-timing-function:ease-in}14%,100%{transform:translateY(8px)}}
 @keyframes aero-fall{0%{opacity:0;transform:translateY(0)}2%{opacity:.95}9%{opacity:.9}11%,100%{opacity:0;transform:translateY(calc(var(--dw)*var(--by)))}}
 
-html[data-decor=off] .aero-animals-front{display:none}
-html[data-paused] .aero-animals-front *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
  .aero-animals-front *,.aero-animals-front{animation:none!important}
  .aero-idol-a{translate:12vw 0}.aero-clown-a{translate:calc(100vw - 100% - 14vw) 0}.aero-turtle-a{translate:calc(100vw - 100% - 30vw) 0}
- .aero-dolphin{translate:-30% 0}.aero-dolphin .aero-img{transform:translateY(-62%) rotate(14deg)}
+ .aero-dolphin{translate:-12% 0}.aero-dolphin .aero-img{transform:translateY(-30%) rotate(14deg)}
  .aero-foam,.aero-dr,.aero-tr{display:none}
 }
 @media (prefers-contrast:more),(forced-colors:active){.aero-animals-front{display:none}}

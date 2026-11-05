@@ -1,4 +1,4 @@
-/* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two parallax layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, balloon, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
+/* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two parallax layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
 :root{--aero-grade:saturate(1.28) contrast(1.05);--dock:62px;--aw-h:clamp(220px,31vh,340px);--hh:max(38vh,20.5vw)}
 html{background:linear-gradient(160deg,#0b4fb8 0,#1f78d8 26%,#3b9de8 50%,#8fd3f4 76%,#cdeefc 100%) fixed}
 .aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
@@ -41,17 +41,14 @@ html{background:linear-gradient(160deg,#0b4fb8 0,#1f78d8 26%,#3b9de8 50%,#8fd3f4
 @keyframes as-wing{from{transform:scaleY(.82) rotate(-6deg)}to{transform:scaleY(1.04) rotate(4deg)}}
 
 /* rare plane event: crosses once per 52s, climbing to the left, trailing a contrail; flies in the top strip above the heading so neither the plane nor its trail crosses the title text */
-.as-plane-a{left:0;top:2vh;width:220px;aspect-ratio:640/169;animation:as-plane-x 52s linear -2s infinite}
+.as-plane-a{left:0;top:.5vh;width:220px;aspect-ratio:640/169;animation:as-plane-x 52s linear -2s infinite}
 .as-plane-b{inset:0;animation:as-plane-y 52s ease-out -2s infinite}
 .as-plane{inset:0;background:var(--plane) no-repeat center/contain;filter:drop-shadow(0 4px 5px rgba(0,50,120,.3))}
 .as-trail{left:90%;top:52%;width:min(50vw,700px);height:6px;border-radius:6px;transform-origin:0 50%;rotate:1.5deg;background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,.5) 35%,rgba(255,255,255,0));filter:blur(1.2px);opacity:.9}
 .as-trail::after{content:"";position:absolute;left:0;right:0;top:-3px;height:12px;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.35),rgba(255,255,255,0) 70%);filter:blur(4px)}
 @keyframes as-plane-x{0%{translate:calc(100vw + 60px) 0}42%,100%{translate:-320px 0}}
-@keyframes as-plane-y{0%{translate:0 26px}42%,100%{translate:0 -30px}}
+@keyframes as-plane-y{0%{translate:0 6px}42%,100%{translate:0 -12px}}
 
-/* balloon drifting behind the right edge of the glass column */
-.as-balloon{left:calc(50% + 470px);top:44vh;width:clamp(44px,4.4vw,70px);filter:drop-shadow(0 6px 6px rgba(0,50,120,.3));animation:as-balloon 11s ease-in-out infinite alternate}
-@keyframes as-balloon{from{translate:-6px 10px;rotate:-2deg}to{translate:8px -16px;rotate:3deg}}
 
 /* four-point star glints */
 .as-star{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);opacity:.95;filter:drop-shadow(0 0 4px #fff)}
@@ -70,7 +67,5 @@ html{background:linear-gradient(160deg,#0b4fb8 0,#1f78d8 26%,#3b9de8 50%,#8fd3f4
 @keyframes as-pfar{to{translate:0 -70px}}
 @keyframes as-pnear{to{translate:0 -170px}}
 }}
-html[data-decor=off] .aero-sky>*{display:none}
-html[data-paused] .aero-sky *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){.aero-sky *{animation:none!important}.as-plane-a{translate:44vw 0}.as-flock{translate:60vw 0}.as-aurora.a2{opacity:.35}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-sky{display:none}}

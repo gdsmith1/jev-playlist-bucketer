@@ -1,28 +1,30 @@
-/* lane: hero (z 1). Earth globe (glass, right edge below the header so it never sits behind the title), glass-tower skyline with haze, far + near hills with scroll parallax. Hills span ~40% of the viewport, bottom-anchored; the fixed dock covers the last 62px. */
+/* lane: hero (z 1). Earth globe (glass, high in the right margin, clear of the title, the column and the dolphin leap below), opaque glass-tower skyline with base haze, far + near hills with scroll parallax. Hills span ~40% of the viewport, bottom-anchored; the fixed dock covers the last 62px. */
 .hero-scene{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;filter:var(--aero-grade,saturate(1.2));
- --i-earth:url(img/aero_earth.webp);--i-sky:url(img/aero_skyline.webp);--i-far:url(img/aero_hill_far.webp);--i-near:url(img/aero_hill_near.webp)}
+ --i-earth:url(img/aero_earth.webp);--i-sky:url(img/aero_skyline.webp);--i-far:url(img/aero_hill_far.webp);--i-mid:url(img/aero_hill_mid.webp);--i-near:url(img/aero_hill_near.webp)}
 .hero-scene i,.hero-scene div{position:absolute;display:block;font-style:normal}
 .hs-par{inset:0}
 .hs-hill{left:0;right:0;bottom:0;height:var(--hh);background:no-repeat center bottom/cover}
-.hs-hill.far{background-image:var(--i-far);opacity:.92}
+.hs-hill.far{background-image:var(--i-far)}
+.hs-hill.mid{background-image:var(--i-mid)}
 .hs-hill.near{background-image:var(--i-near)}
-/* skyline sits behind the far hill's ridge, hazed toward the sky colour */
-.hs-skyline{left:17vw;width:66vw;aspect-ratio:1400/429;bottom:calc(var(--hh) * .7);background:var(--i-sky) no-repeat center bottom/100% 100%;opacity:.82;-webkit-mask-image:linear-gradient(0deg,rgba(0,0,0,.2),#000 55%);mask-image:linear-gradient(0deg,rgba(0,0,0,.2),#000 55%)}
-.hs-skyline::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(205,238,252,.85),rgba(205,238,252,.4) 45%,rgba(205,238,252,0) 80%)}
+/* skyline stands between the far and mid hills: it draws over the far ridge and only its bases sit behind the mid ridge (base = middle of the mid ridge band), hazed toward the sky colour */
+.hs-skyline{left:17vw;width:66vw;aspect-ratio:1400/429;bottom:calc(var(--hh) * .6 + 17vh);background:var(--i-sky) no-repeat center bottom/100% 100%;opacity:1}
+/* haze tints only the base of the towers, clipped to the tower silhouette; the image alpha is solid so nothing behind (hills, sky) ever shows through */
+.hs-skyline::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(205,238,252,.6),rgba(205,238,252,.22) 35%,rgba(205,238,252,0) 65%);-webkit-mask:var(--i-sky) no-repeat center bottom/100% 100%;mask:var(--i-sky) no-repeat center bottom/100% 100%}
 /* glossy glass globe */
-.hs-globe{right:max(-70px,calc(50% - 760px));top:34vh;width:clamp(200px,19vw,300px);aspect-ratio:1;border-radius:50%;filter:drop-shadow(0 10px 18px rgba(8,50,130,.4));animation:hs-float 10s ease-in-out infinite alternate}
+.hs-globe{right:max(-60px,calc(50% - 800px));top:12vh;width:clamp(190px,15vw,290px);aspect-ratio:1;border-radius:50%;filter:drop-shadow(0 10px 18px rgba(8,50,130,.4));animation:hs-float 10s ease-in-out infinite alternate}
 .hs-earth{inset:0;border-radius:50%;background:var(--i-earth) no-repeat center/cover}
 .hs-gloss{inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 26% at 34% 18%,rgba(255,255,255,.85),rgba(255,255,255,0) 100%),radial-gradient(circle at 70% 82%,rgba(160,240,255,.5),transparent 42%),radial-gradient(circle,transparent 62%,rgba(255,255,255,.18) 88%,rgba(255,255,255,.55) 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.85),inset 0 -6px 18px rgba(0,60,160,.35),inset 0 0 28px rgba(255,255,255,.25)}
 @keyframes hs-float{from{translate:0 0}to{translate:0 9px}}
 @media (prefers-reduced-motion:no-preference){@supports (animation-timeline:scroll()){
 .hs-sk{animation:hs-psk linear both;animation-timeline:scroll(root)}
 .hs-far{animation:hs-pfar linear both;animation-timeline:scroll(root)}
+.hs-mid{animation:hs-pmid linear both;animation-timeline:scroll(root)}
 .hs-near{animation:hs-pnear linear both;animation-timeline:scroll(root)}
 @keyframes hs-psk{to{translate:0 60px}}
 @keyframes hs-pfar{to{translate:0 90px}}
+@keyframes hs-pmid{to{translate:0 140px}}
 @keyframes hs-pnear{to{translate:0 190px}}
 }}
-html[data-decor=off] .hero-scene{display:none}
-html[data-paused] .hero-scene *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){.hero-scene *{animation:none!important}}
 @media (prefers-contrast:more),(forced-colors:active){.hero-scene{display:none}}
