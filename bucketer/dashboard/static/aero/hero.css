@@ -1,6 +1,7 @@
 /* lane: hero (z 1). Earth globe (glass, high in the right margin, clear of the title, the column and the dolphin leap below), opaque glass-tower skyline with base haze, far + near hills with scroll parallax. Hills span ~40% of the viewport, bottom-anchored; the fixed dock covers the last 62px. */
 .hero-scene{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;filter:var(--aero-grade,saturate(1.2));
- --i-earth:url(img/aero_earth.webp);--i-sky:url(img/aero_skyline.webp);--i-far:url(img/aero_hill_far.webp);--i-mid:url(img/aero_hill_mid.webp);--i-near:url(img/aero_hill_near.webp)}
+ --i-earth:url(img/aero_earth.webp);--i-sky:url(img/aero_skyline.webp);--i-far:url(img/aero_hill_far.webp)}
+.hero-scene,.v3-hillfx,.v3-wx{--i-mid:url(img/aero_hill_mid.webp);--i-near:url(img/aero_hill_near.webp)}
 .hero-scene i,.hero-scene div{position:absolute;display:block;font-style:normal}
 .hs-par{inset:0}
 .hs-hill{left:0;right:0;bottom:0;height:var(--hh);background:no-repeat center bottom/cover}

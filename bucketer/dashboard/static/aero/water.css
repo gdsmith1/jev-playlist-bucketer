@@ -1,6 +1,7 @@
 /* lane: water (z2). Cyan tiled surface with sliding caustics, diagonal wave crest with foam strip, meniscus line, underwater light shafts + bubble swarm, sparkles. Band height is --aw-h; the dock covers its last 62px. */
 .aero-water{position:fixed;inset:0;pointer-events:none;overflow:hidden}
-.aero-water{z-index:2;--aw-tile:url(img/aero_water.webp)}
+.aero-water{z-index:2}
+.aero-water,.v3-wx{--aw-tile:url(img/aero_water.webp)}
 .aero-water i,.aero-water div{position:absolute;display:block;font-style:normal}
 .aw-band{left:0;right:0;bottom:0;height:var(--aw-h)}
 .aw-body{left:0;right:0;top:34px;bottom:0;overflow:hidden;background:linear-gradient(180deg,#2fd2f4 0,#00b4e6 22%,#0a84cc 55%,#073f93 100%)}

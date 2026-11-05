@@ -1,16 +1,13 @@
 /* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two parallax layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
 :root{--aero-grade:saturate(1.28) contrast(1.05);--dock:62px;--aw-h:clamp(220px,31vh,340px);--hh:max(38vh,20.5vw)}
-html{background:linear-gradient(160deg,#0b4fb8 0,#1f78d8 26%,#3b9de8 50%,#8fd3f4 76%,#cdeefc 100%) fixed}
 .aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
  --c1:url(img/aero_cloud_1.webp);--c2:url(img/aero_cloud_2.webp);--c3:url(img/aero_cloud_3.webp);--c4:url(img/aero_cloud_4.webp);--bird:url(img/aero_bird.webp);--plane:url(img/aero_plane.webp)}
 .aero-sky i,.aero-sky svg,.aero-sky div{position:absolute;display:block}
 .aero-sky i{font-style:normal}
 
-/* sun, warm sunshine accent, rays, flare ghosts */
+/* sun, warm sunshine accent, flare ghosts */
 .as-sun{left:calc(6vw - 32vmax);top:calc(4vh - 32vmax);width:64vmax;height:64vmax;border-radius:50%;mix-blend-mode:screen;background:radial-gradient(circle,#fff 0,#fffbe0 4%,#fff0a8 10%,rgba(255,226,120,.5) 22%,rgba(150,215,250,.35) 42%,transparent 68%)}
 .as-warm{left:-8vw;top:-10vh;width:70vw;height:60vh;mix-blend-mode:screen;background:radial-gradient(ellipse at 18% 18%,rgba(255,204,64,.5),rgba(255,170,40,.18) 40%,transparent 70%)}
-.as-ray{left:6vw;top:4vh;width:150vmax;height:var(--h);transform-origin:0 50%;rotate:var(--r);mix-blend-mode:screen;clip-path:polygon(0 47%,100% 0,100% 100%,0 53%);background:linear-gradient(90deg,rgba(255,246,190,.6),rgba(255,246,190,.18) 40%,transparent 75%)}
-.as-ray.r1{--r:34deg;--h:120px}.as-ray.r2{--r:47deg;--h:70px;opacity:.8}.as-ray.r3{--r:22deg;--h:54px;opacity:.7}
 .as-fl{left:calc(6vw + var(--t) * 78vw);top:calc(4vh + var(--t) * 78vh);width:var(--s);height:var(--s);translate:-50% -50%;border-radius:50%;mix-blend-mode:screen;opacity:.55;background:radial-gradient(circle,rgba(255,255,255,.05) 40%,rgba(190,240,255,.35) 82%,rgba(255,255,255,.55) 100%)}
 .as-fl:nth-of-type(odd){background:radial-gradient(circle,rgba(255,240,170,.1) 40%,rgba(255,220,120,.32) 82%,rgba(255,255,255,.5) 100%)}
 .as-fl.hex{border-radius:0;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);opacity:.4}

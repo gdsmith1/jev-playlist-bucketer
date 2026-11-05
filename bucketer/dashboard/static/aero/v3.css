@@ -1,0 +1,175 @@
+/* lane: v3 (loaded last). Owns the audit pass: one sky gradient, soft rolling rays, pastel flares, bokeh, continuous cloud/plane drift, scroll sky shift,
+   living hills (sway, light wave, cloud shadows), hill reflection + wave layers + seabed in the water, thin-film bubbles, foreground tufts/fronds,
+   the monitor with water splashing out of its screen, and the single glass recipe + Aero chrome for panels, controls, tables and charts. */
+:root{--cyan:#00b4e6;--cobalt:#0a6fd0;--lime:#49c61c;--sun:#ffd93a;--ink:#0a2a4a;--fg:#0a2a4a;--muted:#1b4268;
+--glass-blur:blur(16px) saturate(1.4) brightness(1.1);--glass-tint:rgba(236,248,255,.46);--aero-grade:saturate(1.1) contrast(1.04)}
+html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8 76%,#dff4fc 100%) fixed}
+
+/* ===== sky: rays, bokeh, scroll shift ===== */
+.v3-sky,.v3-hillfx,.v3-wx,.v3-fg,.v3-mon{position:fixed;pointer-events:none}
+.v3-sky{inset:0;z-index:0;overflow:hidden}
+.v3-sky i,.v3-sky div{position:absolute;display:block;font-style:normal}
+.v3-shift{inset:0;opacity:0;background:linear-gradient(180deg,rgba(8,70,170,0) 0,rgba(8,70,170,.4) 100%)}
+.v3-rayswrap{left:6vw;top:4vh;width:0;height:0;animation:v3-raysway 46s ease-in-out infinite alternate;mix-blend-mode:screen}
+.v3-ray{left:0;top:0;width:150vmax;height:var(--w);margin-top:calc(var(--w) / -2);transform-origin:0 50%;rotate:var(--r);opacity:var(--o);filter:blur(7px);clip-path:polygon(0 42%,100% 0,100% 100%,0 58%);background:linear-gradient(90deg,rgba(255,248,205,.85),rgba(255,246,190,.22) 42%,transparent 78%)}
+@keyframes v3-raysway{from{rotate:-3deg}to{rotate:3deg}}
+.v3-bk{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;border-radius:50%;mix-blend-mode:screen;opacity:.5;background:radial-gradient(circle,rgba(var(--c),.04) 0,rgba(var(--c),.12) 62%,rgba(var(--c),.5) 90%,rgba(var(--c),.2) 100%);box-shadow:inset 0 0 0 1px rgba(var(--c),.35);animation:v3-bokeh var(--d) ease-in-out var(--l) infinite alternate}
+@keyframes v3-bokeh{from{translate:-50% -50%;opacity:.25}to{translate:calc(-50% + 3vw) calc(-50% - 2.5vh);opacity:.6}}
+/* pastel spectrum flares: ring and disc variants strung along the sun diagonal */
+.aero-sky .as-fl:nth-of-type(n){background:radial-gradient(circle,rgba(var(--fc),.05) 40%,rgba(var(--fc),.34) 82%,rgba(255,255,255,.5) 100%)}
+.aero-sky .as-fl.ring:nth-of-type(n){background:none;box-shadow:inset 0 0 0 3px rgba(var(--fc),.45),inset 0 0 14px rgba(var(--fc),.35)}
+.aero-sky .as-fl.hex:nth-of-type(n){background:radial-gradient(circle,rgba(var(--fc),.1) 30%,rgba(var(--fc),.4) 100%)}
+.as-aurora{filter:blur(34px)}
+.as-warm{opacity:.9}
+
+/* ===== clouds roll across continuously (translate-only, linear) with a slow breathing scale ===== */
+.aero-sky .as-cl{left:-48vw;animation:v3-roll var(--cd) linear var(--cl) infinite,v3-breathe 40s ease-in-out infinite alternate}
+.aero-sky .as-cl.cl1{--cd:170s;--cl:-52s}.aero-sky .as-cl.cl2a{--cd:230s;--cl:-98s}.aero-sky .as-cl.cl2b{--cd:200s;--cl:-150s}.aero-sky .as-cl.cl3{--cd:260s;--cl:-70s}.aero-sky .as-cl.cl4{--cd:210s;--cl:-30s;right:auto}
+@keyframes v3-roll{from{translate:0 0}to{translate:180vw 0}}
+@keyframes v3-breathe{from{scale:1}to{scale:1.04}}
+.as-cl.cl3{filter:blur(.8px)}.as-cl.cl2a{filter:blur(1.2px)}
+
+/* ===== plane: big, climbing and growing as it passes, soft contrail, behind the near clouds ===== */
+.aero-sky .as-plane-a{top:3vh;width:clamp(260px,22vw,420px);animation:v3-plane-x 110s linear -14s infinite}
+.aero-sky .as-plane-b{animation:v3-plane-y 110s ease-in-out -14s infinite}
+.aero-sky .as-plane{animation:v3-bank 7s ease-in-out infinite alternate}
+.aero-sky .as-plane::after{content:"";position:absolute;left:34%;top:30%;width:22px;height:22px;translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);filter:drop-shadow(0 0 5px #fff);animation:as-twinkle 3.2s ease-in-out infinite}
+.aero-sky .as-trail{width:min(62vw,900px);height:7px;opacity:.85}
+@keyframes v3-plane-x{0%{translate:calc(100vw + 80px) 0;scale:.55}62%,100%{translate:-480px 0;scale:1.08}}
+@keyframes v3-plane-y{0%{translate:0 -2vh}62%,100%{translate:0 7vh}}
+@keyframes v3-bank{from{rotate:-1.6deg}to{rotate:1.6deg}}
+.as-flock.far{top:9vh;scale:.55;opacity:.75;filter:blur(.7px);animation-duration:140s;animation-delay:-60s}
+
+/* ===== hills: sway, mouse parallax, travelling light wave and cloud shadows ===== */
+.hs-hill{left:-5vw;right:-5vw}
+.hs-hill.far{animation:v3-sway 52s ease-in-out infinite alternate}
+.hs-hill.mid{animation:v3-sway 38s ease-in-out -9s infinite alternate-reverse}
+.hs-hill.near{animation:v3-sway 29s ease-in-out -4s infinite alternate}
+@keyframes v3-sway{from{translate:-1.6vw 0}to{translate:1.6vw 0}}
+.hs-skyline{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 11%,#000 89%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 11%,#000 89%,transparent 100%);filter:saturate(.8)}
+.hs-skyline::before{content:"";position:absolute;left:-2%;right:-2%;bottom:-2px;height:7%;z-index:1;background:radial-gradient(circle at 50% 100%,#2c9a26 0 58%,transparent 60%) 0 100%/31px 100% repeat-x,radial-gradient(circle at 50% 100%,#1f7e1e 0 56%,transparent 58%) 15px 100%/37px 78% repeat-x}
+.hs-sk{transform:translate(calc(var(--mx,0) * -6px),calc(var(--my,0) * -3px))}
+.hs-far{transform:translate(calc(var(--mx,0) * -4px),calc(var(--my,0) * -2px))}
+.hs-mid{transform:translate(calc(var(--mx,0) * -9px),calc(var(--my,0) * -4px))}
+.hs-near{transform:translate(calc(var(--mx,0) * -16px),calc(var(--my,0) * -6px))}
+.as-parfar{transform:translate(calc(var(--mx,0) * -3px),0)}.as-parnear{transform:translate(calc(var(--mx,0) * -7px),0)}
+.hs-globe{width:clamp(230px,19vw,360px);top:9vh}
+.hs-globe::before{content:"";position:absolute;inset:-9%;border-radius:50%;background:radial-gradient(circle,transparent 56%,rgba(130,225,255,.5) 66%,rgba(130,225,255,.12) 74%,transparent 80%)}
+.hs-gloss{background:radial-gradient(ellipse 42% 22% at 34% 16%,rgba(255,255,255,.9),rgba(255,255,255,0) 100%),radial-gradient(ellipse 60% 30% at 52% 96%,rgba(150,240,255,.55),transparent 70%),radial-gradient(circle,transparent 58%,rgba(160,230,255,.3) 86%,rgba(255,255,255,.65) 100%)}
+.v3-hillfx{inset:0;z-index:1;overflow:hidden}
+.hf{position:absolute;left:-5vw;right:-5vw;bottom:0;height:var(--hh);overflow:hidden;background:none}
+.hf.mid{transform:translateY(-17vh);-webkit-mask:var(--i-mid) no-repeat center bottom/cover;mask:var(--i-mid) no-repeat center bottom/cover}
+.hf.near{transform:translateY(-6vh);-webkit-mask:var(--i-near) no-repeat center bottom/cover;mask:var(--i-near) no-repeat center bottom/cover}
+.hf i{position:absolute;display:block}
+.hf-wave{top:0;bottom:0;left:-60%;width:60%;mix-blend-mode:soft-light;background:linear-gradient(100deg,transparent 0,rgba(255,255,170,.75) 50%,transparent 100%);animation:v3-wave 17s ease-in-out infinite}
+.hf-wave.w2{animation-duration:23s;animation-delay:-8s}
+@keyframes v3-wave{from{translate:0 0}to{translate:330% 0}}
+.hf-shadow{top:-10%;bottom:-10%;left:-30%;width:34%;border-radius:50%;mix-blend-mode:multiply;background:radial-gradient(ellipse,rgba(10,70,120,.34),transparent 68%);filter:blur(12px);animation:v3-cshadow 70s linear infinite}
+.hf-shadow.s2{animation-duration:90s;animation-delay:-40s;width:44%}
+@keyframes v3-cshadow{from{translate:0 0}to{translate:420% 0}}
+
+/* ===== water: hill reflection, extra wave layers, big-scale tile, bright horizon line, seabed, ripples, denser sparkles ===== */
+.v3-wx{left:0;right:0;bottom:0;height:var(--aw-h);z-index:3;overflow:hidden}
+.v3-wx i,.v3-wx div,.v3-wx svg{position:absolute;display:block;font-style:normal}
+.wx-reflect{left:0;right:0;top:34px;height:96px;background:var(--i-near) center bottom/cover no-repeat;transform:scaleY(-1);opacity:.3;filter:url(#v3-ripple) saturate(1.2);-webkit-mask-image:linear-gradient(0deg,#000 0,transparent 100%);mask-image:linear-gradient(0deg,#000 0,transparent 100%)}
+.wx-tile{left:0;right:0;top:34px;bottom:0;overflow:hidden;mix-blend-mode:screen;opacity:.22}
+.wx-tile i{left:-400px;top:-400px;width:calc(100% + 800px);height:calc(100% + 800px);background:var(--aw-tile) 0 0/377px repeat;rotate:7deg;animation:v3-tile 52s linear infinite}
+@keyframes v3-tile{to{translate:377px 377px}}
+.wx-wave{left:-10%;width:220%;height:22px}
+.wx-wave.w1{top:26px;animation:v3-wavex 16s linear infinite}
+.wx-wave.w2{top:30px;animation:v3-wavex 24s linear infinite reverse}
+@keyframes v3-wavex{to{translate:-45% 0}}
+.wx-spec{left:0;right:0;top:32px;height:5px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95) 18%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.95) 82%,transparent);filter:blur(.8px) drop-shadow(0 0 5px #fff)}
+.wx-sand{left:0;right:0;bottom:var(--dock);height:56px;background:radial-gradient(circle at 12% 70%,rgba(255,244,220,.75) 0 2px,transparent 3px) 0 0/73px 30px,radial-gradient(circle at 60% 40%,rgba(120,90,50,.45) 0 2.5px,transparent 3.5px) 0 0/97px 36px,linear-gradient(0deg,rgba(234,208,150,.82),rgba(214,190,130,.5) 55%,transparent);-webkit-mask-image:linear-gradient(0deg,#000 40%,transparent);mask-image:linear-gradient(0deg,#000 40%,transparent)}
+.wx-ring{left:var(--x);top:30px;width:var(--w);height:calc(var(--w) * .22);translate:-50% 0;border-radius:50%;border:2px solid rgba(255,255,255,.85);opacity:0;animation:v3-ring var(--d) ease-out var(--l) infinite}
+@keyframes v3-ring{0%{scale:.1;opacity:0}12%{opacity:.85}100%{scale:1.7;opacity:0}}
+.wx-gl{left:var(--x);top:calc(30px + var(--y));width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);filter:drop-shadow(0 0 4px #fff);opacity:.3;animation:as-twinkle var(--t) ease-in-out var(--d) infinite}
+
+/* animals: fish pass behind the glass column instead of showing through it as smudges */
+.aero-animals-front{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 610px),transparent calc(50% - 540px),transparent calc(50% + 540px),#000 calc(50% + 610px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 610px),transparent calc(50% - 540px),transparent calc(50% + 540px),#000 calc(50% + 610px),#000 100%)}
+.aero-bf{top:24vh}
+
+/* ===== thin-film bubbles: clear centre, thin rim, rainbow film on every one, double specular ===== */
+.aero-bub{background:radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(255,255,255,.12) 84%,rgba(255,255,255,.4) 97%)}
+.aero-bub::before{content:"";position:absolute;inset:0;border-radius:50%;opacity:.55;background:conic-gradient(from 20deg,#ff6ad5,#ffd36a,#7dff8f,#5fe6ff,#6a8bff,#c76aff,#ff6ad5);-webkit-mask:radial-gradient(farthest-side,transparent 88%,#000 95%,transparent 100%);mask:radial-gradient(farthest-side,transparent 88%,#000 95%,transparent 100%)}
+.aero-bub.irid::before{opacity:.85}
+.aero-bub.xl{filter:blur(1.2px)}
+
+/* ===== foreground framing: grass tufts at the banks, droplet-covered fronds at the right edge ===== */
+.v3-fg{inset:0;z-index:9;overflow:hidden}
+.v3-fg .fg-tuft,.v3-fg .fg-leaf{position:absolute;display:block;background-repeat:no-repeat;background-position:center bottom;background-size:contain}
+.fg-tuft{bottom:calc(var(--aw-h) - 52px);width:clamp(240px,22vw,420px);aspect-ratio:900/500;background-image:url(img/aero_grass_tuft.webp);transform-origin:50% 100%;animation:v3-tuft 5s ease-in-out infinite alternate}
+.fg-tuft.l{left:-40px}.fg-tuft.r{right:-60px;scale:-1 1;animation-delay:-2.2s}
+@keyframes v3-tuft{from{transform:skewX(-1.8deg)}to{transform:skewX(1.8deg)}}
+.fg-leaf{right:-30px;top:30vh;width:clamp(190px,16vw,310px);aspect-ratio:800/900;background-image:url(img/aero_leaf_fronds.webp);background-position:right bottom;filter:blur(1.6px) drop-shadow(0 8px 10px rgba(0,50,90,.3));transform-origin:100% 100%;animation:v3-frond 9s ease-in-out infinite alternate}
+@keyframes v3-frond{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+
+/* ===== monitor with water splashing out of the screen ===== */
+.v3-mon{left:max(6px,calc(50% - 790px));bottom:calc(var(--aw-h) - 46px);width:clamp(210px,15.5vw,270px);aspect-ratio:300/450;z-index:9;filter:drop-shadow(0 12px 14px rgba(0,50,100,.35))}
+.v3-mon svg{width:100%;height:100%;display:block}
+.mon-burst{transform-origin:150px 356px;transform-box:view-box;animation:mon-burst 3.4s ease-in-out infinite alternate}
+@keyframes mon-burst{from{transform:scale(.97,.94)}to{transform:scale(1.03,1.06)}}
+.mon-jet{transform-box:fill-box;transform-origin:50% 100%;animation:mon-jet var(--jd) ease-in-out infinite alternate}
+@keyframes mon-jet{from{transform:scale(.94,.9) skewX(-1.5deg)}to{transform:scale(1.03,1.07) skewX(1.5deg)}}
+.mon-hl{animation:mon-shine 2.2s ease-in-out infinite alternate}@keyframes mon-shine{from{opacity:.55}to{opacity:1}}
+.mon-foam{animation:mon-foam 3s linear infinite}
+@keyframes mon-foam{to{stroke-dashoffset:-88}}
+.mon-d{transform-box:fill-box;transform-origin:center;animation:mon-d var(--t) ease-in var(--l) infinite}
+@keyframes mon-d{0%{translate:0 0;opacity:0;scale:.4}12%{opacity:1;scale:1}45%{translate:calc(var(--dx) * .6) calc(var(--up) * -1)}100%{translate:var(--dx) calc(var(--up) * .7);opacity:0}}
+.mon-drip{transform-box:fill-box;animation:mon-drip 4.2s ease-in infinite}.mon-drip.d2{animation-delay:-2s}
+@keyframes mon-drip{0%{translate:0 -10px;opacity:0}15%{opacity:1}100%{translate:0 40px;opacity:0}}
+
+/* ===== one glass recipe, legible text, hover glint, dew beads, window chrome ===== */
+.stat,.card,.drill,.decs,.simrec,.note,#detail,#covbars,#tags{
+ -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);background-color:var(--glass-tint);
+ background-image:radial-gradient(circle,#fff 0 1px,rgba(255,255,255,.4) 2px,transparent 3.2px),linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%),linear-gradient(115deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.12) 38%,rgba(255,255,255,0) 39%),linear-gradient(160deg,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 40%);
+ background-size:43px 9px,250% 100%,100% 100%,100% 100%;background-position:5px 3px,160% 0,0 0,0 0;background-repeat:repeat-x,no-repeat,no-repeat,no-repeat;
+ transition:background-position .7s ease;
+ box-shadow:0 0 0 1px rgba(0,40,90,.45),0 10px 20px rgba(0,0,0,.1),0 18px 40px rgba(0,60,120,.25),0 0 16px rgba(0,200,255,.2),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.4)}
+.stat:hover,.card:hover,.drill:hover{background-position:5px 3px,-60% 0,0 0,0 0}
+.sub,.legend,.ex,.tag,.n,.bar .n,.hbar .n,.haxis,.daxis span,.hist .col,.dbar{color:#123a62}
+.sub,.legend,main>label{background:rgba(236,248,255,.5)}
+.card .head::after,.drillhead::after{content:"";position:absolute;right:10px;top:50%;width:72px;height:20px;margin-top:-10px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='20' viewBox='0 0 72 20'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff'/%3E%3Cstop offset='.5' stop-color='%23cfe4f6'/%3E%3Cstop offset='.5' stop-color='%2399bfe3'/%3E%3Cstop offset='1' stop-color='%23d8ebf9'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffc2b0'/%3E%3Cstop offset='.5' stop-color='%23e8452c'/%3E%3Cstop offset='.5' stop-color='%23b81a08'/%3E%3Cstop offset='1' stop-color='%23ff7a5c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='19' height='19' rx='4' fill='url(%23a)' stroke='%23456b8c'/%3E%3Crect x='22.5' y='.5' width='19' height='19' rx='4' fill='url(%23a)' stroke='%23456b8c'/%3E%3Crect x='44.5' y='.5' width='27' height='19' rx='4' fill='url(%23r)' stroke='%23701008'/%3E%3Cpath d='M6 13h8' stroke='%23234' stroke-width='2'/%3E%3Crect x='28' y='5.5' width='8' height='8' fill='none' stroke='%23234' stroke-width='1.6'/%3E%3Cpath d='M54 5l8 9M62 5l-8 9' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/contain}
+.card .head{padding-right:96px}.drillhead{position:relative;padding-right:96px}
+/* stat tiles: glossy orb badge */
+.stat::before{content:"";position:absolute;right:12px;top:10px;width:24px;height:24px;border-radius:50%;background:radial-gradient(ellipse 60% 36% at 40% 24%,rgba(255,255,255,.95),rgba(255,255,255,0) 100%),radial-gradient(circle at 50% 85%,color-mix(in srgb,var(--o,#00b4e6) 55%,#fff),var(--o,#00b4e6) 60%,color-mix(in srgb,var(--o,#00b4e6) 70%,#000));box-shadow:0 2px 4px rgba(8,70,120,.35),inset 0 -3px 4px rgba(0,0,0,.2)}
+.stat:nth-child(5n+2)::before{--o:#3ddc1e}.stat:nth-child(5n+3)::before{--o:#ffc21a}.stat:nth-child(5n+4)::before{--o:#2f6fe0}.stat:nth-child(5n)::before{--o:#14d1b8}
+/* section glyphs vary */
+h2:nth-of-type(5n+1)::before{content:"\2600"}h2:nth-of-type(5n+2)::before{content:"\273F"}h2:nth-of-type(5n+3)::before{content:"\2756"}h2:nth-of-type(5n+4)::before{content:"\2726"}
+h1{font-weight:600;letter-spacing:-.5px}
+.btn,button.more{min-height:40px;padding:8px 26px}
+
+/* ===== Aero controls: scrollbars, checkbox ===== */
+html::-webkit-scrollbar,.scroll::-webkit-scrollbar{width:14px;height:14px}
+html::-webkit-scrollbar-track,.scroll::-webkit-scrollbar-track{background:linear-gradient(90deg,rgba(0,60,120,.2),rgba(255,255,255,.55));border-radius:8px}
+html::-webkit-scrollbar-thumb,.scroll::-webkit-scrollbar-thumb{border:1px solid #0a5f94;border-radius:8px;background:linear-gradient(90deg,#e4f5ff,#86cdf2 50%,#3ea8e8 50%,#92d8fb);box-shadow:inset 0 1px 0 #fff}
+label.sub input[type=checkbox],td input[type=checkbox]{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin:0 8px 0 0;border:1px solid #0a5f94;border-radius:5px;vertical-align:middle;cursor:pointer;background:linear-gradient(180deg,#fff,#cfe9f8 50%,#a9d7f1 50%,#d8f0fc);box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,60,110,.3)}
+label.sub input[type=checkbox]:checked,td input[type=checkbox]:checked{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4 9.5l3.2 3.2L14 5.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat,linear-gradient(180deg,#c8f56a,#3ddc1e 50%,#27a812 50%,#4ee22e);border-color:#16720a}
+
+/* ===== data surfaces: glass tables, gel heat tiles, capsule headers ===== */
+.scroll{background:rgba(255,255,255,.58);-webkit-backdrop-filter:blur(12px) saturate(1.3);backdrop-filter:blur(12px) saturate(1.3);border-radius:16px}
+table.hm td:not(.self){background-image:linear-gradient(180deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.08) 48%,rgba(0,40,90,.1) 50%,rgba(255,255,255,.1) 100%)!important}
+tbody tr:nth-child(even):not(.adetail){background:rgba(255,255,255,.2)}
+.dbar i,.hist .col i{box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 3px 0 0 rgba(255,255,255,.4),0 3px 6px rgba(0,60,120,.3)}
+
+/* ===== sound toggle in the taskbar ===== */
+.sndbtn{position:relative;flex:none;width:40px;height:40px;margin-left:6px;border-radius:50%;cursor:pointer;border:1px solid #4d92bd;background:linear-gradient(180deg,#fff 0,#d2eefc 50%,#a0d4f2 50%,#cdecfc 100%);box-shadow:inset 0 1px 1px #fff,0 3px 6px rgba(0,50,100,.25)}
+.sndbtn::before{content:"";position:absolute;left:50%;top:50%;width:20px;height:18px;margin:-9px 0 0 -10px;background:#0a5f94;clip-path:polygon(0 34%,28% 34%,62% 4%,62% 96%,28% 66%,0 66%)}
+.sndbtn[aria-pressed=false]::after{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;margin-top:-1px;background:#c02a14;rotate:-45deg;border-radius:2px}
+.sndbtn[aria-pressed=true]{background:linear-gradient(to bottom,#9fe0ff 0,#1c97e8 50%,#0361A3 50%,#2ab4f8 100%);border-color:#024b7f}
+.sndbtn[aria-pressed=true]::before{background:#fff}
+.v3-bloom{position:fixed;left:0;top:0;z-index:12;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;mix-blend-mode:soft-light;background:radial-gradient(circle,rgba(255,255,255,.7),transparent 66%);opacity:0;transition:opacity .4s}
+
+@media (prefers-reduced-motion:no-preference){
+.as-aurora.a1{animation-name:v3-aur1}.as-aurora.a2{animation-name:v3-aur2}
+@keyframes v3-aur1{from{opacity:.3;translate:-4vw 0}to{opacity:.08;translate:4vw 2vh}}
+@keyframes v3-aur2{from{opacity:.05}to{opacity:.26}}
+@supports (animation-timeline:scroll()){
+.v3-shift{animation:v3-shift linear both;animation-timeline:scroll(root)}
+@keyframes v3-shift{to{opacity:1}}
+.as-sun{animation:v3-sunlow linear both;animation-timeline:scroll(root)}
+@keyframes v3-sunlow{to{translate:0 7vh;filter:hue-rotate(-14deg) saturate(1.2)}}
+}}
+@media (prefers-reduced-motion:reduce){.v3-sky *,.v3-hillfx *,.v3-wx *,.v3-fg *,.v3-mon *{animation:none!important}.aero-sky .as-cl{left:auto}.aero-sky .as-cl.cl1{left:-9vw}.aero-sky .as-cl.cl2a{left:40vw}.aero-sky .as-cl.cl2b{left:63vw}.aero-sky .as-cl.cl3{left:-4vw}.aero-sky .as-cl.cl4{right:-6vw}.v3-bloom{display:none}.wx-gl{opacity:.8}}
+@media (prefers-contrast:more),(forced-colors:active){.v3-sky,.v3-hillfx,.v3-wx,.v3-fg,.v3-mon,.v3-bloom{display:none}}
+@media (prefers-reduced-transparency:reduce){.stat,.card,.drill,.decs,.simrec,.note,#detail,#covbars,#tags{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background-color:#e9f6ff!important}}

@@ -8,9 +8,9 @@ All WebP with alpha unless noted. Sizes are pixels (w x h).
 | aero_cloud_2.webp | 800x420 | soft white puffy cumulus | flat bottom (faded), float freely |
 | aero_cloud_3.webp | 900x245 | long low cumulus bank | flat faded bottom |
 | aero_cloud_4.webp | 900x514 | cumulus mass with wispy cirrus streaks, deep-blue-sky origin so shading is bluer | right edge is a straight crop edge; put it at the right viewport edge or behind something |
-| aero_hill_far.webp | 2400x520 | rendered (not a photo): hazy blue-green far ridge, atmospheric haze, sunlit crest rim | bottom-align; ridge y~90-210; smooth sinuous ridge, no tiling |
-| aero_hill_mid.webp | 2400x520 | rendered mid hills: lit slopes top-left, soft folds, lime crest fading to deep green | bottom-align; ridge y~120-280 |
-| aero_hill_near.webp | 2400x520 | rendered near hill: deep saturated green, yellow-green sunlit crest, fine grass blade texture only in the lower half | bottom-align; ridge y~165-355; bottom row opaque |
+| aero_hill_far.webp | 3200x693 | rendered: hazy blue-green far ridge, tree-line speckle, sunlit rim | bottom-align, blade-detailed; ridge y~120-270 at this size (same silhouette as the old 2400x520); no tiling |
+| aero_hill_mid.webp | 3200x693 | rendered: lit meadow slopes, multi-scale grass texture, hedgerows, tiny tree clusters, lime crest rim | bottom-align, blade-detailed; ridge y~100-390 at this size |
+| aero_hill_near.webp | 3200x693 | rendered: deep green hill, individual grass blades along the whole crest and across the body | bottom-align, blade-detailed; ridge y~139-468 at this size; bottom row opaque |
 | aero_plane.webp | 640x169 | Airbus A380 in climb attitude, nose up-left, tail right | livery painted out (unmarked white jet) |
 | aero_skyline.webp | 1400x429 | glass towers, cyan tint | bottom-align; three separate groups with gaps; alpha solid inside silhouettes (opaque) |
 | aero_water.webp | 512x512 | OPAQUE seamless tile, cyan ripples/caustics | `background-repeat: repeat` |
@@ -23,3 +23,6 @@ All WebP with alpha unless noted. Sizes are pixels (w x h).
 | aero_clownfish_big.webp | 700x413 | clownfish facing left | aspect 1.69 (was 1.71) |
 | aero_moorish_idol.webp | 700x538 | Moorish idol, long dorsal filament now included, yellow | aspect 1.30 (was 1.17, old one cropped the filament) |
 | aero_goldfish.webp | 700x521 | red-cap goldfish, long fins | aspect 1.34 (was 1.35) |
+
+| aero_grass_tuft.webp | 900x500 | ~120 curved grass blades with rim light and a few daisies, transparent | bottom-align; foreground corner tuft |
+| aero_leaf_fronds.webp | 800x900 | 7 glossy mint/tropical leaves with veins, specular streaks and 13 water droplets, transparent | leaves enter from right and bottom edges; frame the right edge |
