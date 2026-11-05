@@ -1,4 +1,4 @@
-/* lane: hero (z 1). Earth globe (glass, high in the right margin, clear of the title, the column and the dolphin leap below), opaque glass-tower skyline with base haze, far + near hills with scroll parallax. Hills span ~40% of the viewport, bottom-anchored; the fixed dock covers the last 62px. */
+/* lane: hero (z 1). Earth globe (glass, high in the right margin, clear of the title, the column and the dolphin leap below), opaque glass-tower skyline with base haze, far + near hills. Hills span ~40% of the viewport, bottom-anchored; the fixed dock covers the last 62px. */
 .hero-scene{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;filter:var(--aero-grade,saturate(1.2));
  --i-earth:url(img/aero_earth.webp);--i-sky:url(img/aero_skyline.webp);--i-far:url(img/aero_hill_far.webp)}
 .hero-scene,.v3-hillfx,.v3-wx{--i-mid:url(img/aero_hill_mid.webp);--i-near:url(img/aero_hill_near.webp)}
@@ -17,15 +17,5 @@
 .hs-earth{inset:0;border-radius:50%;background:var(--i-earth) no-repeat center/cover}
 .hs-gloss{inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 26% at 34% 18%,rgba(255,255,255,.85),rgba(255,255,255,0) 100%),radial-gradient(circle at 70% 82%,rgba(160,240,255,.5),transparent 42%),radial-gradient(circle,transparent 62%,rgba(255,255,255,.18) 88%,rgba(255,255,255,.55) 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.85),inset 0 -6px 18px rgba(0,60,160,.35),inset 0 0 28px rgba(255,255,255,.25)}
 @keyframes hs-float{from{translate:0 0}to{translate:0 9px}}
-@media (prefers-reduced-motion:no-preference){@supports (animation-timeline:scroll()){
-.hs-sk{animation:hs-psk linear both;animation-timeline:scroll(root)}
-.hs-far{animation:hs-pfar linear both;animation-timeline:scroll(root)}
-.hs-mid{animation:hs-pmid linear both;animation-timeline:scroll(root)}
-.hs-near{animation:hs-pnear linear both;animation-timeline:scroll(root)}
-@keyframes hs-psk{to{translate:0 60px}}
-@keyframes hs-pfar{to{translate:0 90px}}
-@keyframes hs-pmid{to{translate:0 140px}}
-@keyframes hs-pnear{to{translate:0 190px}}
-}}
 @media (prefers-reduced-motion:reduce){.hero-scene *{animation:none!important}}
 @media (prefers-contrast:more),(forced-colors:active){.hero-scene{display:none}}

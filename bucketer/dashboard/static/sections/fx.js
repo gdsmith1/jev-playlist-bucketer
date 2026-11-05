@@ -1,9 +1,6 @@
-/* fx: mouse parallax + cursor bloom, count-up on stat numbers, optional WebAudio chimes (off by default, speaker button in the taskbar) */
+/* fx: count-up on stat numbers, optional WebAudio chimes (off by default, speaker button in the taskbar) */
 {const root=document.documentElement,calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
- if(!calm){let mx=0,my=0,raf=0;const bloom=document.createElement("div");bloom.className="v3-bloom";document.body.appendChild(bloom);
-  addEventListener("pointermove",e=>{mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1;
-   if(!raf)raf=requestAnimationFrame(()=>{raf=0;root.style.setProperty("--mx",mx.toFixed(3));root.style.setProperty("--my",my.toFixed(3));bloom.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;bloom.style.opacity=.55})},{passive:true});
-  document.addEventListener("pointerleave",()=>{bloom.style.opacity=0});
+ if(!calm){
   document.querySelectorAll(".stat b").forEach(el=>{const m=el.textContent.match(/^(\D*)([\d,]+)(\D*)$/);if(!m)return;
    const end=+m[2].replace(/,/g,""),t0=performance.now(),dur=900;if(!(end>0))return;
    const tick=t=>{const k=Math.min(1,(t-t0)/dur),v=Math.round(end*(1-Math.pow(1-k,3)));el.textContent=m[1]+v.toLocaleString()+m[3];if(k<1)requestAnimationFrame(tick)};requestAnimationFrame(tick)})}

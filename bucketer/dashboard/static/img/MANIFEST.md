@@ -17,12 +17,10 @@ All WebP with alpha unless noted. Sizes are pixels (w x h).
 | aero_earth.webp | 600x600 | Blue Marble globe, circular alpha | add gloss overlay in CSS |
 | aero_butterfly.webp | 700x502 | monarch, side view facing right | |
 | aero_bird.webp | 560x540 | black tern in flight, wings spread, diving left | |
-| aero_dolphin_leap.webp | 700x450 | spinner dolphin leaping, blue gradient-mapped (same orientation as before) | aspect 1.56 (was 1.57) |
+| aero_dolphin_leap.webp | 700x450 | spinner dolphin leaping, natural slate-grey grade (no gradient map; same orientation as before) | aspect 1.56 |
 | aero_clownfish_big.webp | 700x413 | clownfish facing left | aspect 1.69 (was 1.71) |
 | aero_moorish_idol.webp | 700x538 | Moorish idol, long dorsal filament now included, yellow | aspect 1.30 (was 1.17, old one cropped the filament) |
 | aero_goldfish.webp | 700x521 | red-cap goldfish, long fins | aspect 1.34 (was 1.35) |
 
-| aero_grass_tuft.webp | 900x500 | ~120 curved grass blades with rim light and a few daisies, transparent | bottom-align; foreground corner tuft |
-| aero_splash.webp | 900x1000 | water burst erupting upward, jets, thin sheets, spray; transparent | bottom-centre (x~460) is the emerging point; bottom edge is cut straight, hide behind bezel |
-| aero_splash_lip.webp | 900x260 | water slopping over a flat edge, lumpy lip and 6 drips; transparent | top edge merges into the splash above; align under the splash base |
-| aero_splash_drops.webp | 600x600 | ~25 separate glossy droplets (r 3-26px, some elongated); transparent | place/animate as a spray layer |
+| aero_monitor.webp | 780x795 | photo of a flat-panel monitor (3/4 view), shell recoloured to the site blues, landscape photo on screen | stacks exactly with aero_monitor_water.webp; screen quad on canvas about (123,276) (542,271) (549,619) (131,638) |
+| aero_monitor_water.webp | 780x795 | real wave-spray photo keyed to white water, erupting from the screen's bottom centre up and to the right | same canvas as aero_monitor.webp; the fish goes between the two |

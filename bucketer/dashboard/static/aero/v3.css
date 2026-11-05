@@ -1,15 +1,14 @@
-/* lane: v3 (loaded last). Owns the audit pass: one sky gradient, soft rolling rays, pastel flares, bokeh, continuous cloud/plane drift, scroll sky shift,
+/* lane: v3 (loaded last). Owns the audit pass: one sky gradient, soft rolling rays, pastel flares, bokeh, continuous cloud/plane drift,
    living hills (sway, light wave, cloud shadows), hill reflection + wave layers + seabed in the water, thin-film bubbles, foreground tufts/fronds,
    the monitor with water splashing out of its screen, and the single glass recipe + Aero chrome for panels, controls, tables and charts. */
 :root{--cyan:#00b4e6;--cobalt:#0a6fd0;--lime:#49c61c;--sun:#ffd93a;--ink:#0a2a4a;--fg:#0a2a4a;--muted:#1b4268;
 --glass-blur:blur(16px) saturate(1.4) brightness(1.1);--glass-tint:rgba(236,248,255,.46);--aero-grade:saturate(1.1) contrast(1.04)}
 html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8 76%,#dff4fc 100%) fixed}
 
-/* ===== sky: rays, bokeh, scroll shift ===== */
-.v3-sky,.v3-hillfx,.v3-wx,.v3-fg,.v3-mon{position:fixed;pointer-events:none}
+/* ===== sky: rays, bokeh ===== */
+.v3-sky,.v3-hillfx,.v3-wx,.v3-mon{position:fixed;pointer-events:none}
 .v3-sky{inset:0;z-index:0;overflow:hidden}
 .v3-sky i,.v3-sky div{position:absolute;display:block;font-style:normal}
-.v3-shift{inset:0;opacity:0;background:linear-gradient(180deg,rgba(8,70,170,0) 0,rgba(8,70,170,.4) 100%)}
 .v3-rayswrap{left:6vw;top:4vh;width:0;height:0;animation:v3-raysway 46s ease-in-out infinite alternate;mix-blend-mode:screen}
 .v3-ray{left:0;top:0;width:150vmax;height:var(--w);margin-top:calc(var(--w) / -2);transform-origin:0 50%;rotate:var(--r);opacity:var(--o);filter:blur(7px);clip-path:polygon(0 42%,100% 0,100% 100%,0 58%);background:linear-gradient(90deg,rgba(255,248,205,.85),rgba(255,246,190,.22) 42%,transparent 78%)}
 @keyframes v3-raysway{from{rotate:-3deg}to{rotate:3deg}}
@@ -30,8 +29,8 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 .as-cl.cl3{filter:blur(.8px)}.as-cl.cl2a{filter:blur(1.2px)}
 
 /* ===== plane: big, climbing and growing as it passes, soft contrail, behind the near clouds ===== */
-.aero-sky .as-plane-a{top:3vh;width:clamp(260px,22vw,420px);animation:v3-plane-x 110s linear -14s infinite}
-.aero-sky .as-plane-b{animation:v3-plane-y 110s ease-in-out -14s infinite}
+.aero-sky .as-plane-a{top:3vh;width:clamp(260px,22vw,420px);animation:v3-plane-x 150s linear 35s infinite backwards}
+.aero-sky .as-plane-b{animation:v3-plane-y 150s ease-in-out 35s infinite backwards}
 .aero-sky .as-plane{animation:v3-bank 7s ease-in-out infinite alternate}
 .aero-sky .as-plane::after{content:"";position:absolute;left:34%;top:30%;width:22px;height:22px;translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);filter:drop-shadow(0 0 5px #fff);animation:as-twinkle 3.2s ease-in-out infinite}
 .aero-sky .as-trail{width:min(62vw,900px);height:7px;opacity:.85}
@@ -50,11 +49,6 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 /* haze only touches the very base so the towers stay solid and clearly visible */
 .hs-skyline::after{background:linear-gradient(0deg,rgba(205,238,252,.32),rgba(205,238,252,.08) 22%,rgba(205,238,252,0) 40%)}
 .hs-skyline::before{content:"";position:absolute;left:-2%;right:-2%;bottom:-2px;height:7%;z-index:1;background:radial-gradient(circle at 50% 100%,#2c9a26 0 58%,transparent 60%) 0 100%/31px 100% repeat-x,radial-gradient(circle at 50% 100%,#1f7e1e 0 56%,transparent 58%) 15px 100%/37px 78% repeat-x}
-.hs-sk{transform:translate(calc(var(--mx,0) * -6px),calc(var(--my,0) * -3px))}
-.hs-far{transform:translate(calc(var(--mx,0) * -4px),calc(var(--my,0) * -2px))}
-.hs-mid{transform:translate(calc(var(--mx,0) * -9px),calc(var(--my,0) * -4px))}
-.hs-near{transform:translate(calc(var(--mx,0) * -16px),calc(var(--my,0) * -6px))}
-.as-parfar{transform:translate(calc(var(--mx,0) * -3px),0)}.as-parnear{transform:translate(calc(var(--mx,0) * -7px),0)}
 .hs-globe{width:clamp(230px,19vw,360px);top:9vh}
 .hs-globe::before{content:"";position:absolute;inset:-9%;border-radius:50%;background:radial-gradient(circle,transparent 56%,rgba(130,225,255,.5) 66%,rgba(130,225,255,.12) 74%,transparent 80%)}
 .hs-gloss{background:radial-gradient(ellipse 42% 22% at 34% 16%,rgba(255,255,255,.9),rgba(255,255,255,0) 100%),radial-gradient(ellipse 60% 30% at 52% 96%,rgba(150,240,255,.55),transparent 70%),radial-gradient(circle,transparent 58%,rgba(160,230,255,.3) 86%,rgba(255,255,255,.65) 100%)}
@@ -82,7 +76,6 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 .wx-wave.w2{top:30px;animation:v3-wavex 24s linear infinite reverse}
 @keyframes v3-wavex{to{translate:-45% 0}}
 .wx-spec{left:0;right:0;top:32px;height:5px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95) 18%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.95) 82%,transparent);filter:blur(.8px) drop-shadow(0 0 5px #fff)}
-.wx-sand{left:0;right:0;bottom:var(--dock);height:56px;background:radial-gradient(circle at 12% 70%,rgba(255,244,220,.75) 0 2px,transparent 3px) 0 0/73px 30px,radial-gradient(circle at 60% 40%,rgba(120,90,50,.45) 0 2.5px,transparent 3.5px) 0 0/97px 36px,linear-gradient(0deg,rgba(234,208,150,.82),rgba(214,190,130,.5) 55%,transparent);-webkit-mask-image:linear-gradient(0deg,#000 40%,transparent);mask-image:linear-gradient(0deg,#000 40%,transparent)}
 .wx-ring{left:var(--x);top:30px;width:var(--w);height:calc(var(--w) * .22);translate:-50% 0;border-radius:50%;border:2px solid rgba(255,255,255,.85);opacity:0;animation:v3-ring var(--d) ease-out var(--l) infinite}
 @keyframes v3-ring{0%{scale:.1;opacity:0}12%{opacity:.85}100%{scale:1.7;opacity:0}}
 .wx-gl{left:var(--x);top:calc(30px + var(--y));width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,56% 44%,100% 50%,56% 56%,50% 100%,44% 56%,0 50%,44% 44%);filter:drop-shadow(0 0 4px #fff);opacity:.3;animation:as-twinkle var(--t) ease-in-out var(--d) infinite}
@@ -97,31 +90,17 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 .aero-bub.irid::before{opacity:.85}
 .aero-bub.xl{filter:blur(1.2px)}
 
-/* ===== foreground framing: grass tufts at the banks ===== */
-.v3-fg{inset:0;z-index:9;overflow:hidden}
-.v3-fg .fg-tuft{position:absolute;display:block;background-repeat:no-repeat;background-position:center bottom;background-size:contain}
-.fg-tuft{bottom:calc(var(--aw-h) - 52px);width:clamp(240px,22vw,420px);aspect-ratio:900/500;background-image:url(img/aero_grass_tuft.webp);transform-origin:50% 100%;animation:v3-tuft 5s ease-in-out infinite alternate}
-.fg-tuft.l{left:-40px}.fg-tuft.r{right:-60px;scale:-1 1;animation-delay:-2.2s}
-@keyframes v3-tuft{from{transform:skewX(-1.8deg)}to{transform:skewX(1.8deg)}}
 
-/* ===== early-2000s CRT with water erupting out of its screen (splash sprites sit over the glass, the betta swims inside the water) ===== */
-.v3-mon{left:max(6px,calc(50% - 790px));bottom:calc(var(--aw-h) - 46px);width:clamp(230px,17vw,300px);aspect-ratio:360/430;z-index:9;filter:drop-shadow(0 12px 14px rgba(0,50,100,.35));--i-splash:url(img/aero_splash.webp);--i-lip:url(img/aero_splash_lip.webp);--i-sdrops:url(img/aero_splash_drops.webp)}
-.v3-mon .mon-body{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* ===== monitor: a real photo of an LCD (Dell, public domain) recoloured to the site's blue palette, with a real landscape photo (greens pushed to lime) warped onto its screen, and a real wave-spray photo keyed to white water erupting from the screen centre; the betta swims between the two layers ===== */
+.v3-mon{--mw:clamp(340px,26vw,460px);left:calc(var(--mw) * -.14);bottom:calc(var(--aw-h) - 40px);width:var(--mw);aspect-ratio:780/795;z-index:9;filter:drop-shadow(0 14px 14px rgba(0,50,100,.35));--i-mon:url(img/aero_monitor.webp);--i-monw:url(img/aero_monitor_water.webp)}
 .v3-mon i{position:absolute;display:block;font-style:normal;background-repeat:no-repeat}
-.mon-splash{left:-9%;width:118%;bottom:44%;aspect-ratio:900/1000;background:var(--i-splash) center bottom/100% 100%;transform-origin:50% 100%;filter:drop-shadow(0 0 1.2px rgba(0,120,200,.9)) drop-shadow(0 2px 3px rgba(0,90,160,.3)) saturate(1.15) brightness(1.06);animation:mon-pulse 3.6s ease-in-out infinite alternate}
-/* water body: cyan tint masked by the sprite's own alpha, so the thin translucent sheets read as a coloured liquid and the splash stays solid against a bright sky */
-.mon-splash::before,.mon-lip::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(190,246,255,.4),rgba(40,190,240,.42));-webkit-mask:var(--i-splash) center bottom/100% 100% no-repeat;mask:var(--i-splash) center bottom/100% 100% no-repeat}
-.mon-lip::before{-webkit-mask-image:var(--i-lip);mask-image:var(--i-lip);-webkit-mask-position:center top;mask-position:center top;background:linear-gradient(180deg,rgba(200,248,255,.35),rgba(40,185,240,.45))}
-@keyframes mon-pulse{from{transform:scale(.98,.95) skewX(-.8deg)}to{transform:scale(1.02,1.04) skewX(.8deg)}}
-.mon-lip{left:-6%;width:112%;top:63%;aspect-ratio:900/260;background:var(--i-lip) center top/100% 100%;filter:drop-shadow(0 0 1.2px rgba(0,120,200,.9)) drop-shadow(0 3px 3px rgba(0,90,160,.35)) saturate(1.1);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 34%);mask-image:linear-gradient(180deg,transparent 0,#000 34%);animation:mon-lip 4.4s ease-in-out infinite alternate}
-@keyframes mon-lip{from{transform:translateY(0) scaleY(1)}to{transform:translateY(2px) scaleY(1.04)}}
-.mon-drops{filter:drop-shadow(0 0 1px rgba(0,95,180,.9)) saturate(1.5);left:-14%;width:128%;bottom:46%;aspect-ratio:1;background:var(--i-sdrops) center/100% 100%;opacity:0;animation:mon-spray 3.2s ease-in infinite}
-.mon-drops.b{animation-delay:-1.6s;scale:-1 1;width:112%;left:-6%}
-@keyframes mon-spray{0%{transform:translateY(34%) scale(.82);opacity:0}18%{opacity:.95}55%{transform:translateY(-4%) scale(1)}100%{transform:translateY(22%) scale(1.04);opacity:0}}
-.mon-fish{left:36%;width:34%;aspect-ratio:700/521;bottom:50%;animation:mon-fish 9s ease-in-out infinite}
-.mon-fish .aero-img{filter:saturate(1.6) brightness(1.3) contrast(1.05) drop-shadow(0 0 3px rgba(190,245,255,.9));animation:mon-wag .45s ease-in-out infinite alternate;transform-origin:70% 50%}
+.mon-img{inset:0;background:var(--i-mon) center/100% 100%}
+.mon-water{inset:0;background:var(--i-monw) center/100% 100%;transform-origin:43% 78%;opacity:0;animation:mon-water 9s ease-in-out infinite}
+@keyframes mon-water{0%,21%{opacity:0;transform:scale(.5,.3)}33%{opacity:1;transform:scale(1.03,1.03)}70%{opacity:1;transform:scale(1,1)}88%,100%{opacity:0;transform:scale(.9,.75)}}
+.mon-fish{left:34%;width:19%;aspect-ratio:700/521;bottom:27%;animation:mon-fish 9s ease-in-out infinite}
+.mon-fish .aero-img{filter:saturate(1.5) brightness(1.2) drop-shadow(0 0 3px rgba(190,245,255,.9));animation:mon-wag .45s ease-in-out infinite alternate;transform-origin:70% 50%}
 @keyframes mon-wag{from{transform:skewX(-9deg)}to{transform:skewX(9deg)}}
-@keyframes mon-fish{0%{translate:-20% 60%;rotate:35deg;opacity:0;scale:.6}12%{opacity:1}34%{translate:-8% -90%;rotate:-22deg;scale:1}55%{translate:40% -150%;rotate:6deg}78%{translate:94% -70%;rotate:46deg}100%{translate:118% 50%;rotate:72deg;opacity:0;scale:.7}}
+@keyframes mon-fish{0%,21%{translate:-30% 130%;rotate:30deg;opacity:0;scale:.6}27%{opacity:1;translate:-20% 70%}40%{translate:10% -50%;rotate:-25deg;scale:1}56%{translate:70% -250%;rotate:8deg}74%{translate:140% -150%;rotate:50deg}86%{translate:180% 70%;rotate:75deg;opacity:1;scale:.8}91%,100%{translate:180% 70%;rotate:75deg;opacity:0;scale:.7}}
 
 /* ===== one glass recipe, legible text, hover glint, dew beads, window chrome ===== */
 .stat,.card,.drill,.decs,.simrec,.note,#detail,#covbars,#tags{
@@ -162,18 +141,12 @@ tbody tr:nth-child(even):not(.adetail){background:rgba(255,255,255,.2)}
 .sndbtn[aria-pressed=false]::after{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;margin-top:-1px;background:#c02a14;rotate:-45deg;border-radius:2px}
 .sndbtn[aria-pressed=true]{background:linear-gradient(to bottom,#9fe0ff 0,#1c97e8 50%,#0361A3 50%,#2ab4f8 100%);border-color:#024b7f}
 .sndbtn[aria-pressed=true]::before{background:#fff}
-.v3-bloom{position:fixed;left:0;top:0;z-index:12;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;mix-blend-mode:soft-light;background:radial-gradient(circle,rgba(255,255,255,.7),transparent 66%);opacity:0;transition:opacity .4s}
 
 @media (prefers-reduced-motion:no-preference){
 .as-aurora.a1{animation-name:v3-aur1}.as-aurora.a2{animation-name:v3-aur2}
 @keyframes v3-aur1{from{opacity:.3;translate:-4vw 0}to{opacity:.08;translate:4vw 2vh}}
 @keyframes v3-aur2{from{opacity:.05}to{opacity:.26}}
-@supports (animation-timeline:scroll()){
-.v3-shift{animation:v3-shift linear both;animation-timeline:scroll(root)}
-@keyframes v3-shift{to{opacity:1}}
-.as-sun{animation:v3-sunlow linear both;animation-timeline:scroll(root)}
-@keyframes v3-sunlow{to{translate:0 7vh;filter:hue-rotate(-14deg) saturate(1.2)}}
-}}
-@media (prefers-reduced-motion:reduce){.v3-sky *,.v3-hillfx *,.v3-wx *,.v3-fg *,.v3-mon *{animation:none!important}.aero-sky .as-cl{left:auto}.aero-sky .as-cl.cl1{left:-9vw}.aero-sky .as-cl.cl2a{left:40vw}.aero-sky .as-cl.cl2b{left:63vw}.aero-sky .as-cl.cl3{left:-4vw}.aero-sky .as-cl.cl4{right:-6vw}.v3-bloom{display:none}.wx-gl{opacity:.8}}
-@media (prefers-contrast:more),(forced-colors:active){.v3-sky,.v3-hillfx,.v3-wx,.v3-fg,.v3-mon,.v3-bloom{display:none}}
+}
+@media (prefers-reduced-motion:reduce){.v3-sky *,.v3-hillfx *,.v3-wx *,.v3-mon *{animation:none!important}.mon-water{opacity:1}.aero-sky .as-cl{left:auto}.aero-sky .as-cl.cl1{left:-9vw}.aero-sky .as-cl.cl2a{left:40vw}.aero-sky .as-cl.cl2b{left:63vw}.aero-sky .as-cl.cl3{left:-4vw}.aero-sky .as-cl.cl4{right:-6vw}.wx-gl{opacity:.8}}
+@media (prefers-contrast:more),(forced-colors:active){.v3-sky,.v3-hillfx,.v3-wx,.v3-mon{display:none}
 @media (prefers-reduced-transparency:reduce){.stat,.card,.drill,.decs,.simrec,.note,#detail,#covbars,#tags{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background-color:#e9f6ff!important}}

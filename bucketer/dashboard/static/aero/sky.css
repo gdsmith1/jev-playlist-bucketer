@@ -1,4 +1,4 @@
-/* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two parallax layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
+/* lane: sky (z 0). Cobalt diagonal sky, sun bloom + rays + lens-flare ghosts, aurora, photographic cumulus (two layers), SVG-turbulence cirrus, gull flock (high strip above the heading), rare plane with contrail, star glints, vignette. Also owns the shared tokens (grade, water height, dock height, hill height). */
 :root{--aero-grade:saturate(1.28) contrast(1.05);--dock:62px;--aw-h:clamp(220px,31vh,340px);--hh:max(38vh,20.5vw)}
 .aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
  --c1:url(img/aero_cloud_1.webp);--c2:url(img/aero_cloud_2.webp);--c3:url(img/aero_cloud_3.webp);--c4:url(img/aero_cloud_4.webp);--bird:url(img/aero_bird.webp);--plane:url(img/aero_plane.webp)}
@@ -58,11 +58,6 @@
 .as-aurora.a2{animation:as-aur2 14s ease-in-out infinite alternate}
 @keyframes as-aur{from{opacity:.7;translate:-4vw 0}to{opacity:.18;translate:4vw 2vh}}
 @keyframes as-aur2{from{opacity:.12}to{opacity:.62}}
-@supports (animation-timeline:scroll()){
-.as-parfar{animation:as-pfar linear both;animation-timeline:scroll(root)}
-.as-parnear{animation:as-pnear linear both;animation-timeline:scroll(root)}
-@keyframes as-pfar{to{translate:0 -70px}}
-@keyframes as-pnear{to{translate:0 -170px}}
-}}
+}
 @media (prefers-reduced-motion:reduce){.aero-sky *{animation:none!important}.as-plane-a{translate:44vw 0}.as-flock{translate:60vw 0}.as-aurora.a2{opacity:.35}}
 @media (prefers-contrast:more),(forced-colors:active){.aero-sky{display:none}}

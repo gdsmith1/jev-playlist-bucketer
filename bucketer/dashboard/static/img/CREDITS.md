@@ -4,7 +4,7 @@ The dashboard scenery is photographic cutouts from Wikimedia Commons (public dom
 
 | File here | Source file | Author | Licence | Processing |
 |---|---|---|---|---|
-| `aero_dolphin_leap.webp` | HIHWNMS - Spinner Dolphin (28354954591).jpg (dolphin only) | NOAA National Marine Sanctuaries | Public domain | rembg, gradient-mapped to saturated blue |
+| `aero_dolphin_leap.webp` | HIHWNMS - Spinner Dolphin (28354954591).jpg (dolphin only) | NOAA National Marine Sanctuaries | Public domain | rembg (isnet-general-use), alpha cleaned, mild natural grade (lifted shadows, slight cool tint), no blue gradient map |
 | `aero_clownfish_big.webp` | Ocellaris clownfish bright.jpg | Bruxton | CC0 | rembg, coral removed, stripes whitened |
 | `aero_moorish_idol.webp` | Zanclus cornutus 387908169.jpg (left fish) | Andra Waagmeester | CC0 | rembg, hue-shifted teal to yellow, stripes darkened |
 | `aero_goldfish.webp` | Aquarium tropical de Pierrefitte-Nestalas 03082018 Carassius auratus Lionhead goldfish 2.jpg | Vassil | CC0 1.0 | rembg, mild grade |
@@ -17,7 +17,5 @@ The dashboard scenery is photographic cutouts from Wikimedia Commons (public dom
 | `aero_earth.webp` | Blue Marble Western Hemisphere.jpg | NASA / Reto Stöckli (Terra MODIS) | Public domain | circular mask, shadow lift, saturation boost |
 | `aero_butterfly.webp` | Monarch Butterfly.(Danaus plexippus) (14256022010).jpg | Bernard Spragg | CC0 | rembg, saturation boost |
 | `aero_bird.webp` | Black Tern flying (7402338502).jpg (a tern, not a gull) | U.S. Fish and Wildlife Service, Northeast Region | Public domain | rembg |
-| `aero_grass_tuft.webp` | none (generated) | n/a | n/a | generated procedurally (numpy/scipy/Pillow), no third-party imagery |
-| `aero_splash.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
-| `aero_splash_lip.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
-| `aero_splash_drops.webp` | generated procedurally (numpy/scipy/Pillow metaball + normal-map shading) | n/a | n/a, no third-party imagery | none |
+| `aero_monitor.webp` | Computer monitor remix transparent.png (derivative of Computer_monitor.jpg); screen replaced by a warped crop of Spring time in the Hill country brings on wild flowers and green grass. (24486794213).jpg | Zzubnik, derivative by AGreuet (monitor); USDA NRCS Texas (landscape) | Public domain / Public domain | shell recoloured with a navy-cobalt-aqua-white luminance ramp to match the site; landscape greens hue-shifted to lime, red flowers to yellow; perspective-warped onto the panel with inner shadow and glare; 0.45x resize |
+| `aero_monitor_water.webp` | Wave splash in Brofjorden at Lahälla 3.jpg | W.carter | CC0 | white spray keyed by whiteness (min channel, low saturation) so rocks and sea drop out, cropped to the eruption, rotated 22 degrees about its base, tinted slightly aqua over a soft cyan underlay, placed at the screen's bottom centre |

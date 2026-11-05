@@ -5,7 +5,8 @@
 .aero-animals-front i,.aero-animals-front b{display:block;font-style:normal}
 .aero-img{display:block;width:100%;height:100%;background-repeat:no-repeat;background-position:center;background-size:contain}
 .aero-dol{background-image:var(--ai-dol)}.aero-clown{background-image:var(--ai-clown)}.aero-idol{background-image:var(--ai-idol)}.aero-gold{background-image:var(--ai-gold)}
-.aero-big .aero-img,.aero-dolphin .aero-img,.aero-gold{filter:saturate(1.35) contrast(1.06) drop-shadow(0 0 1.5px #fff) drop-shadow(0 7px 6px rgba(4,60,120,.4))}
+.aero-dolphin .aero-img{filter:saturate(1.05) contrast(1.04) drop-shadow(0 0 1.5px #fff) drop-shadow(0 7px 6px rgba(4,60,120,.4))}
+.aero-big .aero-img,.aero-gold{filter:saturate(1.35) contrast(1.06) drop-shadow(0 0 1.5px #fff) drop-shadow(0 7px 6px rgba(4,60,120,.4))}
 /* underwater swimmers get a cyan caustic cast and a soft contact shadow on the seabed */
 .aero-big .aero-img{filter:saturate(1.35) contrast(1.05) drop-shadow(0 0 7px rgba(0,230,255,.55)) drop-shadow(0 5px 5px rgba(0,50,110,.35))}
 
@@ -29,7 +30,7 @@
 
 
 /* leaping dolphins at the crest line, splash crown at exit and entry */
-.aero-leap{position:absolute;right:-10px;bottom:calc(var(--aw-h) - 34px);width:calc(var(--dw)*1.5);height:0}
+.aero-leap{position:absolute;right:-24px;bottom:calc(var(--aw-h) - 34px);width:calc(var(--dw)*1.5);height:0}
 .aero-leap{--dw:clamp(190px,calc((100vw - 1100px) / 2 + 70px),320px)}
 .aero-leapclip{pointer-events:none;position:absolute;left:0;right:0;bottom:0;height:calc(var(--dw)*2);overflow:hidden}
 .aero-dolphin{position:absolute;right:0;bottom:0;width:var(--dw);aspect-ratio:700/450;translate:0 0;animation:aero-leap-x 12s linear var(--off,0s) infinite}
@@ -52,7 +53,7 @@
 @keyframes aero-swim-l{from{translate:calc(100vw + 40px) 0}to{translate:-300px 0}}
 @keyframes aero-bob{from{transform:translateY(-10px) rotate(-3deg)}to{transform:translateY(12px) rotate(3deg)}}
 @keyframes aero-wag{from{transform:skewY(-5deg) rotate(-1.5deg)}to{transform:skewY(5deg) rotate(1.5deg)}}
-@keyframes aero-leap-x{0%,5%{translate:0 0}49%,100%{translate:-45% 0}}
+@keyframes aero-leap-x{0%,5%{translate:0 0}49%,100%{translate:-10% 0}}
 @keyframes aero-leap-y{
  0%,4%{transform:translateY(130%) rotate(80deg);animation-timing-function:ease-out}
  27%{transform:translateY(-92%) rotate(14deg);animation-timing-function:ease-in}
