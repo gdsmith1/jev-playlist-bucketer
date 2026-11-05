@@ -1,101 +1,70 @@
-/* ===== lane ui: Frutiger Aero chrome, gloss, LCD, pills (paint only) ===== */
+/* ===== lane ui: chrome bezels, gloss, LCD, pills, typography (paint only; layers on style.css) ===== */
 :root{--ui-ink:#0b2a5c;--ui-green:var(--aero-neon-green,#7ee020);
 --ui-font:"Segoe UI","Frutiger","Frutiger Linotype","Trebuchet MS","Lucida Grande","Helvetica Neue",Arial,sans-serif;
---ui-chrome:linear-gradient(180deg,#fbfdff 0%,#d9e2ec 28%,#aab7c6 50%,#cfd9e4 52%,#eef3f8 100%);
---ui-glass:linear-gradient(180deg,rgba(255,255,255,.88) 0%,rgba(236,247,255,.62) 100%);
---ui-gloss:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.18) 52%,rgba(255,255,255,0) 53%)}
-body{font-family:var(--ui-font);font-size:15px;font-weight:500}
-h1,h2,h3,.tabs,.btn,.more{font-family:var(--ui-font)}
-/* typography: title + section headings on the sky */
-h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:.5px;color:#fff;margin:28px 0 6px;position:relative;
--webkit-text-stroke:1px rgba(6,40,110,.55);paint-order:stroke fill;
-text-shadow:0 0 14px rgba(150,220,255,.9),0 2px 0 #06306e,0 3px 6px rgba(6,40,110,.45)}
-h1::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.35em;vertical-align:-.1em;border-radius:50%;
-background:radial-gradient(ellipse 60% 40% at 50% 20%,#fff 0,rgba(255,255,255,0) 100%),radial-gradient(circle at 50% 120%,#8ff 0,transparent 55%),radial-gradient(circle,#59b8ff,#0a4fb0 70%,#06306e);
-box-shadow:0 0 0 .08em #dfe8f1,0 0 0 .14em #8899ab,0 0 14px rgba(120,210,255,.9)}
-h2{color:#fff;font-size:20px;font-weight:700;text-shadow:0 1px 0 #06306e,0 2px 5px rgba(6,40,110,.55)}
-main>.sub,h2+.sub{color:#fff;text-shadow:0 1px 2px rgba(6,40,110,.7)}
-/* shared text on glass */
-.card,.stat,.scroll,.drill,.note{color:var(--ui-ink)}
-.card .sub,.drill .sub,.card .rank,.ex,.legend,.tag{color:#3f5f8f}
-.card h3{color:var(--ui-ink);font-weight:700}
-/* 42/43: glossy bevel cards */
-.card,.drill,.scroll{position:relative;background:var(--ui-glass);
-border:1px solid #0b5fb5;box-shadow:inset 0 0 0 1px rgba(255,255,255,.95),inset 0 0 14px rgba(120,200,255,.45),0 2px 6px rgba(6,40,110,.3)}
-.card{border-left:4px solid var(--c,#0b5fb5);border-radius:14px;overflow:hidden}
-.card::before,.drill::before{content:"";position:absolute;inset:1px 1px 50% 1px;border-radius:inherit;border-bottom-left-radius:50% 14px;border-bottom-right-radius:50% 14px;
-background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.12));pointer-events:none}
-.card>*,.drill>*{position:relative}
-.card .head{position:relative;overflow:hidden;padding-right:36px;width:100%}
-.card .head::after{content:"";position:absolute;top:0;bottom:0;left:-20%;width:30%;transform:skewX(-25deg);
-background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);pointer-events:none}
-/* 49: glossy sphere orb at card corner */
-.card::after{content:"";position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;pointer-events:none;
-background:radial-gradient(ellipse 55% 35% at 50% 22%,rgba(255,255,255,.95),rgba(255,255,255,0) 100%),radial-gradient(ellipse 60% 30% at 50% 92%,rgba(255,255,255,.55),transparent),radial-gradient(circle at 50% 40%,var(--c,#3aa0ff),#0a3f8f 95%);
-box-shadow:inset 0 -3px 5px rgba(0,30,90,.5),0 2px 4px rgba(6,40,110,.4)}
-/* 44: dark blue glass panels */
-.decs,#detail,.simrec{background:linear-gradient(180deg,rgba(40,130,230,.75),rgba(10,80,190,.7));color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid #06306e;border-radius:12px;
-box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 6px rgba(6,40,110,.35)}
-.decs .sub,.simrec .sub,#detail .sub,.decs .dname,.dbar,.daxis span{color:#e6f3ff}
-.simrec b,#detail b,.decs .flag{color:#d8ff9a}
-/* 45/48: chrome bezel stats row with LCD tiles */
-.stats#stats{padding:10px 12px;border-radius:16px;background:var(--ui-chrome);border:1px solid #7b8a9c;align-items:stretch;
-box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(60,80,110,.35),0 3px 8px rgba(6,40,110,.35)}
-.stat{border-radius:8px;background:linear-gradient(180deg,#0a2f66 0%,#06214a 55%,#0a3a78 100%);color:#bfe0ff;
-border:2px solid #98a6b6;box-shadow:inset 0 3px 8px rgba(0,0,0,.6),inset 0 0 0 1px #02122e,0 1px 0 #fff;font-size:13px}
-.stat b{font:700 24px/1.15 "Lucida Console",Consolas,ui-monospace,monospace;letter-spacing:2px;
+--ui-chrome:linear-gradient(180deg,#fbfdff 0%,#d9e2ec 28%,#aab7c6 50%,#cfd9e4 52%,#eef3f8 100%)}
+body{font-family:var(--ui-font);font-size:15px;font-weight:500;color:var(--ui-ink)}
+/* typography 59-62: humanist stack, section headings white on sky, dark text on glass */
+h1,h2,h3,h4,.tabs,.btn,.more,input,select,button{font-family:var(--ui-font)}
+h1{font-weight:700}
+h2{color:#fff;font-weight:700;text-shadow:0 1px 0 #06306e,0 2px 5px rgba(6,40,110,.6)}
+.card,.scroll,.drill,.note,td{color:var(--ui-ink)}
+.card,.card *{text-shadow:none}
+.card .sub,.drill .sub,.card .rank,.ex,.legend,.tag{color:#2c4f80}
+.card h3{font-weight:700}
+/* 42/43: glossy bevel: darker blue outer rim, white inner border, top-half shine, diagonal streak */
+.card,.drill,.scroll{outline:1px solid #0b5fb5;box-shadow:0 8px 22px rgba(8,70,120,.3),inset 0 0 0 1px rgba(255,255,255,.9),inset 0 0 16px rgba(120,200,255,.5)}
+.card::after,.drill::after{content:"";position:absolute;inset:1px 1px 52% 1px;border-radius:13px 13px 50% 50%/13px 13px 16px 16px;pointer-events:none;
+background:linear-gradient(115deg,transparent 0,transparent 55%,rgba(255,255,255,.5) 62%,transparent 72%),linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08))}
+/* 49: bigger glossy sphere with reflected-light crescent */
+.card{padding-left:58px}
+.card::before{width:34px;height:34px;left:12px;top:12px;z-index:1;
+box-shadow:0 2px 5px rgba(8,70,120,.5),inset 0 -4px 6px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.35)}
+.card .head{position:relative;z-index:1}
+/* 44: darker saturated blue glass with white text */
+.decs,.simrec,#detail{background:linear-gradient(180deg,rgba(40,130,230,.72),rgba(10,80,190,.62));color:#fff;border-color:#8cc8ff;outline-color:#06306e;text-shadow:0 1px 1px rgba(0,30,90,.5)}
+.decs .sub,.simrec .sub,#detail .sub,.dname,.dbar,.daxis span,.decs .legend{color:#e6f3ff}
+.simrec b,#detail b,.flag{color:#d8ff9a}
+/* 45/48: chrome bezel for stats row, LCD tiles with glowing digits */
+.stats#stats{padding:10px 12px;border-radius:18px;background:var(--ui-chrome);border:1px solid #fff;outline:1px solid #6b7c90;
+box-shadow:inset 0 1px 0 #fff,inset 0 -2px 5px rgba(60,80,110,.4),0 6px 14px rgba(6,40,110,.35)}
+.stats .stat{background:linear-gradient(180deg,#0a2f66 0%,#06214a 55%,#0a3a78 100%);color:#bfe0ff;text-shadow:none;border:2px solid #98a6b6;outline:1px solid #02122e;border-radius:9px;
+box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 1px 0 #fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+.stat b{font:700 24px/1.15 "Lucida Console",Consolas,ui-monospace,monospace;letter-spacing:2px;text-shadow:none;
 background:linear-gradient(180deg,#fff,#9fd4ff);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
 filter:drop-shadow(0 0 5px rgba(130,200,255,.9))}
-.stat .sub{color:#9cc4f0}.whatif .stat.cur{border-color:var(--ui-green);box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 0 8px var(--ui-green)}
-.whatif .stat b,.whatif .stat.cur b{color:transparent}
-/* 45-47: chrome tab bar, glossy pills, neon active */
-.tabs{gap:10px;padding:8px 12px;border:1px solid #7b8a9c;border-radius:999px;background:var(--ui-chrome);margin:12px 0;
-box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(60,80,110,.35),0 3px 8px rgba(6,40,110,.35)}
-.tabs [role=tab]{position:relative;margin:0;padding:8px 18px 8px 44px;border-radius:999px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,30,90,.7);
-border:2px solid #e8eef5;outline:1px solid #05408a;background:linear-gradient(180deg,#3f8fe0 0%,#1a67c8 48%,#0a4aa8 52%,#2f7fe0 100%);
-box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 4px rgba(6,40,110,.5);overflow:hidden}
-.tabs [role=tab]::before{content:"";position:absolute;left:8px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;
-background:radial-gradient(ellipse 55% 35% at 50% 22%,#fff,rgba(255,255,255,0)),radial-gradient(circle at 50% 110%,#aef,transparent 60%),radial-gradient(circle,#2f8cf0,#053a85);
-box-shadow:inset 0 -2px 3px rgba(0,30,90,.5),0 0 0 2px rgba(255,255,255,.7)}
-.tabs [role=tab]::after{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:var(--ui-gloss);opacity:.7;pointer-events:none}
-.tabs [role=tab]:hover{color:#fff;filter:brightness(1.1)}
-.tabs [role=tab][aria-selected=true]{color:#0b3a00;text-shadow:0 1px 0 rgba(255,255,255,.7);background:linear-gradient(180deg,#d6ff8a 0%,#8fe02a 48%,#5cbb0a 52%,#9bec3c 100%);
-outline-color:#2f7d00;box-shadow:inset 0 1px 0 #fff,0 0 12px var(--ui-green),0 0 3px #fff}
-.tabs [role=tab][aria-selected=true]::before{background:radial-gradient(ellipse 55% 35% at 50% 22%,#fff,rgba(255,255,255,0)),radial-gradient(circle,#9bf03a,#2f8f00);box-shadow:inset 0 -2px 3px rgba(0,60,0,.5),0 0 0 2px #fff,0 0 8px var(--ui-green)}
-/* 51: chrome pill buttons */
-.btn,.more,.chip{position:relative;overflow:hidden;color:var(--ui-ink);font-weight:600;text-shadow:0 1px 0 rgba(255,255,255,.8);
-background:linear-gradient(180deg,#fff 0%,#dde6ef 48%,#b4c2d1 52%,#e6edf4 100%);border:1px solid #6b7c90;border-radius:999px;
-box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(6,40,110,.4)}
-.btn,.more{padding:3px 14px}
-.btn:hover,.more:hover,.chip:hover,.more:focus,.chip:focus{border-color:#0a6ad0;box-shadow:inset 0 1px 0 #fff,0 0 8px rgba(80,180,255,.9);filter:brightness(1.04)}
-.btn:active,.more:active{box-shadow:inset 0 2px 4px rgba(0,30,90,.45)}
-.chip{color:#0a4fa0}
-/* tables and inputs on glass */
-.scroll{border-radius:12px}
+.stat .sub{color:#9cc4f0}
+.whatif .stat.cur{outline-color:var(--ui-green);box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 0 10px var(--ui-green)}
+.whatif .stat.cur b{color:transparent}
+/* 45-47: chrome tab bar, thick-rimmed pills, neon green active */
+.tabs{padding:8px 12px;border:1px solid #fff;outline:1px solid #6b7c90;border-radius:999px;background:var(--ui-chrome);gap:10px;
+box-shadow:inset 0 1px 0 #fff,inset 0 -2px 5px rgba(60,80,110,.4),0 6px 14px rgba(6,40,110,.35)}
+.tabs [role=tab]{border:2px solid #eef3f8;outline:1px solid #05408a;font-weight:700;padding-top:8px;padding-bottom:8px}
+.tabs [role=tab][aria-selected=true]{color:#0b3a00;text-shadow:0 1px 0 rgba(255,255,255,.7);outline-color:#2f7d00;border-color:#fff;
+box-shadow:0 0 14px 2px var(--ui-green),inset 0 1px 0 #fff}
+/* 51: chrome gloss pill buttons */
+.btn,button.more,.chip{color:var(--ui-ink);text-shadow:0 1px 0 rgba(255,255,255,.8);font-weight:600;
+background:linear-gradient(180deg,#fff 0%,#dde6ef 48%,#b4c2d1 52%,#e6edf4 100%);border:1px solid #6b7c90;border-radius:999px;box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(6,40,110,.4)}
+.chip{color:#0a4fa0;position:relative}
+.btn:active,button.more:active{background-image:linear-gradient(0deg,#fff 0%,#dde6ef 48%,#b4c2d1 52%,#e6edf4 100%)}
+/* tables and inputs */
 th{background:linear-gradient(180deg,#f2f8ff,#c9ddf3);color:var(--ui-ink);border-bottom:1px solid #7ea6d6}
-td{border-bottom:1px solid rgba(11,95,181,.2)}
-.arow:hover,.arow:focus{background:rgba(120,200,255,.3)}
-input,select{background:linear-gradient(180deg,#e6eef6,#fff);color:var(--ui-ink);border:1px solid #6b7c90;border-radius:999px;box-shadow:inset 0 2px 3px rgba(0,30,90,.25)}
-.note{background:rgba(255,255,255,.6);border-color:#5d8fcf;border-radius:12px}
-/* 50: media-player progress meter (green gel in silver track) */
-.meter,.fitbar{height:10px}
+input,select{background:linear-gradient(180deg,#d9e3ee,#fff);color:var(--ui-ink);border:1px solid #6b7c90;border-radius:999px;box-shadow:inset 0 2px 3px rgba(0,30,90,.25)}
+/* 50: green gel meter in silver track */
 .meter,.fitbar,.hbar .track{background:linear-gradient(180deg,#9aa8b8,#e9eff5);border:1px solid #6b7c90;border-radius:999px;box-shadow:inset 0 1px 3px rgba(0,30,90,.4)}
+.meter,.fitbar{height:10px}
 .meter i,.fitbar i{background:linear-gradient(180deg,#d9ff9a 0%,#8fe02a 45%,#4fb000 55%,#8fe84a 100%);border-radius:999px;box-shadow:0 0 5px var(--ui-green)}
-/* 52/53: header decor, speaker cone + sticker star (CSS only) */
-main{position:relative}
-main::before{content:"";position:absolute;top:10px;right:0;width:96px;height:96px;border-radius:50%;pointer-events:none;z-index:0;
+/* 52/53: speaker cone and star sticker beside the title (CSS only) */
+main::before{content:"";position:absolute;top:40px;right:0;width:76px;height:76px;border-radius:50%;pointer-events:none;
 background:radial-gradient(circle at 50% 50%,#1b2a3d 0 10%,#4b5d73 11% 22%,#aab7c6 23% 24%,#2a3b52 25% 45%,#c9d4e0 46% 48%,#6b7c90 49% 56%,#eef3f8 57% 62%,#8493a6 63% 70%,transparent 71%);
-box-shadow:0 3px 8px rgba(6,40,110,.45);opacity:.9}
-main::after{content:"";position:absolute;top:70px;right:84px;width:44px;height:44px;pointer-events:none;
+box-shadow:0 3px 8px rgba(6,40,110,.45)}
+main::after{content:"";position:absolute;top:92px;right:70px;width:38px;height:38px;pointer-events:none;
 background:linear-gradient(180deg,#fff7b0,#ffc61a 55%,#e08a00);clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 36%)}
-h1{max-width:calc(100% - 110px)}
-@media (max-width:560px){main::before{width:56px;height:56px}main::after{display:none}.tabs{border-radius:22px}h1{max-width:calc(100% - 64px)}}
-/* accessibility fallbacks */
+main{position:relative}
+@media (max-width:560px){main::before{width:44px;height:44px;top:56px}main::after{display:none}h1{max-width:calc(100% - 60px)}}
+/* accessibility */
 @media (prefers-reduced-transparency:reduce),(prefers-contrast:more){
- .decs,#detail,.simrec{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0a4fa8}
- .card,.drill,.scroll{background:#fff}.card::before,.drill::before{display:none}
- h1{-webkit-text-stroke:0}
+ .decs,.simrec,#detail{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0a4fa8!important}
+ .card,.drill,.scroll{background:#fff!important}.card::after,.drill::after{display:none}
 }
-@media (forced-colors:active){.card::before,.card::after,.tabs [role=tab]::before,.tabs [role=tab]::after,main::before,main::after,h1::before{display:none}
- .stat b{-webkit-text-fill-color:CanvasText;color:CanvasText}}
+@media (forced-colors:active){.card::after,.drill::after,main::before,main::after{display:none}.stat b{-webkit-text-fill-color:CanvasText;color:CanvasText}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
