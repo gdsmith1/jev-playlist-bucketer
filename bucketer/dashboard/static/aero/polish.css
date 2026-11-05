@@ -1,0 +1,30 @@
+/* aero polish: cross-lane fixes after merging the lanes (legibility, clutter, scenery toggle). Loaded last. */
+
+/* one scenery switch for every layer: html[data-decor=off] */
+html[data-decor=off] .hero-scene,html[data-decor=off] .aero-bub-back,html[data-decor=off] .aero-bub-front{display:none}
+
+/* animals swim behind the cards (cards are translucent, so they still show through) instead of covering text */
+.aero-animals-front{z-index:3}
+/* foreground daisies and leaves are pushed toward the corner so they frame the page without sitting on card text */
+.aero-water-fg{translate:5vw 8vh}
+
+/* headings and intro text that land directly on scenery get their own readable backing */
+main h2{display:inline-block;max-width:100%;padding:.18em .8em .22em;border-radius:999px;color:#fff;text-shadow:0 1px 2px rgba(0,30,90,.8);background:linear-gradient(180deg,rgba(40,130,230,.88),rgba(10,70,170,.9));box-shadow:0 2px 8px rgba(0,50,120,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.25)}
+section>.sub,main>.sub,section>label.sub{display:block;width:fit-content;max-width:100%;padding:6px 14px;border-radius:14px;color:#0b2a5c;background:rgba(238,249,255,.82);box-shadow:0 2px 8px rgba(0,60,130,.18),inset 0 1px 0 #fff}
+main>h1+.sub{margin-top:10px}
+
+/* active tab: white label on a deeper green so it reads */
+.tabs [role=tab][aria-selected=true]{color:#fff;text-shadow:0 1px 2px rgba(0,50,0,.85);background:linear-gradient(180deg,#8fe05a 0%,#2fa51a 50%,#1c7d10 52%,#3fbb28 100%)}
+
+/* top-right clutter: toggle to the top-left, stickers beside the title, smaller frond */
+button#decortoggle{right:auto;left:0;top:6px}
+main::before{right:auto;left:400px;top:34px;width:64px;height:64px}
+main::after{right:auto;left:466px;top:40px}
+.hero-frond{width:clamp(120px,21vw,320px)}
+@media (max-width:900px){main::before,main::after{display:none}button#decortoggle{left:auto}}
+
+/* meadow hill: ellipse centred in its own box so the right edge curves down instead of ending in a vertical cut */
+.aw-hill{clip-path:ellipse(50% 100% at 50% 100%)}
+
+/* phones: tab bar wraps instead of forcing sideways scroll */
+@media (max-width:640px){.tabs{display:flex;flex-wrap:wrap;gap:6px;border-radius:22px}.tabs [role=tab]{flex:1 1 auto;min-width:0;padding-left:12px;padding-right:12px}.stats{max-width:100%}.decs{max-width:100%;overflow-x:auto}}
