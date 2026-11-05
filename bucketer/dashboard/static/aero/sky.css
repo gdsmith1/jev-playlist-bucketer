@@ -1,1 +1,49 @@
-/* aero lane: sky (owned by one agent; see z-index map at top of style.css) */
+/* lane: sky (z 0). Deep Frutiger Aero sky, sun glow, sunbeams, lens flare, sparkles, big opaque clouds, shared colour grade and accent tokens. */
+:root{--aero-grade:saturate(1.25) contrast(1.06);--aero-neon-green:#7dff2a;--aero-neon-yellow:#f4ff3a;--aero-neon-orange:#ff8a1f;--aero-cyan-glow:0 0 14px rgba(90,220,255,.55),0 0 34px rgba(60,190,255,.3)}
+/* reusable: subtle cyan glow around floating objects */
+.aero-glow{filter:drop-shadow(0 0 6px rgba(120,230,255,.7)) drop-shadow(0 0 16px rgba(60,190,255,.4))}
+.aero-glow-box{box-shadow:var(--aero-cyan-glow)}
+/* sky gradient replaces the pale one on html; cobalt top-left corner to pale horizon */
+html{background:radial-gradient(ellipse 120% 90% at 0 0,#0a5fd0 0,rgba(10,95,208,0) 62%),linear-gradient(172deg,#0a5fd0 0%,#1f86e6 22%,#3fa9f0 48%,#8fd6f6 76%,#bfe8fa 100%) fixed}
+/* hide superseded elements from the earlier scene */
+.scene .rays,.scene .sun,.scene .horizon,.scene .streak,.scene .flare,.scene .cloud{display:none}
+.aero-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aero-sky i,.aero-sky b{position:absolute;display:block}
+.as-sun{left:-18vmax;top:-18vmax;width:62vmax;height:62vmax;border-radius:50%;mix-blend-mode:screen;background:radial-gradient(circle,#fff 0,#fffbe0 9%,rgba(255,244,190,.95) 18%,rgba(255,236,160,.45) 28%,rgba(190,235,255,.22) 46%,transparent 68%)}
+.as-beam{left:-4vmax;top:-4vmax;width:150vmax;height:150vmax;mix-blend-mode:screen;background:conic-gradient(from 0deg at 0 0,transparent 0 var(--a),rgba(255,255,255,.6) calc(var(--a) + var(--w)/2),transparent calc(var(--a) + var(--w)),transparent 360deg);-webkit-mask-image:linear-gradient(135deg,#000 0,transparent 62%);mask-image:linear-gradient(135deg,#000 0,transparent 62%)}
+.as-beam.b1{--a:5deg;--w:9deg}.as-beam.b2{--a:17deg;--w:5deg;opacity:.8}.as-beam.b3{--a:27deg;--w:14deg;opacity:.7}.as-beam.b4{--a:43deg;--w:7deg}.as-beam.b5{--a:57deg;--w:12deg;opacity:.65}.as-beam.b6{--a:70deg;--w:5deg;opacity:.8}.as-beam.b7{--a:80deg;--w:8deg;opacity:.5}
+/* clouds: reuse the cloud photos (var from style.css), brightened to opaque white cores; three depth layers */
+.as-cloud{background:var(--img-cloud1) center/100% 100% no-repeat;aspect-ratio:620/539;filter:brightness(1.25) saturate(1.1) drop-shadow(0 0 22px rgba(255,255,255,.65)) drop-shadow(0 14px 18px rgba(10,80,190,.3))}
+.as-cloud::before{content:"";position:absolute;inset:22% 14% 18%;border-radius:50%;background:radial-gradient(ellipse,rgba(255,255,255,.95) 0,rgba(255,255,255,.75) 45%,transparent 72%);filter:blur(10px)}
+.as-cloud.k2,.as-cloud.k4,.as-cloud.k6{background-image:var(--img-cloud2);aspect-ratio:560/364}
+.as-cloud.k3{background-image:var(--img-cloud3);aspect-ratio:700/294}
+.as-cloud.far{width:clamp(150px,20vw,340px);opacity:.8;filter:brightness(1.2) saturate(1.1) blur(1.5px) drop-shadow(0 0 14px rgba(255,255,255,.5))}
+.as-cloud.mid{width:clamp(220px,32vw,560px);opacity:.95}
+.as-cloud.near{width:clamp(320px,46vw,820px)}
+.as-cloud.k1{left:30vw;top:2vh}.as-cloud.k2{right:4vw;top:34vh}
+.as-cloud.k3{left:50vw;top:6vh}.as-cloud.k4{left:-4vw;top:34vh}
+.as-cloud.k5{right:-12vw;top:12vh}.as-cloud.k6{left:-10vw;top:56vh}
+/* lens flare: ghosts along the diagonal from the sun */
+.as-flare{inset:0;mix-blend-mode:screen}
+.as-flare b{border-radius:50%;translate:-50% -50%;width:var(--s);height:var(--s);left:var(--x);top:var(--y);background:radial-gradient(circle,var(--c) 0,transparent 68%);opacity:.7}
+.as-flare b.g1{--x:20%;--y:22%;--s:56px;--c:rgba(150,255,190,.9)}
+.as-flare b.g2{--x:30%;--y:32%;--s:110px;--c:rgba(255,240,150,.75);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+.as-flare b.g3{--x:41%;--y:42%;--s:38px;--c:rgba(150,220,255,.95)}
+.as-flare b.g4{--x:53%;--y:53%;--s:140px;--c:rgba(255,190,230,.5);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+.as-flare b.g5{--x:64%;--y:63%;--s:70px;--c:rgba(255,215,140,.6)}
+/* four-point star glints */
+.as-star{left:var(--x);top:var(--y);width:var(--s);height:var(--s);translate:-50% -50%;background:#fff;clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);filter:drop-shadow(0 0 6px #fff);opacity:.85}
+@media (prefers-reduced-motion:no-preference){
+.as-star{animation:as-twinkle 4.2s ease-in-out infinite;animation-delay:var(--d)}
+.as-cloud.mid,.as-cloud.far{animation:as-drift 120s ease-in-out infinite alternate}.as-cloud.near{animation:as-drift 90s ease-in-out infinite alternate-reverse}
+.as-sun{animation:as-pulse 9s ease-in-out infinite alternate}
+}
+@keyframes as-twinkle{0%,100%{transform:scale(.35) rotate(0);opacity:.2}50%{transform:scale(1) rotate(20deg);opacity:1}}
+@keyframes as-drift{to{transform:translateX(5vw)}}
+@keyframes as-pulse{to{transform:scale(1.06)}}
+html[data-decor=off] .as-beam,html[data-decor=off] .as-cloud,html[data-decor=off] .as-flare,html[data-decor=off] .as-star{display:none}
+html[data-paused] .aero-sky *{animation-play-state:paused!important}
+@media (max-width:900px){.as-flare,.as-beam.b5,.as-beam.b6,.as-beam.b7,.as-cloud.far{display:none}}
+@media (prefers-reduced-motion:reduce){.aero-sky *{animation:none!important}}
+@media (prefers-contrast:more){.aero-sky{display:none}}
+@media (forced-colors:active){.aero-sky{display:none}}
