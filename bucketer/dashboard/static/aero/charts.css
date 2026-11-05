@@ -1,1 +1,85 @@
-/* aero lane: charts (owned by one agent; see z-index map at top of style.css) */
+/* lane: charts. Glass-tube bars, neon series, dark-blue glass chart panels, glossy coverage pill, glow + bubble hover. */
+:root{--ch-lime:var(--aero-neon-green,#9dff2e);--ch-orange:var(--aero-neon-orange,#ff9a1f);--ch-yellow:var(--aero-neon-yellow,#ffe92e);--ch-cyan:#19e6ff;
+--ch-ink:#e8f6ff;--ch-ink2:#b9dcf5;--ch-rim:rgba(130,225,255,.5);
+--ch-panel:linear-gradient(180deg,#0f3a73 0%,#082a58 45%,#051a3e 100%);
+--ch-track:linear-gradient(180deg,#020c1f 0%,#08254d 60%,#0b3366 100%)}
+
+/* ---- dark-blue glass panels ---- */
+#covbars,#tags,.decs,div:has(>.hbar),div:has(>.hist),.scroll:has(>table.hm){background:var(--ch-panel);border:1px solid var(--ch-rim);border-radius:14px;padding:12px 14px;color:var(--ch-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -12px 24px rgba(0,10,40,.45),0 3px 12px rgba(0,40,100,.25)}
+div:has(>.hist) .hist{border:0;border-bottom:1px solid var(--ch-rim);padding:16px 4px 0}
+.hist .col,.haxis,.dbar,.daxis span,.decs .sub{color:var(--ch-ink2)}
+#covbars .t,#tags .t,.hbar .t,.dname{color:var(--ch-cyan)}
+#covbars .n,#tags .n,.hbar .n{color:var(--ch-ink)}
+#tags .bar.umb .t::after{color:var(--ch-yellow)}.decs .flag{color:var(--ch-orange)}
+.hist .thr{border-left-color:var(--ch-orange)}.hist .thr span{color:var(--ch-orange)}
+
+/* ---- glass tube: track ---- */
+.bar>div:nth-child(2),.hbar .track,.meter,.fitbar{position:relative;background:var(--ch-track);border-radius:999px;box-shadow:inset 0 2px 4px rgba(0,0,0,.65),inset 0 -1px 0 rgba(130,225,255,.35),0 0 0 1px rgba(120,210,255,.35)}
+.bar>div:nth-child(2),.hbar .track{height:16px}.meter,.fitbar{height:10px}
+/* tick marks every 10% */
+.bar>div:nth-child(2)::after,.hbar .track::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(255,255,255,.28) calc(10% - 1px),rgba(255,255,255,.28) 10%)}
+/* liquid fill */
+.bar .fill,.hbar .track i,.meter i,.fitbar i{position:relative;height:100%;border-radius:999px;background-image:linear-gradient(180deg,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 48%,rgba(0,0,0,.18) 100%);background-color:var(--ch-cyan);box-shadow:0 0 10px rgba(25,230,255,.7);transition:box-shadow .2s,filter .2s}
+#covbars .fill{background-color:var(--ch-lime);box-shadow:0 0 10px rgba(157,255,46,.7)}
+#covbars .fill.small{background-color:var(--ch-orange);box-shadow:0 0 10px rgba(255,154,31,.7)}
+#tags .bar.umb{opacity:1}#tags .bar.umb .fill{background-color:var(--ch-yellow);box-shadow:0 0 10px rgba(255,233,46,.7)}
+.meter i,.fitbar i{background-color:var(--ch-lime);box-shadow:0 0 8px rgba(157,255,46,.7)}
+/* hbar fills keep their inline legend colour */
+.hbar .track i{box-shadow:0 0 9px 1px rgba(255,255,255,.35)}
+
+/* ---- decades and score histograms ---- */
+.dbar i,.hist .col i{position:relative;border-radius:6px 6px 0 0;background-image:linear-gradient(90deg,rgba(255,255,255,.45) 0,rgba(255,255,255,0) 40%,rgba(0,0,0,.18) 100%);box-shadow:0 0 8px rgba(255,255,255,.3)}
+.dbar i{background-color:var(--ch-orange);box-shadow:0 0 9px rgba(255,154,31,.75)}
+.daxis{border-top-color:var(--ch-rim)}
+.decrow+.decrow{border-top:1px solid rgba(130,225,255,.18);padding-top:6px}
+
+/* ---- heatmap on dark glass: aqua ramp ---- */
+.scroll:has(>table.hm){padding:8px}
+table.hm td{color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 2px rgba(0,20,50,.8);border-radius:3px}
+table.hm td.hot{color:#000;text-shadow:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+table.hm td.self{background:rgba(255,255,255,.14);box-shadow:none}
+table.hm th,table.hm th.rh{color:var(--ch-cyan);background:#07224a}
+table.hm th[tabindex]:hover,table.hm th[tabindex]:focus-visible{color:#fff;outline-color:var(--ch-lime)}
+.hmscale i{background:linear-gradient(90deg,#0a2854,#1eb9eb,#96faff);box-shadow:0 0 0 1px var(--ch-rim)}
+
+/* ---- glossy coverage pill (grey, green, cyan) ---- */
+.stack{position:relative;height:30px;padding:3px;border-radius:999px;background:var(--ch-track);border:1px solid var(--ch-rim);box-shadow:inset 0 2px 5px rgba(0,0,0,.6),0 2px 8px rgba(0,40,100,.3);overflow:hidden}
+.stack div{position:relative;height:100%;box-shadow:inset 0 -6px 8px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.6),inset -1px 0 0 rgba(0,30,60,.5)}
+.stack div:first-child{border-radius:999px 0 0 999px}.stack div:last-child{border-radius:0 999px 999px 0}.stack div:only-child{border-radius:999px}
+.stack div:nth-child(2){box-shadow:inset 0 -6px 8px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.6),inset -1px 0 0 rgba(0,30,60,.5),0 0 10px rgba(157,255,46,.55)}
+.stack div:nth-child(3){box-shadow:inset 0 -6px 8px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.6),0 0 10px rgba(25,230,255,.6)}
+.stack::after{content:"";position:absolute;left:12px;right:12px;top:5px;height:36%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.12));pointer-events:none}
+.stack div:hover{filter:brightness(1.2) saturate(1.2)}
+
+/* ---- hover: glowing rim + tiny bubble burst ---- */
+.bar:hover .fill,.hbar:hover .track i,.meter:hover i,.fitbar:hover i{filter:brightness(1.18) saturate(1.2);box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 16px 3px rgba(25,230,255,.85)}
+#covbars .bar:hover .fill{box-shadow:0 0 0 1px #fff,0 0 16px 3px rgba(157,255,46,.9)}
+.dbar:hover i,.hist .col:hover i{filter:brightness(1.2);box-shadow:0 0 0 1px #fff,0 0 14px 3px rgba(255,255,255,.7)}
+.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{content:"";position:absolute;right:2px;top:50%;width:5px;height:5px;margin-top:-3px;border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(circle at 35% 30%,#fff,rgba(255,255,255,.35) 60%,rgba(255,255,255,0) 70%);box-shadow:-9px -7px 0 -1px rgba(255,255,255,.7),-17px 6px 0 -2px rgba(255,255,255,.6),6px -9px 0 -1px rgba(255,255,255,.7),12px 5px 0 -2px rgba(255,255,255,.6)}
+.dbar i::after,.hist .col i::after{right:auto;left:50%;top:0;margin-left:-3px}
+@keyframes ch-burst{0%{opacity:0;transform:translateY(4px) scale(.5)}25%{opacity:1}100%{opacity:0;transform:translateY(-14px) scale(1.3)}}
+.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::after,.hist .col:hover i::after{animation:ch-burst .9s ease-out 1}
+
+/* ---- accessibility modes ---- */
+@media (prefers-reduced-motion:reduce){.bar:hover .fill::before,.hbar:hover .track i::before,.dbar:hover i::after,.hist .col:hover i::after{animation:none}.bar .fill,.hbar .track i{transition:none}}
+@media (prefers-reduced-transparency:reduce){#covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar){background:#06214a}}
+@media (prefers-contrast:more){
+ #covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar),.scroll:has(>table.hm){background:#001233;border:2px solid #fff;box-shadow:none}
+ .bar>div:nth-child(2),.hbar .track,.meter,.fitbar{background:#000;box-shadow:0 0 0 2px #fff}
+ .bar>div:nth-child(2)::after,.hbar .track::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{display:none}
+ .bar .fill,.hbar .track i,.meter i,.fitbar i,.dbar i,.hist .col i,.stack div{background-image:none;box-shadow:none;filter:none}
+ #tags .fill{background-color:#00e5ff}#tags .bar.umb .fill{background-color:#ffe600}#covbars .fill{background-color:#7dff00}#covbars .fill.small{background-color:#ff8c00}.dbar i{background-color:#ffb000}
+ .stack{background:#000;border:2px solid #fff;box-shadow:none}
+ .stack div:nth-child(1){background:#bbb!important}.stack div:nth-child(2){background:#7dff00!important}.stack div:nth-child(3){background:#00e5ff!important}
+ .bar:hover .fill,.hbar:hover .track i{box-shadow:0 0 0 2px #fff}
+ table.hm td{text-shadow:none;box-shadow:none}
+}
+@media (forced-colors:active){
+ #covbars,#tags,.decs,div:has(>.hist),div:has(>.hbar),.scroll:has(>table.hm){background:Canvas;border:1px solid CanvasText;box-shadow:none}
+ .bar>div:nth-child(2),.hbar .track,.meter,.fitbar{background:Canvas;border:1px solid CanvasText;box-shadow:none}
+ .bar>div:nth-child(2)::after,.hbar .track::after,.stack::after,.bar .fill::before,.hbar .track i::before,.dbar i::after,.hist .col i::after{display:none}
+ .bar .fill,.hbar .track i,.meter i,.fitbar i,.dbar i,.hist .col i{background:Highlight;forced-color-adjust:none;box-shadow:none;filter:none}
+ .stack{border:1px solid CanvasText;background:Canvas;box-shadow:none}.stack div{box-shadow:none;border-right:1px solid CanvasText}
+ .stack div:nth-child(1){background:GrayText!important}.stack div:nth-child(2){background:Highlight!important}.stack div:nth-child(3){background:LinkText!important}
+ #covbars .t,#tags .t,.hbar .t,.dname,#covbars .n,#tags .n,.hbar .n,.hist .col,.haxis,.dbar,.daxis span{color:CanvasText}
+}
