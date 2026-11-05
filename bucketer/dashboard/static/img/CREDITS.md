@@ -15,3 +15,7 @@ Photographic scenery in the dashboard. Everything here is public domain or CC0 (
 | `bubble_clear.webp`, `bubble_rainbow.webp` | Rendered procedurally (thin-film colour, specular highlights); no source photo | this repo | n/a |
 
 Licence status was read from each file's Commons page metadata when downloaded. Re-check the file page if you need to rely on it.
+
+## lane: water
+
+No new image files. The water, ice, drops, splash ribbons and daisies are SVG/CSS drawn in this repo; the hill and leaves reuse `meadow.webp` and `leaf.webp` (credited above).
