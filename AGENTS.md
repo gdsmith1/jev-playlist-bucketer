@@ -47,6 +47,8 @@ poetry run python -m bucketer spotlistr-exported-playlist.csv --sample 300 --see
 Other flags: `--limit N` (first N rows; **default is all rows**, so always pass `--dry-run`, `--sample` or `--limit` when testing), `--threshold X` (default 0.8), `--select all|none|a,b,c` and `--buckets PATH` (one of them is needed for real runs without a TTY), `--no-dashboard`, `--similar` (one extra Last.fm call per uncached artist for the dashboard's similar-artists section; never needed for tests), `--yes` (skips the confirmation; never pass it without owner approval), `--jev-cache PATH`, `--refresh-lastfm`, `--refresh-jev` (see README or `-h`). The `--refresh-*` flags replace the whole cache file with only the albums from that run, so back the file up first.
 
 ## Rules for working here
+- **Mobile is not supported.** The dashboard is desktop-only: do not design, test or fix phone/narrow-viewport layouts (the existing narrow-width media queries are best-effort leftovers).
+- For dashboard UI work use `poetry run python -m bucketer --demo`: it writes `runs/<ts>-demo/dashboard.html` from synthetic data with no CSV, Last.fm or jev (about a second, no network).
 - **Never run `python -m bucketer` without `--dry-run` unless the user explicitly approves.** Real runs spend jev tokens (a 300-song sample is about 270 calls). Dry runs only call Last.fm, and cached entries make them nearly free.
 - Changing `format_for_jev` output changes every jev cache key, so previously paid-for scores stop being reused. Do it deliberately and say so.
 - Tag filtering in `clean_tags` is re-applied when reading the Last.fm cache, so filter changes need no cache clearing. Changing what gets *fetched* does.

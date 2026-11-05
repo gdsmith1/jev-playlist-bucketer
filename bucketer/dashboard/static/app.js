@@ -1,6 +1,7 @@
 const D=/*DATA*/null;const COLORS=["#4cc62f","#1fb5e0","#ffb21a","#2f7fd8","#14b8a6","#a6d62f"];
-const RAMP=[[10,40,84],[30,185,235],[150,250,255]];
-function ramp(a){a=Math.max(0,Math.min(1,a));const s=a<.5?0:1,t=a<.5?a*2:(a-.5)*2;return "rgb("+RAMP[s].map((c,i)=>Math.round(c+(RAMP[s+1][i]-c)*t)).join(",")+")"}
+const RAMP=[[0,[244,251,255]],[.3,[140,210,248]],[.62,[30,190,228]],[1,[8,60,150]]],HOT=.82;
+function ramp(a){a=Math.max(0,Math.min(1,a));let k=1;while(a>RAMP[k][0])k++;const [p,c0]=RAMP[k-1],[q,c1]=RAMP[k],t=(a-p)/(q-p);return "rgb("+c0.map((c,i)=>Math.round(c+(c1[i]-c)*t)).join(",")+")"}
+function lst(prefix,items,n){const d=el("div",{className:"ex"},prefix+items.slice(0,n).join("; "));if(items.length>n)d.append(el("details",{},el("summary",{textContent:"+"+(items.length-n)+" more"}),items.slice(n).join("; ")));return d}
 const $=id=>document.getElementById(id);
 function el(tag,props,...kids){const e=document.createElement(tag);Object.assign(e,props||{});kids.forEach(k=>e.append(k));return e}
 function show(tag){const i=D.info[tag];const d=$("detail");d.style.display="block";d.replaceChildren(el("b",{},tag),i?el("span",{}," ("+i.reach.toLocaleString()+" listeners) "+i.summary):el("span",{className:"sub"}," no description on Last.fm"))}

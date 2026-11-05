@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from .checkpoint import choose_buckets, confirm_spend, copy_hint, suggest_buckets, write_recommended, write_selected
 from .dashboard import analyze, song_dicts, write_dashboard
+from .demo import build_demo
 from .formatting import coverage_stats, format_for_jev, format_run_stats
 from .jev import FALLBACK_BUCKET, JevClient
 from .lastfm import LastfmClient
@@ -17,7 +18,7 @@ JEV_CACHE_PATH = "jev_cache.json"
 
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Sort playlist songs into buckets using jev + Last.fm tags, scored once per album.")
-    parser.add_argument("csv_path", help="Path to the playlist CSV")
+    parser.add_argument("csv_path", nargs="?", help="Path to the playlist CSV (not needed with --demo)")
     parser.add_argument("--limit", type=int, help="Only process the first N data rows (default: all; ignored with --sample)")
     parser.add_argument("--sample", type=int, help="Process N randomly chosen rows (original order kept) instead of the first --limit")
     parser.add_argument("--seed", type=int, default=7, help="Random seed for --sample")
@@ -30,6 +31,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--buckets", help="Custom bucket file ({name: {\"description\": ...}}), path relative to the repo root; added to --select, skips the file prompt")
     parser.add_argument("--refresh-lastfm", action="store_true", help="Ignore the existing Last.fm cache and overwrite it with fresh lookups")
     parser.add_argument("--refresh-jev", action="store_true", help="Ignore the existing jev score cache and overwrite it (spends jev tokens on a real run)")
+    parser.add_argument("--demo", action="store_true", help="Build the dashboard from synthetic data and exit: no CSV, Last.fm or jev, for fast UI work")
     parser.add_argument("--jev-cache", default=JEV_CACHE_PATH, help="Path to the jev score cache JSON")
     return parser.parse_args(argv)
 
@@ -37,6 +39,14 @@ def parse_args(argv=None) -> argparse.Namespace:
 def main(argv=None) -> None:
     load_dotenv()
     args = parse_args(argv)
+
+    if args.demo:
+        run_dir = os.path.join("runs", datetime.now().strftime("%Y%m%d-%H%M%S") + "-demo")
+        os.makedirs(run_dir, exist_ok=True)
+        print(f"dashboard: {build_demo(run_dir)}")
+        return
+    if not args.csv_path:
+        raise SystemExit("csv_path is required unless --demo is given")
 
     lastfm = LastfmClient(refresh=args.refresh_lastfm)
     header, lines = load_rows(args.csv_path, args.limit, args.sample, args.seed)

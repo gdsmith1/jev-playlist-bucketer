@@ -35,6 +35,7 @@ Options:
 - `--sample N` / `--seed S` — process N randomly chosen rows, original order kept (default seed 7; the same seed picks the same rows)
 - `--threshold X` — minimum score (0-2) for an album to land in a bucket (default 0.8)
 - `--dry-run` — skip `jev`; still fetches/caches Last.fm tags and prints the text that would be sent per album, and writes `dashboard.html` (see Output)
+- `--demo` — build `dashboard.html` from synthetic data and exit: no CSV, Last.fm or jev (the CSV argument is not needed). Meant for fast dashboard UI work; includes the Selected buckets tab
 - `--yes` — proceed with the jev calls without the confirmation prompt (needed when there is no terminal)
 - `--select all|none|a,b,c` — score with these recommended buckets instead of showing the checklist (`none` = no recommended buckets)
 - `--buckets PATH` — custom bucket file (path relative to the repo root), added to `--select`; skips the file prompt. Without a terminal, `--select` or `--buckets` is required

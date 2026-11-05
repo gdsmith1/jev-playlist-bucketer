@@ -1,7 +1,7 @@
 const cards=D.clusters.map((c,i)=>{const more=el("div",{className:"more"},...c.tags.map(chip));
  if(c.covers.length)more.append(el("div",{className:"thumbs"},...c.covers.map(v=>art(v.url,v.title))));
- more.append(el("div",{className:"ex",textContent:"e.g. "+c.examples.map(e=>e.artist+" - "+e.album+" ("+e.songs+(e.songs==1?" song":" songs")+")").join("; ")}));
- if(c.similar.length)more.append(el("div",{className:"ex",textContent:"similar artists not in your playlist: "+c.similar.join(", ")}));
+ more.append(lst("e.g. ",c.examples.map(e=>e.artist+" - "+e.album+" ("+e.songs+(e.songs==1?" song":" songs")+")"),3));
+ if(c.similar.length)more.append(lst("similar artists not in your playlist: ",c.similar,5));
  more.append(el("button",{className:"more",textContent:"Browse "+c.albums+" albums",onclick:()=>openBucket(c.seed)}));
  const head=el("button",{className:"head",type:"button",onclick:()=>card.classList.toggle("open")},el("span",{className:"rank",textContent:"#"+(i+1)}),
   el("h3",{textContent:c.label_tags.join(" · "),title:"seed tag: "+c.seed}),el("span",{className:"sub",textContent:c.albums+" albums · "+c.songs+" songs"}),

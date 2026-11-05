@@ -1,8 +1,8 @@
 {const host=$("panel-selected");
-if(!D.jev){host.append(el("div",{className:"note",textContent:"Nothing here yet. This tab fills in after the jev step: once you tick buckets and jev scores every album, it shows the buckets you scored, where the songs ended up and what fell into other. Dry runs and --no-dashboard runs stop before that."}))}
+if(!D.jev){host.append(el("div",{className:"note empty"},el("span",{className:"orb","aria-hidden":"true"}),el("div",{},el("h3",{textContent:"Nothing here yet"}),el("p",{textContent:"This tab fills in after the jev step: once you tick buckets and jev scores every album, it shows the buckets you scored, where the songs ended up and what fell into other. Dry runs and --no-dashboard runs stop before that."}))))}
 else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.key);
  const sec=el("div",{id:"yourbuckets"});host.append(sec);
- const stat=(k,v)=>el("div",{className:"stat"},el("b",{textContent:v}),k);
+ const stat=(k,v,sub)=>el("div",{className:"stat"},el("b",{textContent:v}),k,sub?el("div",{className:"sub",textContent:sub}):"");
  const unit=x=>x.albums+" albums · "+x.songs+" songs";
  const sp=n=>(100*n/Math.max(1,D.songs)).toFixed(1)+"%";
  const h2=(t,s)=>{sec.append(el("h2",{textContent:t}));if(s)sec.append(el("div",{className:"sub",textContent:s}))};
@@ -18,7 +18,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
    return el("div",{className:"hbar",title:r.label+": "+r.text},el("span",{className:"t",textContent:r.label}),el("div",{className:"track"},i),el("span",{className:"n",textContent:r.text}))}))};
 
  h2("Selected buckets","The buckets you scored with jev, kept separate from the recommendations. An album is in a bucket when its score reaches "+T+".");
- sec.append(el("div",{className:"stats"},stat("buckets",J.bucket_count),stat("in one bucket",unit(J.one)),stat("in 2+ buckets",unit(J.several)),stat("in other",unit(J.other)),stat("threshold",T)));
+ sec.append(el("div",{className:"stats"},stat("buckets",J.bucket_count),stat("albums in one bucket",J.one.albums,J.one.songs+" songs"),stat("albums in 2+ buckets",J.several.albums,J.several.songs+" songs"),stat("albums in other",J.other.albums,J.other.songs+" songs"),stat("threshold",T)));
 
  h2("Songs per bucket","A song counts in every bucket its album reached, so bars can add up to more than the "+D.songs+" songs; other holds albums that reached none. Percent is of all songs.");
  const rows=J.buckets.map(b=>({label:b.key,value:b.songs,text:b.songs+" songs · "+sp(b.songs),color:colorOf(b.key)}));
@@ -39,7 +39,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
   if(b.shared)body.append(el("div",{className:"sub",textContent:b.shared+" of these albums are also in another bucket"}));
   if(b.agreement){const a=b.agreement;body.append(el("div",{className:"ex",title:"Albums jev put here versus albums whose tags fit the suggested bucket of the same name.",
    textContent:"jev vs tag fit: "+a.both+" both · "+a.jev_only+" jev only · "+a.tags_only+" tags only ("+a.jev+" by jev, "+a.tags+" by tags)"}))}
-  body.append(el("div",{className:"ex",textContent:"top by score: "+(b.top.length?b.top.map(t=>t.artist+" - "+t.album+" ("+t.score.toFixed(2)+")").join("; "):"none")}));
+  body.append(b.top.length?lst("top by score: ",b.top.map(t=>t.artist+" - "+t.album+" ("+t.score.toFixed(2)+")"),3):el("div",{className:"ex",textContent:"top by score: none"}));
   body.append(el("button",{className:"more",textContent:"Browse "+b.albums+" albums",onclick:()=>browse(b.key,recs.filter(r=>r.jev.matched.includes(b.key)).sort((x,y)=>y.jev.scores[b.key]-x.jev.scores[b.key]||y.songs-x.songs))}));
   mk(b.key,b.source,b.albums+" albums · "+b.songs+" songs",colorOf(b.key),body,b.source=="custom"?"custom":"")});
  {const body=el("div",{className:"more"},el("div",{className:"ex",textContent:"Albums that reached the threshold in no bucket."}),
@@ -71,7 +71,7 @@ else{const J=D.jev,recs=D.album_records,T=J.threshold,keys=J.buckets.map(b=>b.ke
  {const m=keys.map(a=>keys.map(b=>recs.filter(r=>r.jev.matched.includes(a)&&r.jev.matched.includes(b)).length));
   const tbl=el("table",{className:"ov"},el("thead",{},el("tr",{},el("th"),...keys.map(k=>el("th",{textContent:k,scope:"col"})))),
    el("tbody",{},...keys.map((a,i)=>el("tr",{},el("th",{className:"rh",textContent:a,scope:"row"}),...keys.map((b,j)=>{const td=el("td",{textContent:m[i][j],className:i==j?"d":"",title:a+" and "+b+": "+m[i][j]+" albums"});
-    if(i!=j){const a=m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j]));td.style.background=ramp(a);if(a>.72)td.classList.add("hot")}return td})))));
+    if(i!=j){const a=m[i][j]/Math.max(1,Math.min(m[i][i],m[j][j]));td.style.background=ramp(a);if(a>HOT)td.classList.add("hot")}return td})))));
   sec.append(el("div",{className:"scroll",style:"padding:8px"},tbl))}
 
  h2("What fell into other","Biggest albums and artists that reached no bucket, with their best-scoring bucket: a score just under "+T+" means a near-miss.");

@@ -22,7 +22,7 @@
   const body=el("tbody");
   out.slice(page*PAGE_SONGS,(page+1)*PAGE_SONGS).forEach(s=>{const r=recs[s.g],tr=el("tr",{className:"arow",tabIndex:0});let open=null;
    const chips=el("td",{className:"chips"},...bucketsOf(s).map(n=>el("span",{className:"chip"+(n==NONE?" other":""),textContent:n})));
-   [el("td",{className:"cv"},art(r.cover,r.artist+" - "+r.album)),el("td",{textContent:s.t}),el("td",{textContent:s.ar}),el("td",{textContent:r.album}),el("td",{className:"tag",textContent:tagLine(r)||"untagged"}),chips,el("td",{textContent:J?topScore(s).toFixed(2):(r.best_cluster?pct(topScore(s)):"")})].forEach(td=>tr.append(td));
+   [el("td",{className:"cv"},art(r.cover,r.artist+" - "+r.album)),el("td",{textContent:s.t}),el("td",{textContent:s.ar}),el("td",{textContent:r.album}),el("td",{className:"tag",textContent:tagLine(r)||"untagged"}),chips,fitCell(topScore(s),J?topScore(s).toFixed(2):(r.best_cluster?pct(topScore(s)):"none"))].forEach(td=>tr.append(td));
    const toggle=()=>{if(open){open.remove();open=null;tr.setAttribute("aria-expanded","false")}else{open=el("tr",{className:"adetail"},el("td",{colSpan:7},albumDetail(r)));tr.after(open);tr.setAttribute("aria-expanded","true")}};
    tr.onclick=toggle;tr.onkeydown=e=>{if(e.key=="Enter"||e.key==" "){e.preventDefault();toggle()}};body.append(tr)});
   list.replaceChildren(el("table",{},el("thead",{},el("tr",{},...["","title","artist","album","tags",J?"buckets":"best bucket",J?"top score":"fit"].map(h=>el("th",{textContent:h})))),body));

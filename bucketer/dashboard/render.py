@@ -11,7 +11,7 @@ from ..models import Enrichment, Group
 from .analysis import analyze
 
 STATIC = Path(__file__).parent / "static"
-LANES = ["sky", "hero", "bubbles", "water", "animals", "layout", "ui", "charts", "polish"]  # stylesheet order after style.css; later lanes win ties
+LANES = ["sky", "hero", "bubbles", "water", "animals", "ui"]  # stylesheet order after style.css; ui holds all page chrome
 SCENE_LANES = ["sky", "hero", "water", "animals", "bubbles"]  # each has aero/<lane>.html injected at <!--SCENE:<lane>-->
 SECTIONS = ["stats", "clusters", "coverage", "tags", "heatmap", "outliers", "drilldown", "quality", "noise", "decades", "similar", "selected", "playlist", "tabs"]  # page order; each file draws one section
 

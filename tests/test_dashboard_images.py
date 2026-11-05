@@ -8,7 +8,7 @@ from bucketer.models import Enrichment, Group
 
 class InlineImagesTest(unittest.TestCase):
     def test_url_replaced_with_data_uri(self):
-        css = inline_images(":root{--x:url(img/bubble_clear.webp)}")
+        css = inline_images(":root{--x:url(img/aero_goldfish.webp)}")
         self.assertRegex(css, r"^:root\{--x:url\(data:image/webp;base64,[A-Za-z0-9+/=]+\)\}$")
 
     def test_other_urls_untouched(self):
