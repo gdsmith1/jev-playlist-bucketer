@@ -20,3 +20,6 @@ Licence status was read from each file's Commons page metadata when downloaded. 
 
 - `hero-earth.webp`: NASA Blue Marble 2002 "Earth Western Hemisphere transparent background" (Wikimedia Commons, File:Earth_Western_Hemisphere_transparent_background.png), NASA Goddard / Reto Stockli, public domain. Resized to 720px, land channel tinted neon green, 1px alpha erode plus soft edge. Licence per Commons PD-USGov-NASA; not re-verified via the Commons API (rate limited).
 - Dome skyline, meadow, frond, droplets, airliner and horizon skyline are original inline SVG/CSS, no external assets.
+## lane: water
+
+No new image files. The water, ice, drops, splash ribbons and daisies are SVG/CSS drawn in this repo; the hill and leaves reuse `meadow.webp` and `leaf.webp` (credited above).
