@@ -15,3 +15,8 @@ Photographic scenery in the dashboard. Everything here is public domain or CC0 (
 | `bubble_clear.webp`, `bubble_rainbow.webp` | Rendered procedurally (thin-film colour, specular highlights); no source photo | this repo | n/a |
 
 Licence status was read from each file's Commons page metadata when downloaded. Re-check the file page if you need to rely on it.
+
+## lane: hero
+
+- `hero-earth.webp`: NASA Blue Marble 2002 "Earth Western Hemisphere transparent background" (Wikimedia Commons, File:Earth_Western_Hemisphere_transparent_background.png), NASA Goddard / Reto Stockli, public domain. Resized to 720px, land channel tinted neon green, 1px alpha erode plus soft edge. Licence per Commons PD-USGov-NASA; not re-verified via the Commons API (rate limited).
+- Dome skyline, meadow, frond, droplets, airliner and horizon skyline are original inline SVG/CSS, no external assets.
