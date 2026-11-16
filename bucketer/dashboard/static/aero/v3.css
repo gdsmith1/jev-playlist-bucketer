@@ -41,11 +41,11 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 
 /* ===== hills: sway, mouse parallax, travelling light wave and cloud shadows ===== */
 .hs-hill{left:-5vw;right:-5vw}
-.hs-hill.far{animation:v3-sway 52s ease-in-out infinite alternate}
-.hs-hill.mid{animation:v3-sway 38s ease-in-out -9s infinite alternate-reverse}
+.hs-hill.far{filter:hue-rotate(-24deg) saturate(1.45) contrast(1.15) brightness(.92);animation:v3-sway 52s ease-in-out infinite alternate}
+.hs-hill.mid{filter:saturate(1.15) contrast(1.05);animation:v3-sway 38s ease-in-out -9s infinite alternate-reverse}
 .hs-hill.near{animation:v3-sway 29s ease-in-out -4s infinite alternate}
 @keyframes v3-sway{from{translate:-1.6vw 0}to{translate:1.6vw 0}}
-.hs-skyline{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 3%,#000 97%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 3%,#000 97%,transparent 100%);filter:saturate(1.15) contrast(1.12) brightness(1.04)}
+.hs-skyline{bottom:calc(var(--hh) * .6 + 8vh);filter:saturate(1.05) brightness(1.03)}
 /* haze only touches the very base so the towers stay solid and clearly visible */
 .hs-skyline::after{background:linear-gradient(0deg,rgba(205,238,252,.32),rgba(205,238,252,.08) 22%,rgba(205,238,252,0) 40%)}
 .hs-skyline::before{content:"";position:absolute;left:-2%;right:-2%;bottom:-2px;height:7%;z-index:1;background:radial-gradient(circle at 50% 100%,#2c9a26 0 58%,transparent 60%) 0 100%/31px 100% repeat-x,radial-gradient(circle at 50% 100%,#1f7e1e 0 56%,transparent 58%) 15px 100%/37px 78% repeat-x}
@@ -82,7 +82,6 @@ html{background:linear-gradient(165deg,#1a5fc4 0,#3b93e6 24%,#7cc4f2 50%,#bfe5f8
 
 /* animals: fish pass behind the glass column instead of showing through it as smudges */
 .aero-swim{position:absolute;inset:0;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 610px),transparent calc(50% - 540px),transparent calc(50% + 540px),#000 calc(50% + 610px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 610px),transparent calc(50% - 540px),transparent calc(50% + 540px),#000 calc(50% + 610px),#000 100%)}
-.aero-bf{top:24vh}
 
 /* ===== thin-film bubbles: clear centre, thin rim, rainbow film on every one, double specular ===== */
 .aero-bub{background:radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(255,255,255,.12) 84%,rgba(255,255,255,.4) 97%)}

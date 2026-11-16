@@ -9,7 +9,7 @@
 .hs-hill.mid{background-image:var(--i-mid)}
 .hs-hill.near{background-image:var(--i-near)}
 /* skyline stands between the far and mid hills: it draws over the far ridge and only its bases sit behind the mid ridge (base = middle of the mid ridge band), hazed toward the sky colour */
-.hs-skyline{left:17vw;width:66vw;aspect-ratio:1400/429;bottom:calc(var(--hh) * .6 + 17vh);background:var(--i-sky) no-repeat center bottom/100% 100%;opacity:1}
+.hs-skyline{left:25vw;width:50vw;aspect-ratio:960/374;bottom:calc(var(--hh) * .6 + 17vh);background:var(--i-sky) no-repeat center bottom/100% 100%;opacity:1}
 /* haze tints only the base of the towers, clipped to the tower silhouette; the image alpha is solid so nothing behind (hills, sky) ever shows through */
 .hs-skyline::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(205,238,252,.6),rgba(205,238,252,.22) 35%,rgba(205,238,252,0) 65%);-webkit-mask:var(--i-sky) no-repeat center bottom/100% 100%;mask:var(--i-sky) no-repeat center bottom/100% 100%}
 /* glossy glass globe */
