@@ -14,12 +14,14 @@ UMBRELLA_TAGS = frozenset({"rock", "pop", "alternative", "alternative rock", "in
 HEAT_TAGS = 24  # tags in the overlap matrix
 TOP_TAGS = 150  # tags considered as bucket candidates
 SHOWN_TAGS = 40  # bars in the Top tags chart
-MIN_TAG_ALBUMS = 3  # a tag on fewer albums is too thin to seed or join a bucket
+MIN_TAG_ALBUMS = 3  # a tag on fewer albums is too thin to seed or join a bucket (small playlists: see _limits)
 MIN_WEIGHT = 0.15  # a tag only counts for an album above this share of its top tag
 JOIN_SIMILARITY = 0.25  # Jaccard needed for a tag to join an existing cluster instead of seeding its own
-MAX_CLUSTERS = 30
-MIN_CLUSTER_ALBUMS = 8  # smaller clusters are not suggested
+MAX_CLUSTERS = 30  # ceiling for big playlists
+MIN_CLUSTER_ALBUMS = 8  # smaller clusters are not suggested (ceiling; small playlists scale it down)
 MIN_CLUSTER_SONGS = 20
+MIN_SUGGESTED = 3  # a run always suggests at least this many buckets, if the tags allow
+ALBUMS_PER_CLUSTER = 6  # the cluster cap is albums / this
 OUTLIER_FIT = 0.3  # an album is an outlier when less than this share of its tag weight lands in its best cluster
 BORDERLINE_GAP = 0.1  # an album is borderline when its top two cluster fits differ by at most this
 SMALL_BUCKET_SONGS = 10
@@ -28,6 +30,14 @@ COVERS_PER_CLUSTER = 5
 LABEL_TAGS = 3  # tags in a card title
 SIMILAR_PER_CLUSTER = 5
 UNCOUNTED_WEIGHT = 0.5  # weight for a tag that came without a count
+
+
+def _limits(albums: int, songs: int) -> dict[str, int]:
+    """Thresholds that scale with playlist size: the module constants are the ceilings for large playlists."""
+    return {"tag_albums": 3 if albums >= 100 else 2,
+            "cluster_albums": max(2, min(MIN_CLUSTER_ALBUMS, round(albums * 0.04))),
+            "cluster_songs": max(3, min(MIN_CLUSTER_SONGS, round(songs * 0.04))),
+            "max_clusters": max(MIN_SUGGESTED, min(MAX_CLUSTERS, round(albums / ALBUMS_PER_CLUSTER)))}
 
 
 def _weighted_tags(enrichment: Enrichment) -> dict[str, tuple[float, str]]:
@@ -138,7 +148,10 @@ def analyze(pairs: list[tuple[Group, Enrichment]], jev_result: dict | None = Non
             members.setdefault(tag, set()).add(i)
     songs_of = lambda idx: sum(albums[i]["songs"] for i in idx)
     ranked = sorted(members, key=lambda t: (-songs_of(members[t]), -len(members[t]), t))
-    top = [t for t in ranked if t not in UMBRELLA_TAGS and len(members[t]) >= MIN_TAG_ALBUMS][:TOP_TAGS]  # bucket candidates
+    limits = _limits(len(albums), sum(a["songs"] for a in albums))
+    top = [t for t in ranked if t not in UMBRELLA_TAGS and len(members[t]) >= limits["tag_albums"]][:TOP_TAGS]  # bucket candidates
+    if not top:  # tiny or very sparse playlist: take whatever specific tags exist rather than suggest nothing
+        top = [t for t in ranked if t not in UMBRELLA_TAGS][:TOP_TAGS]
     keep = set(top[:SHOWN_TAGS]) | set(ranked[:SHOWN_TAGS])
     shown = [t for t in ranked if t in keep]  # Top tags chart also keeps umbrella tags
 
@@ -156,7 +169,7 @@ def analyze(pairs: list[tuple[Group, Enrichment]], jev_result: dict | None = Non
                 best, best_sim = c, sim
         if best is not None and best_sim >= JOIN_SIMILARITY:
             best["tags"].append(tag)
-        elif len(clusters) < MAX_CLUSTERS:
+        elif len(clusters) < limits["max_clusters"] * 2:  # seed extra: small ones are dropped below
             clusters.append({"seed": tag, "tags": [tag]})
 
     for c in clusters:
@@ -170,8 +183,12 @@ def analyze(pairs: list[tuple[Group, Enrichment]], jev_result: dict | None = Non
         c["cohesion"] = cohesion(c["tags"], members)
         c["similar"] = similar_artists([albums[i] for i in ordered], {a["artist"] for a in albums})
         c["covers"] = [{"url": albums[i]["cover"], "title": f"{albums[i]['artist']} - {albums[i]['album']}"} for i in ordered if albums[i]["cover"]][:COVERS_PER_CLUSTER]
-    clusters = [c for c in clusters if c["albums"] >= MIN_CLUSTER_ALBUMS and c["songs"] >= MIN_CLUSTER_SONGS]
-    clusters.sort(key=lambda c: -c["songs"])
+    clusters.sort(key=lambda c: (-c["songs"], -c["albums"]))
+    kept = [c for c in clusters if c["albums"] >= limits["cluster_albums"] and c["songs"] >= limits["cluster_songs"]]
+    if len(kept) < MIN_SUGGESTED:  # never leave the run without buckets: top up with the biggest remaining clusters
+        kept += [c for c in clusters if c not in kept][:MIN_SUGGESTED - len(kept)]
+        kept.sort(key=lambda c: (-c["songs"], -c["albums"]))
+    clusters = kept[:limits["max_clusters"]]
 
     outliers = []
     records = []

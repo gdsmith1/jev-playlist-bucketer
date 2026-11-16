@@ -130,7 +130,7 @@ class DashboardTest(unittest.TestCase):
     def test_coverage_counts_every_album_once(self):
         pairs = [pair("K", "1", [("stoner rock", 100)], songs=3), pair("D", "2", [("doom metal", 100)], songs=2),
                  pair("M", "3", [("stoner rock", 100), ("post-punk", 100)], songs=4), pair("N", "4", None), pair("J", "5", [("post-punk", 100)], songs=1)]
-        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0):  # every tag its own bucket
+        with mock.patch.object(analysis_module, "JOIN_SIMILARITY", 2.0), fixed_limits(tag_albums=1, cluster_albums=1, cluster_songs=1)[0]:  # every tag its own bucket
             a = analyze(pairs)
         cov = a["coverage"]
         self.assertEqual([cov[k]["albums"] for k in ("none", "one", "several")], [1, 3, 1])
@@ -197,6 +197,12 @@ class DashboardTest(unittest.TestCase):
         self.assertIn("doom metal", asked)
 
 
+def fixed_limits(tag_albums=3, cluster_albums=8, cluster_songs=20, max_clusters=30):
+    """Pin the size-scaled thresholds and the minimum-suggestions floor so tests can exercise one rule at a time."""
+    limits = {"tag_albums": tag_albums, "cluster_albums": cluster_albums, "cluster_songs": cluster_songs, "max_clusters": max_clusters}
+    return mock.patch.object(analysis_module, "_limits", return_value=limits), mock.patch.object(analysis_module, "MIN_SUGGESTED", 0)
+
+
 class ClusterLimitsTest(unittest.TestCase):
     def test_cluster_count_is_capped_and_overflow_tags_are_left_out(self):
         pairs = [pair(f"A{i}", "x", [(f"tag{i}", 100)], songs=2) for i in range(5) for _ in range(3)]
@@ -208,19 +214,37 @@ class ClusterLimitsTest(unittest.TestCase):
 
     def test_small_clusters_are_not_suggested(self):
         pairs = [pair(f"A{i}", "x", [("big", 100)], songs=5) for i in range(10)] + [pair("B", "y", [("tiny", 100)]) for _ in range(3)]
-        a = analyze(pairs)
-        self.assertEqual([c["seed"] for c in a["clusters"]], ["big"])
-        with mock.patch.object(analysis_module, "MIN_CLUSTER_ALBUMS", 2), mock.patch.object(analysis_module, "MIN_CLUSTER_SONGS", 2):
+        with fixed_limits()[0], fixed_limits()[1]:
+            self.assertEqual([c["seed"] for c in analyze(pairs)["clusters"]], ["big"])
+        with fixed_limits(cluster_albums=2, cluster_songs=2)[0], fixed_limits()[1]:
             self.assertEqual({c["seed"] for c in analyze(pairs)["clusters"]}, {"big", "tiny"})
 
-    def test_rare_tags_are_not_bucket_candidates(self):
-        a = analyze([pair("A", "1", [("one off", 100)], songs=50)])
-        self.assertEqual(a["clusters"], [])
+    def test_rare_tags_are_not_bucket_candidates_when_better_ones_exist(self):
+        pairs = [pair(f"A{i}", "x", [("common", 100)], songs=5) for i in range(10)] + [pair("B", "1", [("one off", 100)], songs=50)]
+        with fixed_limits()[0], fixed_limits()[1]:
+            a = analyze(pairs)
+        self.assertEqual([c["seed"] for c in a["clusters"]], ["common"])
         self.assertIn("one off", [t["tag"] for t in a["tags"]])  # still listed in Top tags
+
+    def test_tiny_playlist_still_gets_a_bucket(self):
+        a = analyze([pair("A", "1", [("one off", 100)], songs=50)])
+        self.assertEqual([c["seed"] for c in a["clusters"]], ["one off"])
+
+    def test_small_playlist_scales_thresholds_and_always_suggests(self):
+        pairs = [pair(f"A{i}", "x", [(f"tag{i % 4}", 100)], songs=1) for i in range(12)]
+        a = analyze(pairs)
+        self.assertGreaterEqual(len(a["clusters"]), analysis_module.MIN_SUGGESTED)
+        self.assertLessEqual(len(a["clusters"]), 10)
+
+    def test_limits_grow_with_playlist_size(self):
+        small, large = analysis_module._limits(40, 50), analysis_module._limits(5000, 8000)
+        self.assertLessEqual(small["max_clusters"], 10)
+        self.assertEqual(large["max_clusters"], analysis_module.MAX_CLUSTERS)
+        self.assertEqual((large["cluster_albums"], large["cluster_songs"]), (analysis_module.MIN_CLUSTER_ALBUMS, analysis_module.MIN_CLUSTER_SONGS))
 
     def test_unrelated_tag_never_attaches_at_zero_similarity(self):
         pairs = [pair(f"A{i}", "x", [("alpha", 100)], songs=5) for i in range(10)] + [pair(f"B{i}", "y", [("beta", 100)], songs=5) for i in range(9)]
-        with mock.patch.object(analysis_module, "MAX_CLUSTERS", 1):
+        with fixed_limits(max_clusters=1)[0], fixed_limits()[1]:
             a = analyze(pairs)
         self.assertEqual([c["tags"] for c in a["clusters"]], [["alpha"]])
 
