@@ -2,21 +2,21 @@ import re
 import unittest
 
 from bucketer.dashboard import analyze, render
-from bucketer.dashboard.render import STATIC, inline_fonts, inline_images
+from bucketer.dashboard.render import STATIC, inline_assets
 from bucketer.models import Enrichment, Group
 
 
 class InlineImagesTest(unittest.TestCase):
     def test_url_replaced_with_data_uri(self):
-        css = inline_images(":root{--x:url(img/aero_goldfish.webp)}")
+        css = inline_assets(":root{--x:url(img/aero_goldfish.webp)}")
         self.assertRegex(css, r"^:root\{--x:url\(data:image/webp;base64,[A-Za-z0-9+/=]+\)\}$")
 
     def test_other_urls_untouched(self):
-        self.assertEqual(inline_images("a{background:url(https://x/y.png)}"), "a{background:url(https://x/y.png)}")
+        self.assertEqual(inline_assets("a{background:url(https://x/y.png)}"), "a{background:url(https://x/y.png)}")
 
     def test_missing_file_fails_loudly(self):
         with self.assertRaises(FileNotFoundError):
-            inline_images("a{background:url(img/nope.webp)}")
+            inline_assets("a{background:url(img/nope.webp)}")
 
     def test_every_referenced_image_exists_and_is_used_once(self):
         css = "".join(path.read_text(encoding="utf-8") for path in [STATIC / "style.css", *sorted((STATIC / "aero").glob("*.css"))])
@@ -26,7 +26,7 @@ class InlineImagesTest(unittest.TestCase):
             self.assertTrue((STATIC / "img" / name).is_file(), name)
 
     def test_font_url_replaced_with_data_uri(self):
-        css = inline_fonts("@font-face{src:url(fonts/open-sans-latin-400-normal.woff2) format('woff2')}")
+        css = inline_assets("@font-face{src:url(fonts/open-sans-latin-400-normal.woff2) format('woff2')}")
         self.assertRegex(css, r"url\(data:font/woff2;base64,[A-Za-z0-9+/=]+\)")
 
     def test_render_inlines_fonts(self):
